@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<link rel="stylesheet" href="css/style.css">
+	<script src="js/script.js" defer></script>
+
+	<title>Simple Dice Roller</title>
+</head>
+<body>
+	<div class="container">
+		<section class="options">
+			<form action="">
+				<div>
+					<input type="number" name="min" id="min" value="1" placeholder="lowest" title="lowest number on dice">
+					<input type="number" name="max" id="max" placeholder="highest" title="highest number on dice">
+				</div>
+				<input type="count" name="" id="" value="1" placeholder="count" title="how many dice to add">
+			</form>
+			
+		</section>
+		<main class="main">
+			<div class="dice-container">
+				
+				<button>Role</button>
+			</div>
+			<div class="output">
+				sum, conts
+			</div>
+			<aside class="info-container">
+				<span class="info-container-toggle">></span>
+				<div class="info">
+					<div class="genral-stats-container">
+						<h3>Genral Stats:</h3>
+						<h4>
+							Stats for the
+							<select class="inline-input">
+								<option value="sum">sum of all dice</option>
+							</select>
+						</h4>
+						<div class="genral-stats">
+							<div title="Minimum possible number">Min: <span class="stat" id="min">2</span></div>
+							<div title="Maximum possible number">Max: <span class="stat" id="max">?</span></div>
+							<div title="How many dice total">Number of dice: <span class="stat" id="dice-count">0</span></div>
+							<div title="Average number to role">Average: <span class="stat" id="avg">?</span></div>
+						</div>
+					</div>
+
+					<div class="number-stats">
+						<h3>Stats For Number:</h3>
+						<h4>
+							Chance of the
+							<select class="inline-input" id="num-stat-type">
+								<option value="sum">sum of all dice</option>
+								<option value="value">any dice</option>
+							</select>
+							being
+							<input class="inline-input" id="num-stat-num" type="number" name="">
+						</h4>
+						<div class="genral-stats">
+							<div title="Chance of getting">Chance: <span class="stat" id="avg">?</span>%</div>
+							<div>One in: <span class="stat" id="avg">?</span></div>
+						</div>
+					</div>
+				</div>
+			</aside>
+		</main>
+	</div>
+</body>
+</html>
