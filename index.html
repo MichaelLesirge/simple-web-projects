@@ -18,7 +18,7 @@
 					<input type="number" name="min" id="min" value="1" placeholder="lowest" title="lowest number on dice">
 					<input type="number" name="max" id="max" placeholder="highest" title="highest number on dice">
 				</div>
-				<input type="count" name="" id="" value="1" placeholder="count" title="how many dice to add">
+				<input type="number" name="" id="" value="1" placeholder="count" title="how many dice to add">
 			</form>
 			
 		</section>
@@ -34,30 +34,59 @@
 				<span class="info-container-toggle">></span>
 				<div class="info">
 					<div class="genral-stats-container">
-						<h3>Genral Stats:</h3>
+						<u><h3>Genral Stats:</h3></u>
 						<h4>
-							Stats for the
+							Stats for
 							<select class="inline-input">
-								<option value="sum">sum of all dice</option>
+								<option value="sum">the sum of all dice</option>
+								<option value="sum">any individual dice</option>
 							</select>
 						</h4>
 						<div class="genral-stats">
-							<div title="Minimum possible number">Min: <span class="stat" id="min">2</span></div>
+							<div title="Minimum possible number">Min: <span class="stat" id="min">?</span></div>
 							<div title="Maximum possible number">Max: <span class="stat" id="max">?</span></div>
+						</div>
+						<h4>Stats for sum of all dice</h4>
+						<div class="genral-stats">
 							<div title="How many dice total">Number of dice: <span class="stat" id="dice-count">0</span></div>
 							<div title="Average number to role">Average: <span class="stat" id="avg">?</span></div>
 						</div>
 					</div>
 
 					<div class="number-stats">
-						<h3>Stats For Number:</h3>
+						<u><h3>Stats For Number:</h3></u>
 						<h4>
 							Chance of the
 							<select class="inline-input" id="num-stat-type">
-								<option value="sum">sum of all dice</option>
-								<option value="value">any dice</option>
+								<option title="all dice summed up" value="sum">sum of all dice</option>
 							</select>
 							being
+							<select class="inline-input" id="num-stat-rle">
+								<option title="greater than" value="sum">&gt;</option>
+								<option title="less than" value="value">&lt;</option>
+								<option title="greater than or eqaul to" value="sum">&ge;</option>
+								<option title="less than or eqaul to" value="value">&le;</option>
+								<option title="eqaul to" value="value">=</option>
+							</select>
+							<input class="inline-input" id="num-stat-num" type="number" name="">
+						</h4>
+						<div class="genral-stats">
+							<div title="Chance of getting">Chance: <span class="stat" id="avg">?</span>%</div>
+							<div>One in: <span class="stat" id="avg">?</span></div>
+						</div>
+						<h4>
+							Chance of the
+							<select class="inline-input" id="num-stat-type">
+								<option title="all dice summed up" value="sum">sum of all dice</option>
+							</select>
+							being
+							<select class="inline-input" id="num-stat-rle">
+								<option title="greater than" value="sum">&gt;</option>
+								<option title="less than" value="value">&lt;</option>
+								<option title="greater than or eqaul to" value="sum">&ge;</option>
+								<option title="less than or eqaul to" value="value">&le;</option>
+								<option title="eqaul to" value="value">eqaul to</option>
+							</select>
 							<input class="inline-input" id="num-stat-num" type="number" name="">
 						</h4>
 						<div class="genral-stats">
