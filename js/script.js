@@ -2,7 +2,7 @@ document.querySelectorAll(".info-container-toggle").forEach(el => {
 	const labelFor = document.getElementById(el.getAttribute("for"))
 
 	toggle = () => {
-		el.innerText === "<" ? ">" : "<"
+		el.innerText = el.innerText === "<" ? ">" : "<"
 		labelFor.classList.toggle("hidden")
 	}
 

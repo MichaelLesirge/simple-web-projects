@@ -99,6 +99,10 @@ body {
 }
 
 .info-container-toggle:hover {
+	box-shadow: 0 0 0.7rem white;
+}
+
+.info-container-toggle:active {
 	box-shadow: 0 0 1rem white;
 }
 
