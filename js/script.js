@@ -1,11 +1,13 @@
-const infoBarToggleButton = document.querySelector(".info-container-toggle")
-const infoBar = document.querySelector(".info-container")
+document.querySelectorAll(".info-container-toggle").forEach(el => {
+	const labelFor = document.getElementById(el.getAttribute("for"))
 
-toggle = () => {
-	infoBarToggleButton.innerText = infoBarToggleButton.innerText === "<" ? ">" : "<"
-	infoBar.classList.toggle("hidden")
-}
+	toggle = () => {
+		el.innerText === "<" ? ">" : "<"
+		labelFor.classList.toggle("hidden")
+	}
 
-infoBarToggleButton.onclick = toggle;
+	if (window.innerWidth < 800) toggle()
 
-if (window.innerWidth < 800) toggle()
+	el.onclick = toggle;
+
+})
