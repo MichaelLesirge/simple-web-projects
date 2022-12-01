@@ -1,39 +1,49 @@
 let z = 1
 
 document.querySelectorAll(".info-container-toggle").forEach(label => {
-	const infoConainer = document.getElementById(label.getAttribute("for"))
+	// add toggle
+	const container = document.getElementById(label.getAttribute("for"))
+	const infoContainer = container.querySelector(".info")
 
 	toggle = () => {
 		label.innerText = label.innerText === "<" ? ">" : "<"
-		infoConainer.classList.toggle("hidden")
+		container.classList.toggle("hidden")
 	}
 
 	if (window.innerWidth < 800) toggle()
 
 	label.onclick = toggle;
 
+	// add dragging
 	let isDown = false;
 	let offset = 0
 
-	infoConainer.addEventListener("mousedown", (event) => {
-		infoConainer.style.opacity = 0.7
-		infoConainer.style.zIndex = z
 
-		z++;
+	const startListener = ["mousedown", "touchstart"];
+	const endListeners = ["mouseup", "touchend", "mouseleave"]
 
-		isDown = true;
-		offset = infoConainer.offsetTop - event.clientY
+	startListener.forEach((eventType) => {
+		infoContainer.addEventListener(eventType, (event) => {
+			infoContainer.style.opacity = 0.7
+
+			container.style.zIndex = z
+			z++;
+
+			isDown = true;
+			offset = container.offsetTop - event.clientY
+		})
 	})
 
-	infoConainer.addEventListener("mouseup", (event) => {
-		isDown = false;
+	endListeners.forEach((eventType) => {
+		infoContainer.addEventListener(eventType, (event) => {
+			isDown = false;
 
-		infoConainer.style.zIndex = 1
-		infoConainer.style.opacity = 1
+			infoContainer.style.opacity = 1
+		})
 	})
 
 	document.addEventListener("mousemove", (event) => {
-		if (isDown) infoConainer.style.top  = (event.clientY + offset) + 'px'
+		if (isDown) container.style.top  = (event.clientY + offset) + 'px'
 	})
 
 })
