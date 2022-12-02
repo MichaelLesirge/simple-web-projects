@@ -13,6 +13,9 @@ body {
 }
 
 .options {
+	display: flex;
+	justify-content: space-between;
+
 	position: fixed;
 	bottom: 0;
 	left: 0;
