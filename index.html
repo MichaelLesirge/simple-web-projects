@@ -14,17 +14,6 @@
 
 <body>
 	<div class="container">
-		<section class="options">
-			<form action="">
-				<div>
-					<input type="number" name="min" id="min" value="1" placeholder="lowest"
-						title="lowest number on dice">
-					<input type="number" name="max" id="max" placeholder="highest" title="highest number on dice">
-				</div>
-				<input type="number" name="" id="" value="1" placeholder="count" title="how many dice to add">
-			</form>
-
-		</section>
 		<main class="main">
 			<div class="dice-container">
 				<button>Role</button>
@@ -33,7 +22,7 @@
 				sum, counts
 			</div>
 			<aside class="info-containers">
-				<div class="info-container" id="info-1" style="top: 40%;">
+				<div class="info-container" id="info-1" style="top: 20%;">
 					<label for="info-1" class="info-container-toggle">></label>
 					<div class="info">
 						<div class="genral-stats-container">
@@ -48,7 +37,14 @@
 									Max: <span class="stat" id="max">80</span>
 								</div>
 
-								<div title="Average sum of dice">Average: <span class="stat" id="avg">42</span></div>
+								<div title="Average sum of dice">
+									Average Sum: <span class="stat" id="avg-sum">42</span>
+								</div>
+
+								<div title="Average sum of dice">
+									Average Role: <span class="stat" id="avg-role">10.5</span>
+								</div>
+
 								<div title="How many dice total">
 									Number of dice: <span class="stat" id="dice-count">4</span>
 								</div>
@@ -57,7 +53,7 @@
 					</div>
 				</div>
 
-				<div class="info-container" id="info-2" style="top: 60%;">
+				<div class="info-container" id="info-2" style="top: 40%;">
 					<label for="info-2" class="info-container-toggle">></label>
 					<div class="info">
 						<div class="number-stats">
@@ -99,6 +95,17 @@
 				</div>
 			</aside>
 		</main>
+		<section class="options">
+			<form action="">
+				<div>
+					<input type="number" name="min" id="min" value="1" placeholder="lowest"
+						title="lowest number on dice">
+					<input type="number" name="max" id="max" placeholder="highest" title="highest number on dice">
+				</div>
+				<input type="number" name="" id="" value="1" placeholder="count" title="how many dice to add">
+			</form>
+
+		</section>
 	</div>
 </body>
 

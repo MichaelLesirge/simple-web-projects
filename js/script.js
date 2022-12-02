@@ -24,7 +24,7 @@ document.querySelectorAll(".info-container-toggle").forEach((label) => {
 	startListener.forEach((eventType) => {
 		infoContainer.addEventListener(eventType, (event) => {
 			container.style.opacity = 0.7;
-			label.style.opacity = "1 !important";
+			label.style.opacity = 1;
 
 			container.style.zIndex = z;
 			z++;
