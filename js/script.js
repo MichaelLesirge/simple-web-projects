@@ -2,11 +2,11 @@ let lastMoved = undefined;
 let zIndexeMax = 0;
 
 document.querySelectorAll(".info-container-toggle").forEach((label, index) => {
-	(() => {
-		// add toggle
-		const container = document.getElementById(label.getAttribute("for"));
-		const infoContainer = container.querySelector(".info");
+	const container = document.getElementById(label.getAttribute("for"));
+	const infoContainer = container.querySelector(".info");
 
+	// add toggle
+	(() => {
 		toggle = () => {
 			label.innerText = label.innerText === "<" ? ">" : "<";
 			container.classList.toggle("hidden");
@@ -17,8 +17,8 @@ document.querySelectorAll(".info-container-toggle").forEach((label, index) => {
 		label.onclick = toggle;
 	})();
 
+	// add dragging
 	(() => {
-		// add dragging
 		let isDown = false;
 		let isInputing = false;
 		let offset = 0;
