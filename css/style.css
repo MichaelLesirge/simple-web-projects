@@ -61,12 +61,6 @@ body {
 	border-radius: 1rem;
 	border-top-right-radius: 0;
 	border-bottom-right-radius: 0;
-
-	user-select: none;
-	-webkit-user-select: none;
-	-khtml-user-select: none;
-	-moz-user-select: none;
-	-ms-user-select: none;
 }
 
 .info-container.hidden {
@@ -116,6 +110,14 @@ body {
 .info .genral-stats {
 	margin-left: 0.5rem;
 	margin-bottom: 0.5rem;
+}
+
+.info .stat-section-title {
+	user-select: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
 }
 
 .inline-input {
