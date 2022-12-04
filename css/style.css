@@ -8,7 +8,6 @@ body {
 	height: 100%;
 
 	color: white;
-	/* background: rgb(2,0,36); */
 	background: black;
 }
 
@@ -62,6 +61,12 @@ body {
 	border-radius: 1rem;
 	border-top-right-radius: 0;
 	border-bottom-right-radius: 0;
+
+	user-select: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
 }
 
 .info-container.hidden {
