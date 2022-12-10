@@ -1,1 +1,1 @@
-My friend wanted a virtual dice that were super cosmisable 
+My friend wanted a virtual dice that were super customizable 
