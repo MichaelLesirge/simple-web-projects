@@ -112,7 +112,6 @@ body {
 	-khtml-user-select: none;
 	-moz-user-select: none;
 	-ms-user-select: none;
-	width: fit-content;
 }
 
 .inline-input {
