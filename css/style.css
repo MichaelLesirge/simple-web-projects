@@ -26,19 +26,13 @@ body {
 	height: 30%;
 
 	border-top: 1px solid cyan;
-}
-
-/* .main {
-
-}
-
-.main .dice-container {
-
-}
-
-.main .output {
 	
-} */
+	resize: vertical;
+}
+
+.options {
+	
+}
 
 .info-container {
 	position: absolute;
@@ -118,6 +112,7 @@ body {
 	-khtml-user-select: none;
 	-moz-user-select: none;
 	-ms-user-select: none;
+	width: fit-content;
 }
 
 .inline-input {
