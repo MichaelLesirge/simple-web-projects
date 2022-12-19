@@ -22,7 +22,7 @@ document.querySelectorAll(".info-container-toggle").forEach((label, index) => {
 		let isDown = false;
 		let offset = 0;
 
-		const statSectionTitle = infoContainer.querySelector(".stat-section-title")
+		const statSectionTitle = infoContainer.querySelector(".stat-section-title");
 
 		const startListener = ["mousedown", "touchstart"];
 		const endListeners = ["mouseup", "touchend"];
@@ -30,52 +30,43 @@ document.querySelectorAll(".info-container-toggle").forEach((label, index) => {
 
 		statSectionTitle.style.cursor = "grab";
 
-		startListener.forEach((eventType) => {
-			statSectionTitle.addEventListener(eventType, (event) => {
-				container.style.opacity = 0.7;
+		const startGrab = (event) => {
+			isDown = true;
 
-				statSectionTitle.style.cursor = "grabbing";
-				container.style.cursor = "grabbing";
+			container.style.opacity = 0.7;
 
-				label.style.opacity = 1;
+			statSectionTitle.style.cursor = "grabbing";
+			container.style.cursor = "grabbing";
 
-				if (index !== lastMoved) {
-					zIndexeMax++;
-					lastMoved = index;
-					container.style.zIndex = zIndexeMax;
-				}
+			label.style.opacity = 1;
 
-				isDown = true;
-				offset = container.offsetTop - event.clientY;
-			});
-		});
+			if (index !== lastMoved) {
+				zIndexeMax++;
+				lastMoved = index;
+				container.style.zIndex = zIndexeMax;
+			}
 
-		const endGrab = () => {
+			offset = container.offsetTop - event.clientY;
+		};
+
+		const endGrab = (event) => {
 			isDown = false;
-			statSectionTitle.style.cursor = "grab";
-			container.style.cursor = ""
-
+			
 			container.style.opacity = 1;
 
-			let containerRect = container.getBoundingClientRect();
-			
-			console.log("start y:", containerRect.y)
-			if (containerRect.y <= 0) {
-				console.log(Math.trunc(containerRect.height))
-				container.style.top = Math.trunc(containerRect.height) + "px";
-			}
-			else if (false) {
-				container.style.top = "0px";
-			}
-			containerRect = container.getBoundingClientRect();
-			console.log("end y:  ", containerRect.y)
+			statSectionTitle.style.cursor = "grab";
+			container.style.cursor = "";
+
 		};
 
 		endListeners.forEach((eventType) => {
-			statSectionTitle.addEventListener(eventType, endGrab)
+			statSectionTitle.addEventListener(eventType, endGrab);
 		});
 
-		
+		startListener.forEach((eventType) => {
+			statSectionTitle.addEventListener(eventType, startGrab)
+		});
+
 		const containerRect = container.getBoundingClientRect();
 		document.addEventListener("mousemove", (event) => {
 			if (isDown) {
