@@ -9,6 +9,8 @@ body {
 
 	color: white;
 	background: black;
+
+	overflow: hidden;
 }
 
 .options {
@@ -38,8 +40,6 @@ body {
 	height: fit-content;
 
 	padding: .4rem;
-
-	transform: translate(0, -50%);
 
 	color: #232323;
 	
@@ -76,7 +76,7 @@ body {
 	
 	transform: translate(-101%, 0);
 
-	opacity: 0.8;
+	opacity: 0.8 !important;
 	
 	background-color: white;
 
@@ -88,7 +88,7 @@ body {
 	box-shadow: 0 0 0.7rem white;
 }
 
-.info-container-toggle:active {
+.info-container-toggle:hover:active {
 	box-shadow: 0 0 1rem white;
 }
 
