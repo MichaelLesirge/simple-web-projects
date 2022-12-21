@@ -50,7 +50,7 @@
 					</div>
 				</div>
 
-				<div class="info-container" id="info-2" style="top: 40%;">
+				<div class="info-container" id="info-2" style="top: 42%;">
 					<label for="info-2" class="info-container-toggle">></label>
 					<div class="info">
 						<div class="number-stats">
@@ -93,8 +93,26 @@
 			</aside>
 		</main>
 		<section class="options">
-			<form action="" class="create-dice">
-				
+			<form action="get" class="create-dice">
+				<div class="form-options">	
+					<div class="form-group">
+						<div id="dice-range">
+							<label for="dice-range">Range:</label>
+							<input type="number" name="dice-range-low" id="dice-range-low"> to <input type="number" name="dice-range-low" id="dice-range-low">
+						</div>
+					</div>				
+					<div class="form-group">
+						<label for="dice-color">Color:</label>
+						<input type="color" name="dice-color" id="dice-color">
+					</div>				
+					<div class="form-group">
+						<label for="dice-count">How many:</label>
+						<input type="number" name="dice-count" id="dice-count">
+					</div>				
+				</div>
+				<div class="form-buttons">
+					<button class="submit-button" style="background-color: lightskyblue;" type="submit">Add Dice</button>
+				</div>
 			</form>
 		</section>
 	</div>
