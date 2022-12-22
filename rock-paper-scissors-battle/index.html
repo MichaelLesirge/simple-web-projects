@@ -17,16 +17,29 @@
 		<main class="container">
 			<h1 class="title">Rock Paper Scissor Battle Royal</h1>
 			<div class="settings">
-                <div class="speed-slider">                   
+                <div class="slider-group speed">                   
                     <label for="speed-slider">Speed</label>
-                    <input type="range" min="0" max="100" value="50" id="speed-slider" />
-                    <span id="current-speed"></span>
+                    <input type="range" min="0" max="100" value="50" class="slider" id="speed-slider" />
+                    <span class="current-val"></span>
+                </div>
+                <div class="slider-group count">                   
+                    <label for="count-slider">Count</label>
+                    <input type="range" min="0" max="100" value="20" class="slider" id="count-slider" />
+                    <span class="current-val"></span>
+                </div>
+                <div class="slider-group scale">                   
+                    <label for="fps-slider">Scale</label>
+                    <input type="range" min="0" max="200" value="100" class="slider" id="fps-slider" />
+                    <span class="current-val"></span>
                 </div>
 			</div>
             <div class="arena-container">
                 <div class="arena"></div>
             </div>
-			<button class="start-btn">Start Battle!</button>
+			<class="settings">
+				<button id="start" class="btn" style="background-color: greenyellow;">Start Battle!</button>
+				<button id="reset" class="btn">Reset</button>
+			</div>
 		</main>
 	</body>
 </html>
