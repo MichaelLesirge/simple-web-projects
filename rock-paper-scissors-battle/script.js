@@ -9,26 +9,41 @@
 // have peices move random amount between speed and 0 in each direction (for looks)
 // move between 0 and width/height
 
+const rock_emoji = "🪨";
+const paper_emoji = "📃";
+const scissors_emoji = "✂️";
+
+const slider_defaults = {
+	speed: 20, 
+	count: 50, 
+	scale: 100, 
+}
+
+const config = {
+	speed: undefined, // set by slider
+	count: undefined, // set by slider
+	scale: undefined, // set by slider
+	
+	randomExtraSpeed: 3,
+	fps: 20,
+	canSpreadCooldownStart: 5,
+};
+
+for (const [name, value] of Object.entries(slider_defaults)) {
+	document.querySelector(`.slider-group.${name} .slider`).value = value;
+}
+
 const root = document.querySelector(":root");
 const arena = document.querySelector(".arena");
 
 const startBtn = document.querySelector("#start");
 const resetBtn = document.querySelector("#reset");
 
-const rock_emoji = "🪨";
-const paper_emoji = "📃";
-const scissors_emoji = "✂️";
-
 function randInt(min, max) {
 	// min and max included
 	return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
-const config = {
-	speed: undefined,
-	count: undefined,
-	scale: undefined,
-};
 
 const rock = {
 	value: rock_emoji,
@@ -54,12 +69,15 @@ function isCollide(a, b) {
 }
 
 function getDistance(a, b) {
-	return a.x;
+	return Math.sqrt(Math.pow(a.centerX - b.centerX, 2) + Math.pow(a.centerY - b.centerY, 2));
 }
 
 class Entity {
-	width = undefined
-	height = undefined
+	width = undefined;
+	height = undefined;
+
+	halfWidth = undefined;
+	halfHeight = undefined;
 
 	constructor(type, x = undefined, y = undefined) {
 		this.el = document.createElement("div");
@@ -72,19 +90,25 @@ class Entity {
 
 		arena.appendChild(this.el);
 
-		this.setPos(x ?? randInt(0, arena.offsetWidth - this.el.offsetWidth), y ?? randInt(0, arena.offsetHeight - this.el.offsetHeight));
+		this.canSpreadCooldown = 0;
 
 		this.updateSizes();
+		this.setPos(x ?? randInt(0, arena.offsetWidth - this.el.offsetWidth), y ?? randInt(0, arena.offsetHeight - this.el.offsetHeight));
 	}
 
 	updateSizes() {
-		if (!(Entity.width || Entity.height)) {
+		// I just wanted it to work at this point
+		if (!(Entity.width && Entity.height && Entity.halfWidth && Entity.halfHeight)) {
 			const elRect = this.el.getBoundingClientRect();
 			Entity.width = elRect.width;
 			Entity.height = elRect.height;
+			Entity.halfWidth = Entity.width / 2;
+			Entity.halfHeight = Entity.height / 2;
 		}
 		this.width = Entity.width;
 		this.height = Entity.height;
+		this.halfWidth = Entity.halfWidth;
+		this.halfHeight = Entity.halfHeight;
 	}
 
 	setType(type) {
@@ -93,8 +117,10 @@ class Entity {
 	}
 
 	setPos(x, y) {
-		this.x = x;
-		this.y = y;
+		this.x = Math.max(Math.min(x, arena.offsetWidth-this.width), 0);
+		this.y = Math.max(Math.min(y, arena.offsetHeight-this.height), 0);
+		this.centerX = this.x + this.halfWidth;
+		this.centerY = this.y + this.halfHeight;
 		this.el.style.top = this.y + "px";
 		this.el.style.left = this.x + "px";
 	}
@@ -104,18 +130,53 @@ class Entity {
 	}
 
 	move() {
-		let minDistance = Infinity;
+		this.canSpreadCooldown = this.canSpreadCooldown && this.canSpreadCooldown-1;
+
+		let minDistanceT = Infinity;
 		let target = undefined;
-		for (const entity of entities) {
-			if (entity.type.value === this.type.chases) {
-				const distance = getDistance(this, entity)
-			} else if (entity.type.value === this.type.runsFrom) {
-				if (isCollide(this, entity)) {
-					this.setType(entity.type);
-					return;
+		let minDistanceE = Infinity;
+		let enemy = undefined;
+		for (const otherEntity of entities) {
+			if (otherEntity.type.value === this.type.chases) {
+				if (otherEntity.canSpreadCooldown === 0) {
+					const distance = getDistance(this, otherEntity);
+					if (minDistanceT > distance) {
+						target = otherEntity;
+						minDistanceT = distance;
+					}
+				}
+			} else if (otherEntity.type.value === this.type.runsFrom) {
+				if (isCollide(this, otherEntity)) {
+					this.setType(otherEntity.type);
+					this.canSpreadCooldown = config.canSpreadCooldownStart;
+				}
+				const distance = getDistance(this, otherEntity);
+				if (minDistanceE > distance) {
+					enemy = otherEntity;
+					minDistanceE = distance;
 				}
 			}
 		}
+
+		let xChange;
+		let yChange;
+
+		if (target) {
+			xChange = target.centerX - this.centerX;
+			yChange = target.centerY - this.centerY;
+		} else if (enemy) {
+			xChange = enemy.centerX + this.centerX;
+			yChange = enemy.centerY + this.centerY;
+		} else {
+			xChange = 0
+			yChange = 0
+		}
+
+		xChange = Math.max(Math.min(xChange, config.speed + randInt(-config.randomExtraSpeed, config.randomExtraSpeed)), -config.speed + randInt(-config.randomExtraSpeed, config.randomExtraSpeed));
+		yChange = Math.max(Math.min(yChange, config.speed + randInt(-config.randomExtraSpeed, config.randomExtraSpeed)), -config.speed + randInt(-config.randomExtraSpeed, config.randomExtraSpeed));
+
+
+		this.changePos(xChange, yChange);
 	}
 }
 
@@ -129,7 +190,7 @@ makeSlider("scale", (v) => {
 		Entity.height = undefined;
 	}
 
-	entities.forEach((entity) => entity.updateSizes())
+	entities.forEach((entity) => entity.updateSizes());
 
 	return v;
 });
@@ -161,7 +222,7 @@ resetBtn.onclick = () => {
 startBtn.onclick = () => {
 	startBtn.disabled = true;
 
-	id = setInterval(() => entities.forEach((entity) => entity.move()), 1000);
+	id = setInterval(() => entities.forEach((entity) => entity.move()), 1000/config.fps);
 };
 
 function makeSlider(name, updateFunc) {
