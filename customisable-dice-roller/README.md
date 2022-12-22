@@ -1,3 +1,5 @@
-My friend wanted a virtual roller dice that were super customizable 
+My friend mentioned it would be nice to have a virtual dice roller that were super customizable for WarHammer so I decided to make it as a hobby project.
 
-This project is incomplete.
+I currently have only made the apperance so it is not currenlty funtional
+
+Link: https://raw.githack.com/michael-lesirge/random-simple-web-projects/main/customisable-dice-roller/index.html
