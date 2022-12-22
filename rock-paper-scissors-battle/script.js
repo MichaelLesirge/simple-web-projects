@@ -95,7 +95,7 @@ makeSlider("count", (v) => {
 });
 
 makeSlider("scale", (v) => {
-	v = v && v / 100
+	v = (v && v / 100)
 	root.style.setProperty("--icon-scale", v)
 	return v
 });
