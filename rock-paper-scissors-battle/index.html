@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+		<meta name="description" content="Watch the battle royal of the centry as Rock, Paper, and Scissors fight to become the ruling power of the arena" />
+		<meta name="keywords" content="rock paper scissors, battle royal, game" />
+
+		<link rel="stylesheet" href="style.css" />
+		<script src="script.js" defer></script>
+
+		<title>🪨📃✂️</title>
+	</head>
+	<body>
+		<main class="container">
+			<h1 class="title">Rock Paper Scissor Battle Royal</h1>
+			<div class="settings">
+                <div class="speed-slider">                   
+                    <label for="speed-slider">Speed</label>
+                    <input type="range" min="0" max="100" value="50" id="speed-slider" />
+                    <span id="current-speed"></span>
+                </div>
+			</div>
+            <div class="arena-container">
+                <div class="arena"></div>
+            </div>
+			<button class="start-btn">Start Battle!</button>
+		</main>
+	</body>
+</html>
