@@ -9,7 +9,7 @@
 // have peices move random amount between speed and 0 in each direction (for looks)
 // move between 0 and width/height
 
-const root = document.querySelector(':root');
+const root = document.querySelector(":root");
 const arena = document.querySelector(".arena");
 
 const startBtn = document.querySelector("#start");
@@ -47,7 +47,20 @@ const scissors = {
 };
 const entity_types = [rock, paper, scissors];
 
+const entities = [];
+
+function isCollide(a, b) {
+	return !(a.y + a.height < b.y || a.y > b.y + b.height || a.x + a.width < b.x || a.x > b.x + b.width);
+}
+
+function getDistance(a, b) {
+	return a.x;
+}
+
 class Entity {
+	width = undefined
+	height = undefined
+
 	constructor(type, x = undefined, y = undefined) {
 		this.el = document.createElement("div");
 		this.innerEl = document.createElement("span");
@@ -60,6 +73,18 @@ class Entity {
 		arena.appendChild(this.el);
 
 		this.setPos(x ?? randInt(0, arena.offsetWidth - this.el.offsetWidth), y ?? randInt(0, arena.offsetHeight - this.el.offsetHeight));
+
+		this.updateSizes();
+	}
+
+	updateSizes() {
+		if (!(Entity.width || Entity.height)) {
+			const elRect = this.el.getBoundingClientRect();
+			Entity.width = elRect.width;
+			Entity.height = elRect.height;
+		}
+		this.width = Entity.width;
+		this.height = Entity.height;
 	}
 
 	setType(type) {
@@ -77,12 +102,39 @@ class Entity {
 	changePos(xChange, yChange) {
 		this.setPos(this.x + xChange, this.y + yChange);
 	}
+
+	move() {
+		let minDistance = Infinity;
+		let target = undefined;
+		for (const entity of entities) {
+			if (entity.type.value === this.type.chases) {
+				const distance = getDistance(this, entity)
+			} else if (entity.type.value === this.type.runsFrom) {
+				if (isCollide(this, entity)) {
+					this.setType(entity.type);
+					return;
+				}
+			}
+		}
+	}
 }
 
-const entities = [];
-
 makeSlider("speed", (v) => v && v / 10);
-makeSlider("count", (v) => {
+makeSlider("scale", (v) => {
+	v = v && v / 100;
+	root.style.setProperty("--icon-scale", v);
+
+	if (entities.length > 0) {
+		Entity.width = undefined;
+		Entity.height = undefined;
+	}
+
+	entities.forEach((entity) => entity.updateSizes())
+
+	return v;
+});
+
+const setEntityCount = (v) => {
 	while (entities.length < v) {
 		const entity = new Entity(entity_types[entities.length % entity_types.length]);
 		entities.push(entity);
@@ -92,13 +144,25 @@ makeSlider("count", (v) => {
 		entity.el.remove();
 	}
 	return entities.length;
-});
+};
 
-makeSlider("scale", (v) => {
-	v = (v && v / 100)
-	root.style.setProperty("--icon-scale", v)
-	return v
-});
+makeSlider("count", setEntityCount);
+
+let id;
+resetBtn.onclick = () => {
+	startBtn.disabled = false;
+
+	if (id) clearInterval(id);
+
+	setEntityCount(0);
+	setEntityCount(config.count);
+};
+
+startBtn.onclick = () => {
+	startBtn.disabled = true;
+
+	id = setInterval(() => entities.forEach((entity) => entity.move()), 1000);
+};
 
 function makeSlider(name, updateFunc) {
 	const slider_gruop = document.querySelector(".slider-group." + name);
