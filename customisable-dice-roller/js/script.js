@@ -2,6 +2,7 @@ let lastMoved = undefined;
 let zIndexeMax = 0;
 
 document.querySelectorAll(".info-container").forEach((container, index) => {
+	const containerRect = container.getBoundingClientRect();
 	const infoContainer = container.querySelector(".info");
 	
 	// add toggle
@@ -54,18 +55,22 @@ document.querySelectorAll(".info-container").forEach((container, index) => {
 			container.style.cursor = "";
 		};
 
+		
+		["mousedown", "touchstart"].forEach((eventType) => {
+			statSectionTitle.addEventListener(eventType, startGrab)
+		});
+		
 		["mouseup", "touchend"].forEach((eventType) => {
 			statSectionTitle.addEventListener(eventType, endGrab);
 		});
 
-		["mousedown", "touchstart"].forEach((eventType) => {
-			statSectionTitle.addEventListener(eventType, startGrab)
-		});
+		const titleRect = statSectionTitle.getBoundingClientRect();
+		const titleLeft = titleRect.x;
+		const titleRight = titleRect.x + titleRect.width;
 
-		const containerRect = container.getBoundingClientRect();
 		document.addEventListener("mousemove", (event) => {
 			if (isDown) {
-				if (containerRect.x > event.clientX) {
+				if (event.clientX < titleLeft || event.clientX > titleRight ) {
 					endGrab();
 				}
 
