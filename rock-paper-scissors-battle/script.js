@@ -1,13 +1,4 @@
 "use strict";
-// 2 states fighting and waiting
-
-// in waiting state: sliders are on and dragging is enabled.
-// sliders inlcude Count, FPS, and speed
-
-// in fighing state: sliders are disabled and figting starts
-// entities follows target, if no target exsits runs away from enemy
-// have peices move random amount between speed and 0 in each direction (for looks)
-// move between 0 and width/height
 
 const rock_emoji = "🪨";
 const paper_emoji = "📃";
