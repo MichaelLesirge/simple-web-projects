@@ -59,6 +59,14 @@ body {
 	border-bottom-right-radius: 0;
 }
 
+.info-container.grabbed {
+	opacity: 0.7;
+
+	cursor: -moz-grabbing;
+    cursor: -webkit-grabbing;
+    cursor: grabbing;	
+}
+
 .info-container.hidden {
 	border: none;
 	padding: 0;
@@ -109,11 +117,20 @@ body {
 }
 
 .info .stat-section-title {
+    cursor: move;
+    cursor: grab;
+ 
 	user-select: none;
 	-webkit-user-select: none;
 	-khtml-user-select: none;
 	-moz-user-select: none;
 	-ms-user-select: none;
+}
+
+.info-container.grabbed .info .stat-section-title {
+	cursor: -moz-grabbing;
+    cursor: -webkit-grabbing;
+    cursor: grabbing;
 }
 
 .inline-input {

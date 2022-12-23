@@ -1,15 +1,18 @@
+"use strict"
+
+
+// set up sidebar info containers
 let lastMoved = undefined;
 let zIndexeMax = 0;
-
 document.querySelectorAll(".info-container").forEach((container, index) => {
 	const containerRect = container.getBoundingClientRect();
 	const infoContainer = container.querySelector(".info");
-	
+
 	// add toggle
 	(() => {
-		const label = container.querySelector(".info-container-toggle")
+		const label = container.querySelector(".info-container-toggle");
 
-		toggle = () => {
+		function toggle() {
 			label.innerText = label.innerText === "<" ? ">" : "<";
 			container.classList.toggle("hidden");
 		};
@@ -26,67 +29,53 @@ document.querySelectorAll(".info-container").forEach((container, index) => {
 		let isDown = false;
 		let offset = 0;
 
-		statSectionTitle.style.cursor = "grab";
-		
-		const startGrab = (event) => {
+		statSectionTitle.addEventListener("touchstart", dragStart, false);
+		statSectionTitle.addEventListener("touchend", dragEnd, false);
+		document.addEventListener("touchmove", drag, false);
+
+		statSectionTitle.addEventListener("mousedown", dragStart, false);
+		statSectionTitle.addEventListener("mouseup", dragEnd, false);
+		document.addEventListener("mousemove", drag, false);
+
+		function dragStart (event) {
 			isDown = true;
-			
-			container.style.opacity = 0.7;
-			
-			
+			container.classList.add("grabbed")
+
 			if (index !== lastMoved) {
 				zIndexeMax++;
 				lastMoved = index;
 				container.style.zIndex = zIndexeMax;
 			}
-			
+
 			offset = container.offsetTop - event.clientY;
-			
-			statSectionTitle.style.cursor = "grabbing";
-			container.style.cursor = "grabbing";
-		};
-		
-		const endGrab = (event) => {
-			isDown = false;
-			
-			container.style.opacity = 1;
-			
-			statSectionTitle.style.cursor = "grab";
-			container.style.cursor = "";
 		};
 
-		
-		["mousedown", "touchstart"].forEach((eventType) => {
-			statSectionTitle.addEventListener(eventType, startGrab)
-		});
-		
-		["mouseup", "touchend"].forEach((eventType) => {
-			statSectionTitle.addEventListener(eventType, endGrab);
-		});
+		function dragEnd(event) {
+			isDown = false;
+			container.classList.remove("grabbed")
+		};
 
 		const titleRect = statSectionTitle.getBoundingClientRect();
 		const titleLeft = titleRect.x;
 		const titleRight = titleRect.x + titleRect.width;
 
-		document.addEventListener("mousemove", (event) => {
+		function drag(event) {
 			if (isDown) {
-				if (event.clientX < titleLeft || event.clientX > titleRight ) {
-					endGrab();
+				if (event.clientX < titleLeft || event.clientX > titleRight) {
+					dragEnd();
 				}
 
-				let newTop = event.clientY + offset
+				let newTop = event.clientY + offset;
 				if (newTop < 0) {
-					newTop = 1
-					endGrab()
-				}
-
-				else if (newTop + containerRect.height > document.documentElement.clientHeight) {
-					newTop = document.documentElement.clientHeight - containerRect.height
-					endGrab()
+					newTop = 1;
+					dragEnd();
+				} else if (newTop + containerRect.height > document.documentElement.clientHeight) {
+					newTop = document.documentElement.clientHeight - containerRect.height;
+					dragEnd();
 				}
 
 				container.style.top = newTop + "px";
 			}
-		});
+		}
 	})();
 });
