@@ -125,6 +125,8 @@ body {
     
     width: 100%;
     height: 100%;
+
+    border: 1px solid red;
 }
 
 .arena .entity {
@@ -132,16 +134,22 @@ body {
 
     scale: calc(var(--icon-scale) / 10);
 
-    -webkit-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
+	user-select: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
 
+    cursor: move;
     cursor: grab;
     
     /* border: 1px solid red; */
 }
 
-
+.arena .entity:active{
+    cursor: -moz-grabbing;
+    cursor: -webkit-grabbing;
+    cursor: grabbing;
+}
 
 .btn {
     height: 2rem;

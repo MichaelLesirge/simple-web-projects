@@ -267,9 +267,10 @@ class Entity {
 })();
 
 (() => {
-	let active = false;
+	let isDown = false;
 
 	let cur;
+	let last;
 	let curYoffset;
 	let curXoffset;
 
@@ -284,38 +285,32 @@ class Entity {
 	function dragStart(e) {
 		const item = e || e.touches[0];
 
-		if (item.target.parentElement.classList.contains("entity")) {
-			active = true;
+		cur = undefined
+		entities.forEach((entity) => {
+			if (entity.el.contains(item.target) || entity.el === item.target) {
+				cur = entity;
+				return;
+			}
+		});
 
-			console.log(item.target)
-			entities.forEach((entity) => {
-				if (item.target === entity.el.children[0]) {
-					cur = entity;
-					return;
-				}
-			});
+		if (cur) {
 			const arenaRech = arena.getBoundingClientRect();
 			curXoffset = -arenaRech.x - cur.halfWidth;
 			curYoffset = -arenaRech.y - cur.halfHeight;
-
-			cur.el.style.cursor = "grabbing";
+			
+			isDown = true;
 		}
 	}
-
+	
 	function dragEnd(e) {
-		if (cur) cur.el.style.cursor = "";
-		active = false;
+		isDown = false;
 	}
-
+	
 	function drag(e) {
-		if (active) {
-			e.preventDefault();
-
-			const item = e || e.touches[0];
+		if (isDown) {
+			// e.preventDefault();
 
 			cur.setPos(e.clientX + curXoffset, e.clientY + curYoffset);
-
-			last = item.target;
 		}
 	}
 })();
