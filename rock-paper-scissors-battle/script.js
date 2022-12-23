@@ -28,7 +28,7 @@ const config = {
 	fps: 20,
 	canSpreadCooldownStart: 10,
 
-	showDebugIndicator: false, 
+	showDebugIndicator: false,
 
 	bloodLust: 2,
 	maxScareDistance: 300,
@@ -76,7 +76,7 @@ const entities = [];
 // }
 
 function isCollide(a, b) {
-	return getDistance(a, b) < (30 * config.scale)
+	return getDistance(a, b) < 30 * config.scale;
 }
 
 function getDistance(a, b) {
@@ -108,7 +108,6 @@ class Entity {
 	}
 
 	updateSizes() {
-		// I just wanted it to work at this point
 		if (!(Entity.width && Entity.height && Entity.halfWidth && Entity.halfHeight)) {
 			Entity.width = this.el.offsetWidth;
 			Entity.height = this.el.offsetHeight;
@@ -177,10 +176,10 @@ class Entity {
 		let extra = 0;
 
 		if (target && (!enemy || minDistanceEnemy > minDistanceTarget / config.bloodLust)) {
-			xChange = (target.centerX - this.centerX);
-			yChange = (target.centerY - this.centerY);
+			xChange = target.centerX - this.centerX;
+			yChange = target.centerY - this.centerY;
 			if (config.showDebugIndicator) this.el.style.border = "1px solid green";
-			extra = config.chaseBonus
+			extra = config.chaseBonus;
 		} else if (enemy && minDistanceEnemy < config.maxScareDistance) {
 			xChange = (enemy.centerX - this.centerX) * -1;
 			yChange = (enemy.centerY - this.centerY) * -1;
@@ -205,67 +204,131 @@ class Entity {
 	}
 }
 
-makeSlider("speed", (v) => v && v / 10);
-makeSlider("scale", (v) => {
-	v = v && v / 100;
-	root.style.setProperty("--icon-scale", v);
+(() => {
+	makeSlider("speed", setSpeed);
+	makeSlider("count", setEntityCount);
+	makeSlider("scale", setScale);
 
-	if (entities.length > 0) {
-		Entity.width = undefined;
-		Entity.height = undefined;
+	function setSpeed(v) {
+		return v && v / 10;
 	}
 
-	entities.forEach((entity) => entity.updateSizes());
-
-	return v;
-});
-
-const setEntityCount = (v) => {
-	while (entities.length < v) {
-		const entity = new Entity(entity_types[entities.length % entity_types.length]);
-		entities.push(entity);
+	function setEntityCount(v) {
+		while (entities.length < v) {
+			const entity = new Entity(entity_types[entities.length % entity_types.length]);
+			entities.push(entity);
+		}
+		while (entities.length > v) {
+			const entity = entities.pop();
+			entity.el.remove();
+		}
+		return entities.length;
 	}
-	while (entities.length > v) {
-		const entity = entities.pop();
-		entity.el.remove();
+
+	function setScale(v) {
+		v = v && v / 100;
+		root.style.setProperty("--icon-scale", v);
+
+		if (entities.length > 0) {
+			Entity.width = undefined;
+			Entity.height = undefined;
+		}
+
+		entities.forEach((entity) => entity.updateSizes());
+
+		return v;
 	}
-	return entities.length;
-};
-
-makeSlider("count", setEntityCount);
-
-let id;
-resetBtn.onclick = () => {
-	startBtn.disabled = false;
-
-	if (id) clearInterval(id);
-
-	setEntityCount(0);
-	setEntityCount(config.count);
-};
-
-startBtn.onclick = () => {
-	startBtn.disabled = true;
-
-	id = setInterval(() => entities.forEach((entity) => entity.move()), 1000 / config.fps);
-};
-
-function makeSlider(name, updateFunc) {
-	const slider_gruop = document.querySelector(".slider-group." + name);
-	const slider = slider_gruop.querySelector(".slider");
-	const currentValDisplay = slider_gruop.querySelector(".current-val");
-	function func() {
-		const newVal = updateFunc(slider.value);
-		config[name] = newVal;
-		currentValDisplay.innerText = newVal;
+	function makeSlider(name, updateFunc) {
+		const slider_gruop = document.querySelector(".slider-group." + name);
+		const slider = slider_gruop.querySelector(".slider");
+		const currentValDisplay = slider_gruop.querySelector(".current-val");
+		function func() {
+			const newVal = updateFunc(slider.value);
+			config[name] = newVal;
+			currentValDisplay.innerText = newVal;
+		}
+		slider.addEventListener("input", func);
+		func();
 	}
-	slider.addEventListener("input", func);
-	func();
-}
 
+	let gameInveralId;
+	resetBtn.onclick = () => {
+		startBtn.disabled = false;
+	
+		if (gameInveralId) clearInterval(gameInveralId);
+	
+		setEntityCount(0);
+		setEntityCount(config.count);
+	};
+	
+	startBtn.onclick = () => {
+		startBtn.disabled = true;
 
-let titleVals = entity_types.map(e => e.value)
-setInterval(() => {
-	document.title = titleVals.join("") + " Battle Royal";
-	titleVals.unshift(titleVals.pop());
-}, 1000)
+		// arena.requestFullscreen();
+	
+		gameInveralId = setInterval(() => entities.forEach((entity) => entity.move()), 1000 / config.fps);
+	};	
+})();
+
+(() => {
+	let titleVals = entity_types.map((e) => e.value);
+	setInterval(() => {
+		document.title = "Rock Paper Scissors Battle Royal " + titleVals.join("");
+		titleVals.unshift(titleVals.pop());
+	}, 1000);
+})();
+
+(() => {
+	let active = false;
+	let last = undefined;
+
+	let cur;
+	let curYoffset;
+	let curXoffset;
+
+	arena.addEventListener("touchstart", dragStart, false);
+	arena.addEventListener("touchend", dragEnd, false);
+	arena.addEventListener("touchmove", drag, false);
+
+	arena.addEventListener("mousedown", dragStart, false);
+	arena.addEventListener("mouseup", dragEnd, false);
+	arena.addEventListener("mousemove", drag, false);
+
+	function dragStart(e) {
+		const item = e || e.touches[0];
+
+		if (item.target.parentElement.classList.contains("entity")) {
+			active = true;
+
+			entities.forEach((entity) => {
+				if (item.target === entity.innerEl) {
+					cur = entity;
+					return
+				}
+			});
+			const arenaRech = arena.getBoundingClientRect();
+			curXoffset = -arenaRech.x - cur.halfWidth
+			curYoffset = -arenaRech.y - cur.halfHeight
+
+			cur.el.style.cursor = "grabbing"
+		}
+
+	}
+
+	function dragEnd(e) {
+		cur.el.style.cursor = "";
+		active = false;
+	}
+
+	function drag(e) {
+		if (active) {
+			e.preventDefault();
+
+			const item = e || e.touches[0];
+
+			cur.setPos(e.clientX + curXoffset, e.clientY + curYoffset)
+			
+			last = item.target;
+		}
+	}
+})();

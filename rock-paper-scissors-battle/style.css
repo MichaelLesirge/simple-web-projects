@@ -121,6 +121,8 @@ body {
     -webkit-user-select: none;
     -ms-user-select: none;
     user-select: none;
+
+    cursor: grab;
     
     /* border: 1px solid red; */
 }
@@ -165,6 +167,6 @@ body {
 }
 
 .btn:disabled {
-    cursor: auto;
+    cursor: not-allowed;
 }
 
