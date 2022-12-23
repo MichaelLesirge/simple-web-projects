@@ -33,8 +33,9 @@ const config = {
 	bloodLust: 2,
 	maxScareDistance: 300,
 
-	chaseBonus: 0,
-	escapeBonus: 0,
+	nearExtinctThreshold: 3,
+	nearExtinctSpeedMultipler: 1.5,
+	nearExtinctBloodLustMultiply: 2,
 };
 
 for (const [name, value] of Object.entries(slider_defaults)) {
@@ -140,13 +141,13 @@ class Entity {
 
 	move() {
 		this.canSpreadCooldown = this.canSpreadCooldown && this.canSpreadCooldown - 1;
-		// console.log(this.canSpreadCooldown)
-
 		let minDistanceTarget = Infinity;
 		let target = undefined;
 
 		let minDistanceEnemy = Infinity;
 		let enemy = undefined;
+
+		let friendlyCount = 0;
 
 		for (const otherEntity of entities) {
 			if (otherEntity.type.value === this.type.chases) {
@@ -167,38 +168,49 @@ class Entity {
 					enemy = otherEntity;
 					minDistanceEnemy = distance;
 				}
+			} else {
+				friendlyCount++;
 			}
 		}
 
 		let xChange;
 		let yChange;
+		
+		let nearExtinct = friendlyCount <= config.nearExtinctThreshold;
 
-		let extra = 0;
-
-		if (target && (!enemy || minDistanceEnemy > minDistanceTarget / config.bloodLust)) {
+		if (target && (!enemy || minDistanceEnemy > (minDistanceTarget / (config.bloodLust * (nearExtinct ? config.nearExtinctBloodLustMultiply : 1))))) {
 			xChange = target.centerX - this.centerX;
 			yChange = target.centerY - this.centerY;
 			if (config.showDebugIndicator) this.el.style.border = "1px solid green";
-			extra = config.chaseBonus;
 		} else if (enemy && minDistanceEnemy < config.maxScareDistance) {
 			xChange = (enemy.centerX - this.centerX) * -1;
 			yChange = (enemy.centerY - this.centerY) * -1;
 			if (config.showDebugIndicator) this.el.style.border = "1px solid red";
-			extra = config.escapeBonus;
 		} else {
 			xChange = randInt(-config.randomExtraSpeed, config.randomExtraSpeed);
 			yChange = randInt(-config.randomExtraSpeed, config.randomExtraSpeed);
 			this.el.style.border = "";
 		}
 
-		xChange = Math.max(
-			Math.min(xChange, config.speed + extra + randInt(-config.randomExtraSpeed, config.randomExtraSpeed)),
-			-config.speed - extra + randInt(-config.randomExtraSpeed, config.randomExtraSpeed)
-		);
-		yChange = Math.max(
-			Math.min(yChange, config.speed + extra + randInt(-config.randomExtraSpeed, config.randomExtraSpeed)),
-			-config.speed - extra + randInt(-config.randomExtraSpeed, config.randomExtraSpeed)
-		);
+		if (nearExtinct) {
+			xChange = Math.max(
+				Math.min(xChange * config.nearExtinctSpeedMultipler, (config.speed * config.nearExtinctSpeedMultipler * 2)),
+				(-config.speed * config.nearExtinctSpeedMultipler * 2)
+			)
+			yChange = Math.max(
+				Math.min(yChange * config.nearExtinctSpeedMultipler, config.speed * config.nearExtinctSpeedMultipler),
+				-config.speed * config.nearExtinctSpeedMultipler
+			)
+		} else {
+			xChange = Math.max(
+				Math.min(xChange, config.speed + randInt(-config.randomExtraSpeed, config.randomExtraSpeed)),
+				-config.speed + randInt(-config.randomExtraSpeed, config.randomExtraSpeed)
+			);
+			yChange = Math.max(
+				Math.min(yChange, config.speed + randInt(-config.randomExtraSpeed, config.randomExtraSpeed)),
+				-config.speed + randInt(-config.randomExtraSpeed, config.randomExtraSpeed)
+			);
+		}
 
 		this.changePos(xChange, yChange);
 	}
@@ -316,7 +328,7 @@ class Entity {
 	}
 
 	function dragEnd(e) {
-		cur.el.style.cursor = "";
+		if (cur) cur.el.style.cursor = "";
 		active = false;
 	}
 
