@@ -41,19 +41,18 @@ body {
     text-align: center;
 }
 
+@media screen and (max-height: 750px) {
+    .title {
+        display: none;
+    }
+}
+
 .settings {
     display: flex;
     justify-content: center;
     gap: 1rem;
 }
 
-@media screen and (max-width: 750px) {
-    .settings {
-        flex-direction: column;
-        gap: 0.3rem;
-        font-size: 0.75rem;
-    }
-}
 
 .settings .slider-group {
     display: flex;
@@ -62,7 +61,7 @@ body {
     gap: 0.25em;
     
     width: 13.5rem;
-
+    
     padding: 0.2em 0.5em;
     border: 1px solid gray;
     border-radius: 1em;
@@ -72,7 +71,7 @@ body {
     height: 2px;
     
     transform: translate(0, 0.13em);
-
+    
     border: none;
     outline: none;
 }
@@ -83,25 +82,42 @@ body {
 
 .settings .slider-group .current-val {
     position: inline-block;
-
+    
     width: 1.4rem;
 }
 
 .arena-container {
     display: block;
     overflow: hidden;
-
+    
     width: min(80%, 40rem);
     height: 75%;
-
+    
     max-width: 80%;
     max-height: 75%;
-
+    
     background-color: white;
     
     resize: both; 
     
     border: 3px solid gray;
+}
+
+@media screen and (max-width: 750px) {
+    .settings {
+        flex-direction: column;
+        gap: 0.2rem;
+        font-size: 0.5rem;
+    }
+    .settings .slider-group {
+        width: 12rem;
+    }
+}
+
+@media screen and (orientation: landscape) {
+    .settings {
+        flex-direction: row;
+    }
 }
 
 .arena-container .arena {
