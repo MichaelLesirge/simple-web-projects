@@ -10,7 +10,7 @@ const slider_defaults = {
 	scale: 100,
 };
 
-const config = {
+const CONFIG = {
 	speed: undefined, // set by slider
 	count: undefined, // set by slider
 	scale: undefined, // set by slider
@@ -68,7 +68,7 @@ const entities = [];
 // }
 
 function isCollide(a, b) {
-	return getDistance(a, b) < 30 * config.scale;
+	return getDistance(a, b) < 30 * CONFIG.scale;
 }
 
 function getDistance(a, b) {
@@ -93,7 +93,7 @@ class Entity {
 
 		arena.appendChild(this.el);
 
-		this.canSpreadCooldown = config.canSpreadCooldownStart;
+		this.canSpreadCooldown = CONFIG.canSpreadCooldownStart;
 
 		this.updateSizes();
 		this.setPos(x ?? randInt(0, arena.offsetWidth - this.el.offsetWidth), y ?? randInt(0, arena.offsetHeight - this.el.offsetHeight));
@@ -151,7 +151,7 @@ class Entity {
 				if (otherEntity.canSpreadCooldown === 0) {
 					if (isCollide(this, otherEntity)) {
 						this.setType(otherEntity.type);
-						this.canSpreadCooldown = config.canSpreadCooldownStart;
+						this.canSpreadCooldown = CONFIG.canSpreadCooldownStart;
 					}
 				}
 				const distance = getDistance(this, otherEntity);
@@ -167,39 +167,39 @@ class Entity {
 		let xChange;
 		let yChange;
 		
-		let nearExtinct = friendlyCount <= config.nearExtinctThreshold;
+		let nearExtinct = friendlyCount <= CONFIG.nearExtinctThreshold;
 
-		if (target && (!enemy || minDistanceEnemy > (minDistanceTarget / (config.bloodLust * (nearExtinct ? config.nearExtinctBloodLustMultiply : 1))))) {
+		if (target && (!enemy || minDistanceEnemy > (minDistanceTarget / (CONFIG.bloodLust * (nearExtinct ? CONFIG.nearExtinctBloodLustMultiply : 1))))) {
 			xChange = target.centerX - this.centerX;
 			yChange = target.centerY - this.centerY;
-			if (config.showDebugIndicator) this.el.style.border = "1px solid green";
-		} else if (enemy && minDistanceEnemy < config.maxScareDistance) {
+			if (CONFIG.showDebugIndicator) this.el.style.border = "1px solid green";
+		} else if (enemy && minDistanceEnemy < CONFIG.maxScareDistance) {
 			xChange = (enemy.centerX - this.centerX) * -1;
 			yChange = (enemy.centerY - this.centerY) * -1;
-			if (config.showDebugIndicator) this.el.style.border = "1px solid red";
+			if (CONFIG.showDebugIndicator) this.el.style.border = "1px solid red";
 		} else {
-			xChange = randInt(-config.randomExtraSpeed, config.randomExtraSpeed);
-			yChange = randInt(-config.randomExtraSpeed, config.randomExtraSpeed);
+			xChange = randInt(-CONFIG.randomExtraSpeed, CONFIG.randomExtraSpeed);
+			yChange = randInt(-CONFIG.randomExtraSpeed, CONFIG.randomExtraSpeed);
 			this.el.style.border = "";
 		}
 
 		if (nearExtinct) {
 			xChange = Math.max(
-				Math.min(xChange * config.nearExtinctSpeedMultipler, (config.speed * config.nearExtinctSpeedMultipler * 2)),
-				(-config.speed * config.nearExtinctSpeedMultipler * 2)
+				Math.min(xChange * CONFIG.nearExtinctSpeedMultipler, (CONFIG.speed * CONFIG.nearExtinctSpeedMultipler * 2)),
+				(-CONFIG.speed * CONFIG.nearExtinctSpeedMultipler * 2)
 			)
 			yChange = Math.max(
-				Math.min(yChange * config.nearExtinctSpeedMultipler, config.speed * config.nearExtinctSpeedMultipler),
-				-config.speed * config.nearExtinctSpeedMultipler
+				Math.min(yChange * CONFIG.nearExtinctSpeedMultipler, CONFIG.speed * CONFIG.nearExtinctSpeedMultipler),
+				-CONFIG.speed * CONFIG.nearExtinctSpeedMultipler
 			)
 		} else {
 			xChange = Math.max(
-				Math.min(xChange, config.speed + randInt(-config.randomExtraSpeed, config.randomExtraSpeed)),
-				-config.speed + randInt(-config.randomExtraSpeed, config.randomExtraSpeed)
+				Math.min(xChange, CONFIG.speed + randInt(-CONFIG.randomExtraSpeed, CONFIG.randomExtraSpeed)),
+				-CONFIG.speed + randInt(-CONFIG.randomExtraSpeed, CONFIG.randomExtraSpeed)
 			);
 			yChange = Math.max(
-				Math.min(yChange, config.speed + randInt(-config.randomExtraSpeed, config.randomExtraSpeed)),
-				-config.speed + randInt(-config.randomExtraSpeed, config.randomExtraSpeed)
+				Math.min(yChange, CONFIG.speed + randInt(-CONFIG.randomExtraSpeed, CONFIG.randomExtraSpeed)),
+				-CONFIG.speed + randInt(-CONFIG.randomExtraSpeed, CONFIG.randomExtraSpeed)
 			);
 		}
 
@@ -247,7 +247,7 @@ class Entity {
 		const currentValDisplay = slider_gruop.querySelector(".current-val");
 		function func() {
 			const newVal = updateFunc(slider.value);
-			config[name] = newVal;
+			CONFIG[name] = newVal;
 			currentValDisplay.innerText = newVal;
 		}
 		slider.addEventListener("input", func);
@@ -261,7 +261,7 @@ class Entity {
 		if (gameInveralId) clearInterval(gameInveralId);
 	
 		setEntityCount(0);
-		setEntityCount(config.count);
+		setEntityCount(CONFIG.count);
 	};
 	
 	startBtn.onclick = () => {
@@ -269,7 +269,7 @@ class Entity {
 
 		// arena.requestFullscreen();
 	
-		gameInveralId = setInterval(() => entities.forEach((entity) => entity.move()), 1000 / config.fps);
+		gameInveralId = setInterval(() => entities.forEach((entity) => entity.move()), 1000 / CONFIG.fps);
 	};	
 })();
 
