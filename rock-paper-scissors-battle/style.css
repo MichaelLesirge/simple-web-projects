@@ -130,9 +130,7 @@ body {
 .arena .entity {
     position: absolute;
 
-    font-size: calc(var(--icon-scale) * 1.75rem);
-
-    scale: 0.8;
+    scale: calc(var(--icon-scale) / 10);
 
     -webkit-user-select: none;
     -ms-user-select: none;
@@ -143,13 +141,7 @@ body {
     /* border: 1px solid red; */
 }
 
-.arena .entity span {
-    display: inline-block;
-    transform: translate(0, -0.06em);
-    scale: 1.34;
 
-    /* border: 1px solid blue; */
-}
 
 .btn {
     height: 2rem;
