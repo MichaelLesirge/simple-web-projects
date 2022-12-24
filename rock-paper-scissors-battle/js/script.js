@@ -21,8 +21,6 @@ const CONFIG = {
 	fps: 20,
 	canSpreadCooldownStart: 10,
 
-	showDebugChaseIndicator: false,
-
 	bloodLust: 2,
 	maxScareDistance: 300,
 
@@ -176,11 +174,9 @@ class Entity {
 		if (target && (!enemy || minDistanceEnemy > minDistanceTarget / (CONFIG.bloodLust * (nearExtinct ? CONFIG.nearExtinctBloodLustMultiply : 1)))) {
 			xChange = target.centerX - this.centerX;
 			yChange = target.centerY - this.centerY;
-			if (CONFIG.showDebugChaseIndicator) this.el.style.border = "1px solid green";
 		} else if (enemy && minDistanceEnemy < CONFIG.maxScareDistance) {
 			xChange = (enemy.centerX - this.centerX) * -1;
 			yChange = (enemy.centerY - this.centerY) * -1;
-			if (CONFIG.showDebugChaseIndicator) this.el.style.border = "1px solid red";
 		} else {
 			xChange = randInt(-CONFIG.randomExtraSpeed, CONFIG.randomExtraSpeed);
 			yChange = randInt(-CONFIG.randomExtraSpeed, CONFIG.randomExtraSpeed);
@@ -278,9 +274,9 @@ class Entity {
 	let curYoffset;
 	let curXoffset;
 
-	arena.addEventListener("touchstart", dragStart, false);
-	arena.addEventListener("touchend", dragEnd, false);
-	arena.addEventListener("touchmove", drag, false);
+	// arena.addEventListener("touchstart", dragStart, false);
+	// arena.addEventListener("touchend", dragEnd, false);
+	// arena.addEventListener("touchmove", drag, false);
 
 	arena.addEventListener("mousedown", dragStart, false);
 	arena.addEventListener("mouseup", dragEnd, false);
