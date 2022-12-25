@@ -19,16 +19,16 @@ const sliderVals = {
 const CONFIG = {
 	randomExtraSpeed: 0.8,
 	fps: 20,
-	canSpreadCooldownStart: 10,
+	canSpreadCooldownStart: 3,
 
 	bloodLust: 2,
 	maxScareDistance: 300,
 
 	nearExtinctThreshold: 3,
-	nearExtinctSpeedMultipler: 1.3,
-	nearExtinctBloodLustMultiply: 2,
+	nearExtinctSpeedMultipler: 1.5,
+	nearExtinctBloodLustMultiply: 1.1,
 
-	speedDifAmount: 0.2,
+	speedDifAmount: 0.1,
 };
 console.info("CONFIG object is aviable to change and will update in real time");
 console.info(CONFIG);
