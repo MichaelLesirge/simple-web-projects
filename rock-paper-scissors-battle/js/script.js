@@ -78,6 +78,7 @@ function getDistance(a, b) {
 }
 
 class Entity {
+	// TODO fix dragging in game by slowing speed
 	width = undefined;
 	height = undefined;
 
@@ -298,7 +299,7 @@ class Entity {
 				curXoffset = -arenaRech.x - current.halfWidth;
 				curYoffset = -arenaRech.y - current.halfHeight;
 
-				current.curSpeedMultplyer = 0.3;
+				current.curSpeedMultplyer = 0.001;
 			}
 		}
 
