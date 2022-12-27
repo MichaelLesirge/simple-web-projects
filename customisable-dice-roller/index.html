@@ -1,25 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<head>
-	<meta charset="UTF-8">
-	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<link rel="stylesheet" href="css/style.css" />
+		<script src="js/script.js" defer></script>
 
-	<link rel="stylesheet" href="css/style.css">
-	<script src="js/script.js" defer></script>
+		<meta name="description" content="Simple dice roller that you can customize to whatever you need. Good for WarHammer or any other game that uses lots of dice." />
+		<meta name="keywords" content="dice, WarHammer, customizable" />
 
-	<meta name="description" content="Simple dice roller that you can customize to whatever you need. Good for WarHammer or any other game that uses lots of dice.">
-	<meta name="keywords" content="dice, WarHammer, customizable">
+		<title>Simple Dice Roller</title>
+	</head>
 
-	<title>Simple Dice Roller</title>
-</head>
-
-<body>
-	<div class="container">
-		<main class="main">
+	<body>
+		<div class="container">
+			<main class="main">
+				<section class="options">
+					<form action="get" class="create-dice">
+						<div class="form-options">
+							<div class="form-group">
+								<div id="dice-range">
+									<label for="dice-range">Range:</label>
+									<input type="number" name="dice-range-low" id="dice-range-low" /> to <input type="number" name="dice-range-low" id="dice-range-low" />
+								</div>
+							</div>
+							<div class="form-group">
+								<label for="dice-color">Color:</label>
+								<input type="color" name="dice-color" id="dice-color" />
+							</div>
+							<div class="form-group">
+								<label for="dice-count">How many:</label>
+								<input type="number" name="dice-count" id="dice-count" />
+							</div>
+						</div>
+						<div class="form-buttons">
+							<button class="submit-button" style="background-color: lightskyblue" type="submit">Add Dice</button>
+						</div>
+					</form>
+				</section>
+			</main>
 			<aside class="info-containers">
-				<div class="info-container" id="info-1" style="top: 20%;">
+				<div class="info-container" id="info-1" style="top: 20%">
 					<label for="info-1" class="info-container-toggle">></label>
 					<div class="info">
 						<div class="genral-stats-container">
@@ -27,30 +50,20 @@
 								<h3 class="stat-section-title">Genral Stats:</h3>
 							</u>
 							<div class="genral-stats">
-								<div title="Minimum possible sum of dice">
-									Min: <output class="stat" id="min">0</output>
-								</div>
-								<div title="Maximum possible sum of dice">
-									Max: <output class="stat" id="max">0</output>
-								</div>
+								<div title="Minimum possible sum of dice">Min: <output class="stat" id="min">0</output></div>
+								<div title="Maximum possible sum of dice">Max: <output class="stat" id="max">0</output></div>
 
-								<div title="Average sum of dice">
-									Average Sum: <output class="stat" id="avg-sum">0</output>
-								</div>
+								<div title="Average sum of dice">Average Sum: <output class="stat" id="avg-sum">0</output></div>
 
-								<div title="Average average role for each individual dice">
-									Average Role: <output class="stat" id="avg-role">0</output>
-								</div>
+								<div title="Average average role for each individual dice">Average Role: <output class="stat" id="avg-role">0</output></div>
 
-								<div title="How many dice total">
-									Number of dice: <output class="stat" id="dice-count">0</output>
-								</div>
+								<div title="How many dice total">Number of dice: <output class="stat" id="dice-count">0</output></div>
 							</div>
 						</div>
 					</div>
 				</div>
 
-				<div class="info-container" id="info-2" style="top: 42%;">
+				<div class="info-container" id="info-2" style="top: 42%">
 					<label for="info-2" class="info-container-toggle">></label>
 					<div class="info">
 						<div class="number-stats">
@@ -66,7 +79,7 @@
 									<option title="less than or eqaul to" value="lte">&le;</option>
 									<option title="eqaul to" value="et">=</option>
 								</select>
-								<input class="inline-input" id="num-stat-num" type="number" name="">
+								<input class="inline-input" id="num-stat-num" type="number" name="" />
 							</h4>
 							<div class="genral-stats">
 								<div title="Chance of getting above condtion">Chance: <output class="stat" id="avg">?</output>%</div>
@@ -80,7 +93,7 @@
 									<option title="less than or eqaul to" value="lte">&le;</option>
 									<option title="eqaul to" value="et">=</option>
 								</select>
-								<input class="inline-input" id="num-stat-num" type="number" name="">
+								<input class="inline-input" id="num-stat-num" type="number" name="" />
 							</h4>
 							<div class="genral-stats">
 								<div title="Average number of dice that meet above condtion">
@@ -91,31 +104,6 @@
 					</div>
 				</div>
 			</aside>
-		</main>
-		<section class="options">
-			<form action="get" class="create-dice">
-				<div class="form-options">	
-					<div class="form-group">
-						<div id="dice-range">
-							<label for="dice-range">Range:</label>
-							<input type="number" name="dice-range-low" id="dice-range-low"> to <input type="number" name="dice-range-low" id="dice-range-low">
-						</div>
-					</div>				
-					<div class="form-group">
-						<label for="dice-color">Color:</label>
-						<input type="color" name="dice-color" id="dice-color">
-					</div>				
-					<div class="form-group">
-						<label for="dice-count">How many:</label>
-						<input type="number" name="dice-count" id="dice-count">
-					</div>				
-				</div>
-				<div class="form-buttons">
-					<button class="submit-button" style="background-color: lightskyblue;" type="submit">Add Dice</button>
-				</div>
-			</form>
-		</section>
-	</div>
-</body>
-
+		</div>
+	</body>
 </html>
