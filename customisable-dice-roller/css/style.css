@@ -57,6 +57,13 @@ body {
 	border-radius: 1rem;
 	border-top-right-radius: 0;
 	border-bottom-right-radius: 0;
+
+	transform: translate(0%, 0%);
+	transition: transform 0.75s ease;
+}
+
+.info-container.hidden {
+	transform: translate(100%, 0%);
 }
 
 .info-container.grabbed {
@@ -67,15 +74,6 @@ body {
     cursor: grabbing;	
 }
 
-.info-container.hidden {
-	border: none;
-	padding: 0;
-	transform: translate(100%, -50%);
-}
-
-.info-container.hidden .info {
-	display: none;
-}
 
 .info-container-toggle {
 	visibility: visible;
@@ -95,7 +93,6 @@ body {
 	background-color: white;
 
 	cursor: pointer;
-
 }
 
 .info-container-toggle:hover {
