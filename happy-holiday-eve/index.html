@@ -11,17 +11,20 @@
 		<title></title>
 	</head>
 	<body>
+		<div class="select-holiday">
+			<label for="holidays">Holiday:</label>
+			<select name="holidays" id="holidays">
+				<option value="new-years">New Years</option>
+			</select>
+		</div>
 		<div class="container">
-            <div class="select-holiday">
-                <label for="holidays">Holiday:</label>
-                <select name="holidays" id="holidays">
-                    <option value="new-years">New Years</option>
-                </select>
-            </div>
             <main class="message-container">
-				<span class="message" id="merry-message"></span>
-				<span class="message" id="holiday-message"></span>
-				<span class="message" id="eve-message"></span>
+				<h1 class="message">
+					<span class="message-section" id="merry-message">Merry</span>
+					<span class="message-section" id="holiday-message">New Years</span>
+					<span class="message-section" id="eve-message">Eve</span>
+					<span class="message-section">!</span>
+				</h1>
 			</main>
 		</div>
 	</body>
