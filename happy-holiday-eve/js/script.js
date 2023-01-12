@@ -1,23 +1,67 @@
+"use strict"
+
 const today = new Date();
-holdays = [
-    {
-        name: "new-years",
-        humanReadableName: "new-years",
-        startDate: new Date(today.getFullYear(), 0, 1)
+const oneDay = 24 * 60 * 60 * 1000; 
+
+const holidays = {
+    ny: {
+        name: "Ney Years",
+        startDate: new Date(today.getFullYear()+1, 0, 1)
     },
-    {
-        name: "christmas",
-        humanReadableName: "christmas",
-        startDate: new Date(today.getFullYear(), 0, 1)
+    xmas: {
+        name: "Christmas",
+        startDate: new Date(today.getFullYear(), 11, 25)
     },
-    {
-        name: "hanukkah",
-        humanReadableName: "Hanukkah",
-        startDate: new Date(today.getFullYear(), 0, 1)
+    han: {
+        name: "Hanukkah",
+        startDate: new Date(today.getFullYear(), 11, 18)
     },
-    {
-        name: "Kwanzaa",
-        humanReadableName: "kwanzaa",
-        startDate: new Date(today.getFullYear(), 0, 1)
+    kz: {
+        name: "kwanzaa",
+        startDate: new Date(today.getFullYear(), 11, 26)
     },
-]
+    // // for debuging
+    // today: {
+    //     name: "today",
+    //     startDate: today
+    // }
+}
+
+const holidaySpan = document.querySelector("#holiday-name");
+const eveMessageSpan = document.querySelector("#eve-message");
+const end = document.querySelector("#punctuation")
+
+function setHoliday(holiday) {
+    holidaySpan.innerText = holiday.name;
+
+    const daysTillHoliday = getDaysTill(holiday.startDate);
+
+    eveMessageSpan.innerText = "Eve ".repeat(daysTillHoliday)
+    eveMessageSpan.title = `Eve × ${daysTillHoliday}`
+
+    console.log(daysTillHoliday)
+}
+
+function getDaysTill(date) {
+    return Math.round((date - today) / oneDay)
+}
+
+setHoliday(holidays.ny)
+
+const selectHolidayInput = document.querySelector("#holidays-select")
+
+// add each holiday to menu
+for (const [name, holiday] of Object.entries(holidays)) {
+    const option = document.createElement("option")
+    option.value = name;
+    option.innerText = holiday.name
+    selectHolidayInput.add(option)
+};
+
+selectHolidayInput.onchange = (event) => {
+    setHoliday(holidays[event.target.value])
+}
+
+// TODO add differnt condions if message overflows
+// window.scrollTo({ right: 0, behavior: 'auto' });
+// window.scrollTo({ left: 0, behavior: 'smooth' });
