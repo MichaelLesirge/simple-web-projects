@@ -6,18 +6,22 @@ const oneDay = 24 * 60 * 60 * 1000;
 const holidays = {
     ny: {
         name: "Ney Years",
+        merryMessage: "Happy",
         startDate: new Date(today.getFullYear()+1, 0, 1)
     },
     xmas: {
         name: "Christmas",
+        merryMessage: "Merry",
         startDate: new Date(today.getFullYear(), 11, 25)
     },
     han: {
         name: "Hanukkah",
+        merryMessage: "Happy",
         startDate: new Date(today.getFullYear(), 11, 18)
     },
     kz: {
-        name: "kwanzaa",
+        name: "Kwanzaa",
+        merryMessage: "Happy",
         startDate: new Date(today.getFullYear(), 11, 26)
     },
     // // for debuging
@@ -29,10 +33,11 @@ const holidays = {
 
 const holidaySpan = document.querySelector("#holiday-name");
 const eveMessageSpan = document.querySelector("#eve-message");
-const end = document.querySelector("#punctuation")
+const merryMessageSpan = document.querySelector("#merry-message");
 
 function setHoliday(holiday) {
     holidaySpan.innerText = holiday.name;
+    merryMessageSpan.innerText = holiday.merryMessage
 
     const daysTillHoliday = getDaysTill(holiday.startDate);
 
