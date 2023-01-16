@@ -5,7 +5,7 @@ const oneDay = 24 * 60 * 60 * 1000;
 
 const holidays = {
     ny: {
-        name: "Ney Years",
+        name: "New Years",
         merryMessage: "Happy",
         startDate: new Date(today.getFullYear()+1, 0, 1)
     },
@@ -14,11 +14,12 @@ const holidays = {
         merryMessage: "Merry",
         startDate: new Date(today.getFullYear(), 11, 25)
     },
-    han: {
-        name: "Hanukkah",
-        merryMessage: "Happy",
-        startDate: new Date(today.getFullYear(), 11, 18)
-    },
+    // Waiting for hebrew calendar implantation in javascript
+    // han: {
+    //     name: "Hanukkah",
+    //     merryMessage: "Happy",
+    //     startDate: new Date(today.getFullYear(), 11, 18)
+    // },
     kz: {
         name: "Kwanzaa",
         merryMessage: "Happy",
