@@ -1,5 +1,4 @@
-"use strict"
-
+"use strict";
 
 // set up sidebar info containers
 let lastMoved = undefined;
@@ -15,7 +14,7 @@ document.querySelectorAll(".info-container").forEach((container, index) => {
 		function toggle() {
 			label.innerText = label.innerText === "<" ? ">" : "<";
 			container.classList.toggle("hidden");
-		};
+		}
 
 		if (window.innerWidth < 800) toggle();
 
@@ -37,9 +36,9 @@ document.querySelectorAll(".info-container").forEach((container, index) => {
 		statSectionTitle.addEventListener("mouseup", dragEnd, false);
 		document.addEventListener("mousemove", drag, false);
 
-		function dragStart (event) {
+		function dragStart(event) {
 			isDown = true;
-			container.classList.add("grabbed")
+			container.classList.add("grabbed");
 
 			if (index !== lastMoved) {
 				zIndexeMax++;
@@ -48,12 +47,12 @@ document.querySelectorAll(".info-container").forEach((container, index) => {
 			}
 
 			offset = container.offsetTop - event.clientY;
-		};
+		}
 
 		function dragEnd(event) {
 			isDown = false;
-			container.classList.remove("grabbed")
-		};
+			container.classList.remove("grabbed");
+		}
 
 		const titleRect = statSectionTitle.getBoundingClientRect();
 		const titleLeft = titleRect.x;
@@ -79,3 +78,11 @@ document.querySelectorAll(".info-container").forEach((container, index) => {
 		}
 	})();
 });
+
+// add dice
+(() => {
+	const form = document.querySelector("#create-dice");
+	form.addEventListener("submit", (event) => {
+		event.preventDefault()
+	})
+})();
