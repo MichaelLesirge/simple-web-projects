@@ -81,8 +81,8 @@ document.querySelectorAll(".info-container").forEach((container, index) => {
 
 // add dice
 (() => {
-	const form = document.querySelector("#create-dice");
+	const form = document.querySelector(".create-dice");
 	form.addEventListener("submit", (event) => {
-		event.preventDefault()
+		event.preventDefault();
 	})
 })();
