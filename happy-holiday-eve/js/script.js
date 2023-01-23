@@ -7,7 +7,7 @@ const holidays = {
 	ny: {
 		name: "New Years",
 		merryMessage: "Happy",
-		startDate: new Date(today.getFullYear() + 1, 0, 1),
+		startDate: new Date(today.getFullYear() + (today.getMonth() != 0 || today.getDay() != 1), 0, 1),
 	},
 	xmas: {
 		name: "Christmas",
@@ -15,11 +15,12 @@ const holidays = {
 		startDate: new Date(today.getFullYear(), 11, 25),
 	},
 	// Waiting for hebrew calendar implantation in javascript
-	// han: {
-	//     name: "Hanukkah",
-	//     merryMessage: "Happy",
-	//     startDate: new Date(today.getFullYear(), 11, 18)
-	// },
+	// TODO maybe add end date and say "Happy first/second/third... day of " 
+	han: {
+	    name: "Hanukkah",
+	    merryMessage: "Happy",
+	    startDate: today,
+	},
 	kz: {
 		name: "Kwanzaa",
 		merryMessage: "Happy",
@@ -61,6 +62,7 @@ for (const [name, holiday] of Object.entries(holidays)) {
 
 selectHolidayInput.onchange = (event) => {
 	setHoliday(holidays[event.target.value]);
+	if (event.target.value == "han") setTimeout(() => alert("Unknown start date because I don't know how Hebrew calendar works or how to code that. Sorry!"), 100);
 };
 
 // TODO add differnt condions if message overflows
