@@ -148,6 +148,9 @@ body {
 	height: 10rem;
 
 	border: 1px solid black;
+	border-radius: 4px;
+
+	background-color: var(--color);
 }
 
 .create-dice {
@@ -155,17 +158,28 @@ body {
 	align-items: center;
 	flex-direction: column;
 	gap: 1rem;
-
+	
 	width: max(50%, max-content);
+
 	margin: 0px 1rem;
+	padding: 1rem;
 
 	border: 1px solid white;
 	border-radius: 1rem;
 
-	color: white;
+	color: black;
 	background-color: #ffffff0e;
+}
 
-	padding: 1rem;
+.create-dice-body {
+	display: flex;
+	align-items: center;
+	flex-direction: row;
+	gap: 1rem;
+
+	font-family: monospace;
+	font-weight: 80;
+	font-size: 2.7rem;
 }
 
 .dice-range-inputs {
@@ -175,40 +189,41 @@ body {
 
 	margin-bottom: 1rem;
 
-	font-family: monospace;
-	font-weight: 80;
+}
+
+.dice-range-inputs {
 	font-size: 2.7rem;
+}
+
+.dice-amount-input {
+	font-size: 3rem;
 }
 
 .clear-input {
 	box-sizing: border-box;
 
-	width: 3.5rem;
-	height: 3rem;
-	padding: 0 0.1rem;
-
-	color: white;
+	width: 1.5em;
+	height: 1em;
+	padding: 0 0.1em;
 
 	border: none;
 	outline: none;
 	box-shadow: none;
 
-	border-bottom: 1.5px solid black;
+	border-bottom: 0.04em solid black;
 	background-color: transparent;
 
+	font-size: inherit;
 	text-align: center;
-	font-family: monospace;
-	font-weight: 80;
-	font-size: 2.7rem;
 
 	overflow-x: visible;
 
 	transition: border 0.3s linear;
+
 }
 
 .clear-input:focus {
-	/* border-bottom: 1px solid linear-gradient(#11998e, #38ef7d); */
-	border-bottom: 1px solid cyan;
+	border-bottom: 1px solid linear-gradient(#11998e, #38ef7d);
 }
 
 .submit-button {

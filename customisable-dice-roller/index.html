@@ -19,15 +19,29 @@
 			<main class="main">
 				<section class="options">
 					<form action="get" class="create-dice">
-						<div class="dice">
-							<div class="dice-range-inputs">
-								<input class="clear-input" type="number" name="dice-create-min" id="dice-create-min">
-								<span>-</span>
-								<input class="clear-input" type="number" name="dice-create-max" id="dice-create-max">
+						<div class="create-dice-body">
+							<div class="dice" style="--color: tranparent;">
+								<div class="dice-range-inputs">
+									<input class="clear-input num-only" type="number" name="dice-create-min" id="dice-create-min">
+									<span>-</span>
+									<input class="clear-input num-only" type="number" name="dice-create-max" id="dice-create-max">
+								</div>
+								<div>
+									<input type="color" name="dice-color" id="dice-color" title="select dice color" oninput="document.querySelector('.dice').style.setProperty('--color', document.querySelector('#dice-color').value)" list="colors">
+									<datalist id="colors">
+										<option value="#FF0000">Red</option>
+										<option value="#FFA500">Orange </option>
+										<option value="#FFFF00">Yellow</option>
+										<option value="#800080">Purple</option>
+										<option value="#008000">Green</option>
+										<option value="#0000FF">Blue</option>
+									</datalist>
+								</div>
 							</div>
-							<div>
-								<input type="color" name="dice-color" id="dice-color" title="select dice color">
-							</div>
+							<div class="dice-amount-input create-dice-body">
+								<div>×</div>
+								<div><input class="clear-input num-only" type="number" name="dice-create-amount" id="dice-create-amount"></div>
+							</div>				
 						</div>
 					</form>
 				</section>
