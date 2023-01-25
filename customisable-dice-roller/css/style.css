@@ -82,7 +82,7 @@ body {
 
 	padding: 0.5rem;
 
-	transform: translatex(-100%);
+	transform: translatex(-104%);
 
 	opacity: 0.8 !important;
 
@@ -210,7 +210,7 @@ body {
 	outline: none;
 	box-shadow: none;
 
-	border-bottom: 0.04em solid black;
+	border-bottom: 0.06em solid black;
 	background-color: transparent;
 
 	font-size: inherit;

@@ -22,9 +22,9 @@
 						<div class="create-dice-body">
 							<div class="dice" style="--color: tranparent;">
 								<div class="dice-range-inputs">
-									<input class="clear-input num-only" type="number" name="dice-create-min" id="dice-create-min">
+									<input class="clear-input num-only" type="number" name="dice-create-min" id="dice-create-min" value="1">
 									<span>-</span>
-									<input class="clear-input num-only" type="number" name="dice-create-max" id="dice-create-max">
+									<input class="clear-input num-only" type="number" name="dice-create-max" id="dice-create-max" value="6">
 								</div>
 								<div>
 									<input type="color" name="dice-color" id="dice-color" title="select dice color" oninput="document.querySelector('.dice').style.setProperty('--color', document.querySelector('#dice-color').value)" list="colors">
@@ -40,7 +40,7 @@
 							</div>
 							<div class="dice-amount-input create-dice-body">
 								<div>×</div>
-								<div><input class="clear-input num-only" type="number" name="dice-create-amount" id="dice-create-amount"></div>
+								<div><input class="clear-input num-only" type="number" name="dice-create-amount" id="dice-create-amount" value="1"></div>
 							</div>				
 						</div>
 					</form>
@@ -85,7 +85,7 @@
 									<option title="less than or eqaul to" value="lte">&le;</option>
 									<option title="eqaul to" value="et">=</option>
 								</select>
-								<input class="inline-input" id="num-stat-num" type="number" name="" />
+								<input class="inline-input num-only" id="num-stat-num" type="number" name="" />
 							</h4>
 							<div class="genral-stats">
 								<div title="Chance of getting above condtion">Chance: <output class="stat" id="avg">?</output>%</div>
@@ -99,7 +99,7 @@
 									<option title="less than or eqaul to" value="lte">&le;</option>
 									<option title="eqaul to" value="et">=</option>
 								</select>
-								<input class="inline-input" id="num-stat-num" type="number" name="" />
+								<input class="inline-input num-only" id="num-stat-num" type="number" name="" />
 							</h4>
 							<div class="genral-stats">
 								<div title="Average number of dice that meet above condtion">
