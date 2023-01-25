@@ -17,24 +17,31 @@
 	<body>
 		<div class="container">
 			<main class="main">
+				<section>
+				</section>
+
 				<section class="options">
 					<form action="get" class="create-dice">
 						<div class="create-dice-body">
-							<div class="dice" style="--color: tranparent;">
+							<div class="dice" id="input-dice" style="--color: #edefec;">
 								<div class="dice-range-inputs">
-									<input class="clear-input num-only" type="number" name="dice-create-min" id="dice-create-min" value="1">
+									<input class="clear-input num-only" type="number" name="dice-create-min" id="dice-create-min" title="select minimum value of dice" value="1">
 									<span>-</span>
-									<input class="clear-input num-only" type="number" name="dice-create-max" id="dice-create-max" value="6">
+									<input class="clear-input num-only" type="number" name="dice-create-max" id="dice-create-max" title="select maximum value of dice" value="6">
 								</div>
 								<div>
-									<input type="color" name="dice-color" id="dice-color" title="select dice color" oninput="document.querySelector('.dice').style.setProperty('--color', document.querySelector('#dice-color').value)" list="colors">
+									<input type="color" name="dice-color" id="dice-color" title="select color of dice" value="#edefec" list="colors">
 									<datalist id="colors">
-										<option value="#FF0000">Red</option>
-										<option value="#FFA500">Orange </option>
-										<option value="#FFFF00">Yellow</option>
-										<option value="#800080">Purple</option>
-										<option value="#008000">Green</option>
-										<option value="#0000FF">Blue</option>
+										<option value="#e5e200">Yellow</option>
+										<option value="#edefec">White</option>
+										<option value="#16c16a">Green</option>
+										<option value="#3b77e9">Blue</option>
+										<option value="#d3b2eb">Pink</option>
+										<option value="#f5f3ca">Cream</option>
+										<option value="#fb7012">Orange</option>
+										<option value="#652582">Purple</option>
+										<option value="#d12203">Red</option>
+										<option value="#00AAFF">Light blue</option>
 									</datalist>
 								</div>
 							</div>
