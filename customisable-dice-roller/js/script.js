@@ -94,6 +94,7 @@ document.querySelectorAll(".info-container").forEach((container, index) => {
 const form = document.querySelector(".create-dice");
 form.addEventListener("submit", (event) => {
 	event.preventDefault();
+	
 });
 
 document.querySelectorAll("input.num-only").forEach((clearInput) => {

@@ -22,33 +22,39 @@
 
 				<section class="options">
 					<form action="get" class="create-dice">
-						<div class="create-dice-body">
-							<div class="dice" id="input-dice" style="--color: #edefec;">
-								<div class="dice-range-inputs">
-									<input class="clear-input num-only" type="number" name="dice-create-min" id="dice-create-min" title="select minimum value of dice" value="1">
-									<span>-</span>
-									<input class="clear-input num-only" type="number" name="dice-create-max" id="dice-create-max" title="select maximum value of dice" value="6">
+						<div class="create-dice-body col gap1 center">
+							<div class="create-dice-body-inputs row gap1">
+								<div class="dice" id="input-dice" style="--color: #edefec;">
+									<div class="dice-range-inputs row center-y">
+										<input class="clear-input num-only" type="number" name="dice-create-min" id="dice-create-min" title="select minimum value of dice" value="1">
+										<span>-</span>
+										<input class="clear-input num-only" type="number" name="dice-create-max" id="dice-create-max" title="select maximum value of dice" value="6">
+									</div>
+									<div>
+										<input type="color" name="dice-color" id="dice-color" title="select color of dice" value="#edefec" list="colors">
+										<datalist id="colors">
+											<option value="#e5e200">Yellow</option>
+											<option value="#edefec">White</option>
+											<option value="#16c16a">Green</option>
+											<option value="#3b77e9">Blue</option>
+											<option value="#d3b2eb">Pink</option>
+											<option value="#f5f3ca">Cream</option>
+											<option value="#fb7012">Orange</option>
+											<option value="#652582">Purple</option>
+											<option value="#d12203">Red</option>
+											<option value="#00AAFF">Light blue</option>
+										</datalist>
+									</div>
 								</div>
-								<div>
-									<input type="color" name="dice-color" id="dice-color" title="select color of dice" value="#edefec" list="colors">
-									<datalist id="colors">
-										<option value="#e5e200">Yellow</option>
-										<option value="#edefec">White</option>
-										<option value="#16c16a">Green</option>
-										<option value="#3b77e9">Blue</option>
-										<option value="#d3b2eb">Pink</option>
-										<option value="#f5f3ca">Cream</option>
-										<option value="#fb7012">Orange</option>
-										<option value="#652582">Purple</option>
-										<option value="#d12203">Red</option>
-										<option value="#00AAFF">Light blue</option>
-									</datalist>
-								</div>
+								<div class="dice-amount-input create-dice-body row center">
+									<div>×</div>
+									<div><input class="clear-input num-only" type="number" name="dice-create-amount" id="dice-create-amount" value="1"></div>
+								</div>				
 							</div>
-							<div class="dice-amount-input create-dice-body">
-								<div>×</div>
-								<div><input class="clear-input num-only" type="number" name="dice-create-amount" id="dice-create-amount" value="1"></div>
-							</div>				
+							<div class="row center gap1">
+								<button class="submit-button" type="submit">Add Dice</button>
+								<!-- <button class="submit-button" type="reset">Reset</button>						 -->
+							</div>
 						</div>
 					</form>
 				</section>

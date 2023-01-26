@@ -16,6 +16,41 @@ body {
 	font-size: 0.9rem;
 }
 
+.row {
+	display: flex;
+	flex-direction: row;
+}
+
+.col {
+	display: flex;
+	flex-direction: column;
+}
+
+.row.center, .col.center {
+	justify-content: center;
+	align-items: center;
+}
+
+.row.center-x {
+	justify-content: center;
+}
+
+.row.center-y {
+	align-items: center;
+}
+
+.col.center-x {
+	align-items: center;
+}
+
+.col.center-y {
+	justify-content: center;
+}
+
+.row.gap1, .col.gap1 {
+	gap: 1rem;
+}
+
 .options {
 	display: flex;
 	justify-content: space-between;
@@ -27,13 +62,12 @@ body {
 	padding: 0.4rem 0.5rem;
 
 	background-color: #232323;
-	background: rgb(0, 58, 122);
-	background: linear-gradient(351deg, rgba(0, 58, 122, 1) 0%, rgb(14, 29, 30) 90%);
+	background: linear-gradient(187deg, rgb(41, 65, 61), rgb(10, 10, 10));
 
 	width: 100%;
-	height: 30%;
+	height: 16rem;
 
-	border-top: 1px solid cyan;
+	border-top: 1px solid white;
 }
 
 .info-container {
@@ -153,42 +187,37 @@ body {
 	background-color: var(--color);
 }
 
-.create-dice {
-	display: flex;
-	align-items: center;
-	flex-direction: column;
-	gap: 1rem;
-	
+.create-dice {	
 	width: max(50%, max-content);
+	height: min-content;
 
 	margin: 0px 1rem;
 	padding: 1rem;
 
-	border: 1px solid white;
+	border: 1px dotted gray;
 	border-radius: 1rem;
 
 	color: black;
-	background-color: #ffffff0e;
+	background-color: rgb(41, 65, 61);
+}
+
+.create-dice:has(button[type="submit"]:active) {
+	filter: brightness(96%);
 }
 
 .create-dice-body {
-	display: flex;
-	align-items: center;
-	flex-direction: row;
-	gap: 1rem;
-
 	font-family: monospace;
 	font-weight: 80;
 	font-size: 2.7rem;
 }
 
-.dice-range-inputs {
-	display: flex;
-	flex-direction: row;
-	justify-content: center;
+.create-dice-body-inputs {
+	gap: 1rem;
+}
 
-	margin-bottom: 1rem;
-
+.form-dice {
+	padding: 0.4rem;
+	font-size: 1.3rem;
 }
 
 .dice-range-inputs {
@@ -197,6 +226,7 @@ body {
 
 .dice-amount-input {
 	font-size: 3rem;
+	gap: 1rem;
 }
 
 .clear-input {
@@ -229,12 +259,16 @@ body {
 }
 
 .submit-button {
-	padding: 0.3rem;
-
+	padding: 0.3rem 0.5rem;
+	
 	font-size: 1.1rem;
 	border-radius: 0.5rem;
-
+	
 	cursor: pointer;
+}
+
+.submit-button[type="submit"] {
+	background-color: rgb(95, 193, 95);
 }
 
 .submit-button:hover {
@@ -243,7 +277,7 @@ body {
 
 .submit-button:active {
 	filter: brightness(80%);
-	padding: 0.3rem 0.29rem;
+	padding: 0.3rem 0.48rem;
 }
 
 input[type="number"]::-webkit-inner-spin-button,
