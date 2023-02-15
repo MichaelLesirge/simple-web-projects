@@ -1,7 +1,0 @@
-simple site that allows you to start/stop a voice that occosially tells you to not get distracted and do your work
-have it when you start the page says "why are you looking at this page" after a bit
-maybe even allow user to say what they are doing and have ChatGPT genorate them the message
-allow user to set voice or set it to be different each time. have slider with avg frequency of messages
-
-
-use speech systhisis web API
