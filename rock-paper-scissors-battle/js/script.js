@@ -2,12 +2,12 @@
 
 const SLIDER_DEFAULTS = {
 	speed: 20,
-	count: 35,
+	count: 30,
 	scale: 100,
 };
 
 for (const [name, value] of Object.entries(SLIDER_DEFAULTS)) {
-	document.querySelector(`.slider-group.${name} .slider`).value = value;
+	document.querySelector(`.slider-group.${name} .slider`).setAttribute("value", value);
 }
 
 const sliderVals = {
@@ -19,14 +19,9 @@ const sliderVals = {
 const CONFIG = {
 	randomExtraSpeed: 0.8,
 	fps: 20,
-	canSpreadCooldownStart: 3,
 
 	bloodLust: 2,
 	maxScareDistance: 300,
-
-	nearExtinctThreshold: 3,
-	nearExtinctSpeedMultipler: 1.5,
-	nearExtinctBloodLustMultiply: 1.1,
 
 	speedDifAmount: 0.1,
 };
@@ -42,6 +37,10 @@ const resetBtn = document.querySelector("#reset");
 function randInt(min, max) {
 	// min and max included
 	return Math.floor(Math.random() * (max - min + 1) + min);
+}
+
+function clamp(value, min, max) {
+	return Math.max(Math.min(value, max), min);
 }
 
 const rock = {
@@ -69,16 +68,11 @@ const entity_types = [rock, paper, scissors];
 
 const entities = [];
 
-// function isCollide(a, b) {
-// 	return !(a.y + a.height < b.y || a.y > b.y + b.height || a.x + a.width < b.x || a.x > b.x + b.width);
-// }
-
 function getDistance(a, b) {
 	return Math.sqrt(Math.pow(a.centerX - b.centerX, 2) + Math.pow(a.centerY - b.centerY, 2));
 }
 
 class Entity {
-	// TODO fix dragging in game by slowing speed
 	width = undefined;
 	height = undefined;
 
@@ -87,15 +81,13 @@ class Entity {
 
 	constructor(type, speedMultiplyer = 1, x = undefined, y = undefined) {
 		this.speedMultiplyer = speedMultiplyer;
-		this.curSpeedMultplyer = 1;
+		this.canMove = true;
 
 		this.el = document.createElement("div");
 		this.el.classList.add("entity");
 		this.setType(type);
 
 		arena.appendChild(this.el);
-
-		this.canSpreadCooldown = CONFIG.canSpreadCooldownStart;
 
 		this.updateSizes();
 		this.setPos(x ?? randInt(0, arena.offsetWidth - this.el.offsetWidth), y ?? randInt(0, arena.offsetHeight - this.el.offsetHeight));
@@ -134,71 +126,50 @@ class Entity {
 	}
 
 	move() {
-		this.canSpreadCooldown = this.canSpreadCooldown && this.canSpreadCooldown - 1;
-		let minDistanceTarget = Infinity;
+		if (!this.canMove) return;
+
+		let minDistanceToTarget = Infinity;
 		let target = undefined;
 
-		let minDistanceEnemy = Infinity;
+		let minDistanceToEnemy = Infinity;
 		let enemy = undefined;
-
-		let friendlyCount = 0;
 
 		for (const otherEntity of entities) {
 			if (otherEntity.type.value === this.type.chases) {
 				const distance = getDistance(this, otherEntity);
-				if (minDistanceTarget > distance) {
+				if (minDistanceToTarget > distance) {
 					target = otherEntity;
-					minDistanceTarget = distance;
+					minDistanceToTarget = distance;
 				}
 			} else if (otherEntity.type.value === this.type.runsFrom) {
 				const distance = getDistance(this, otherEntity);
-				if (otherEntity.canSpreadCooldown === 0) {
-					if (distance < 30 * sliderVals.scale) {
-						this.setType(otherEntity.type);
-						this.canSpreadCooldown = CONFIG.canSpreadCooldownStart;
-					}
-				}
-				if (minDistanceEnemy > distance) {
+				if (minDistanceToEnemy > distance) {
 					enemy = otherEntity;
-					minDistanceEnemy = distance;
+					minDistanceToEnemy = distance;
 				}
-			} else {
-				friendlyCount++;
 			}
 		}
 
-		let xChange;
-		let yChange;
+		if (minDistanceToEnemy < 30 * sliderVals.scale) {
+			this.setType(enemy.type);
+			return;
+		}
 
-		let nearExtinct = friendlyCount <= CONFIG.nearExtinctThreshold;
-
-		if (target && (!enemy || minDistanceEnemy > minDistanceTarget / (CONFIG.bloodLust * (nearExtinct ? CONFIG.nearExtinctBloodLustMultiply : 1)))) {
-			xChange = target.centerX - this.centerX;
+		let xChange = randInt(-CONFIG.randomExtraSpeed*10, CONFIG.randomExtraSpeed*10)/10;
+		let yChange = randInt(-CONFIG.randomExtraSpeed*10, CONFIG.randomExtraSpeed*10)/10;
+		
+		if (target && (!enemy || minDistanceToEnemy > minDistanceToTarget / CONFIG.bloodLust)) {
+			xChange += target.centerX - this.centerX;
 			yChange = target.centerY - this.centerY;
-		} else if (enemy && minDistanceEnemy < CONFIG.maxScareDistance) {
-			xChange = (enemy.centerX - this.centerX) * -1;
-			yChange = (enemy.centerY - this.centerY) * -1;
-		} else {
-			xChange = randInt(-CONFIG.randomExtraSpeed, CONFIG.randomExtraSpeed);
-			yChange = randInt(-CONFIG.randomExtraSpeed, CONFIG.randomExtraSpeed);
-			this.el.style.border = "";
+		} else if (enemy && minDistanceToEnemy < CONFIG.maxScareDistance) {
+			xChange += (enemy.centerX - this.centerX) * -1;
+			yChange += (enemy.centerY - this.centerY) * -1;
 		}
-
-		if (nearExtinct) {
-			xChange = Math.max(Math.min(xChange * CONFIG.nearExtinctSpeedMultipler, sliderVals.speed * CONFIG.nearExtinctSpeedMultipler), -sliderVals.speed * CONFIG.nearExtinctSpeedMultipler);
-			yChange = Math.max(Math.min(yChange * CONFIG.nearExtinctSpeedMultipler, sliderVals.speed * CONFIG.nearExtinctSpeedMultipler), -sliderVals.speed * CONFIG.nearExtinctSpeedMultipler);
-		} else {
-			xChange = Math.max(
-				Math.min(xChange, sliderVals.speed + randInt(-CONFIG.randomExtraSpeed, CONFIG.randomExtraSpeed)),
-				-sliderVals.speed + randInt(-CONFIG.randomExtraSpeed, CONFIG.randomExtraSpeed)
-			);
-			yChange = Math.max(
-				Math.min(yChange, sliderVals.speed + randInt(-CONFIG.randomExtraSpeed, CONFIG.randomExtraSpeed)),
-				-sliderVals.speed + randInt(-CONFIG.randomExtraSpeed, CONFIG.randomExtraSpeed)
-			);
-		}
-
-		this.changePos(xChange * this.speedMultiplyer * this.curSpeedMultplyer, yChange * this.speedMultiplyer * this.curSpeedMultplyer);
+		
+		xChange = clamp(xChange, -sliderVals.speed, sliderVals.speed);
+		yChange = clamp(yChange, -sliderVals.speed, sliderVals.speed);
+		
+		this.changePos(xChange * this.speedMultiplyer, yChange * this.speedMultiplyer);
 	}
 }
 
@@ -299,7 +270,7 @@ class Entity {
 				curXoffset = -arenaRech.x - current.halfWidth;
 				curYoffset = -arenaRech.y - current.halfHeight;
 
-				current.curSpeedMultplyer = 0.001;
+				current.canMove = false;
 			}
 		}
 
@@ -309,8 +280,10 @@ class Entity {
 	}
 
 	function dragEnd(e) {
-		current.curSpeedMultplyer = 1;
-		isDown = false;
+		if (isDown) {
+			current.canMove = true;
+			isDown = false;
+		}
 	}
 
 	function drag(e) {
