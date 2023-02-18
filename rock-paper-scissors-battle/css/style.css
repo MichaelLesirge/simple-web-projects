@@ -90,10 +90,6 @@ body {
     width: 1.4rem;
 }
 
-.settings .slider-group.button {
-    /* width: ; */
-}
-
 @media screen and (max-width: 750px) {
     .settings {
         flex-direction: column;
@@ -115,7 +111,7 @@ body {
     display: block;
     overflow: hidden;
     
-    width: min(80%, 45rem);
+    width: min(80%, 55rem);
     height: min(75%, 40rem);
     
     max-width: 80%;
@@ -138,7 +134,10 @@ body {
 .arena .entity {
     position: absolute;
 
-    width: calc((var(--icon-scale)) * 2rem);
+    /* width: calc((var(--icon-scale)) * 2rem); */
+
+    width: 2.2rem;
+    scale: var(--icon-scale);
 
 	user-select: none;
 	-webkit-user-select: none;
@@ -147,14 +146,14 @@ body {
 
     cursor: move;
     cursor: grab;
-    
-    /* border: 1px solid red; */
-}
+    }
 
 .arena .entity:active{
     cursor: -moz-grabbing;
     cursor: -webkit-grabbing;
     cursor: grabbing;
+
+    scale: 105%;
 }
 
 .btn {

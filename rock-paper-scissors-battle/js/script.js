@@ -91,6 +91,9 @@ class Entity {
 
 		this.updateSizes();
 		this.setPos(x ?? randInt(0, arena.offsetWidth - this.el.offsetWidth), y ?? randInt(0, arena.offsetHeight - this.el.offsetHeight));
+
+		this.lastChangeX = 0;
+		this.lastChangeY = 0;
 	}
 
 	updateSizes() {
@@ -126,6 +129,10 @@ class Entity {
 	}
 
 	move() {
+		if (sliderVals.count > 250 && randInt(0, 2) == 0) {
+			this.changePos(this.lastChangeX, this.lastChangeY);
+		}
+
 		if (!this.canMove) return;
 
 		let minDistanceToTarget = Infinity;
@@ -155,9 +162,9 @@ class Entity {
 			return;
 		}
 
-		let xChange = randInt(-CONFIG.randomExtraSpeed*10, CONFIG.randomExtraSpeed*10)/10;
-		let yChange = randInt(-CONFIG.randomExtraSpeed*10, CONFIG.randomExtraSpeed*10)/10;
-		
+		let xChange = randInt(-CONFIG.randomExtraSpeed * 10, CONFIG.randomExtraSpeed * 10) / 10;
+		let yChange = randInt(-CONFIG.randomExtraSpeed * 10, CONFIG.randomExtraSpeed * 10) / 10;
+
 		if (target && (!enemy || minDistanceToEnemy > minDistanceToTarget / CONFIG.bloodLust)) {
 			xChange += target.centerX - this.centerX;
 			yChange = target.centerY - this.centerY;
@@ -165,11 +172,14 @@ class Entity {
 			xChange += (enemy.centerX - this.centerX) * -1;
 			yChange += (enemy.centerY - this.centerY) * -1;
 		}
-		
-		xChange = clamp(xChange, -sliderVals.speed, sliderVals.speed);
-		yChange = clamp(yChange, -sliderVals.speed, sliderVals.speed);
-		
-		this.changePos(xChange * this.speedMultiplyer, yChange * this.speedMultiplyer);
+
+		xChange = clamp(xChange, -sliderVals.speed, sliderVals.speed) * this.speedMultiplyer;
+		yChange = clamp(yChange, -sliderVals.speed, sliderVals.speed) * this.speedMultiplyer;
+
+		this.changePos(xChange, yChange);
+
+		this.lastChangeX = xChange;
+		this.lastChangeY = yChange;
 	}
 }
 
@@ -221,7 +231,7 @@ class Entity {
 	}
 
 	let gameInveralId;
-	resetBtn.onclick = () => {
+	resetBtn.onclick = (e) => {
 		startBtn.disabled = false;
 
 		if (gameInveralId) clearInterval(gameInveralId);
@@ -230,12 +240,22 @@ class Entity {
 		setEntityCount(sliderVals.count);
 	};
 
-	startBtn.onclick = () => {
+	startBtn.onclick = (e) => {
 		startBtn.disabled = true;
 
 		// arena.requestFullscreen();
 
 		gameInveralId = setInterval(() => entities.forEach((entity) => entity.move()), 1000 / CONFIG.fps);
+	};
+
+	const resetSettingsBtn = document.querySelector("#reset-sliders");
+
+	resetSettingsBtn.onclick = (e) => {
+		for (const [name, value] of Object.entries(SLIDER_DEFAULTS)) {
+			const el = document.querySelector(`.slider-group.${name} .slider`);
+			el.value = value;
+			el.dispatchEvent(new Event("input"));
+		}
 	};
 })();
 
