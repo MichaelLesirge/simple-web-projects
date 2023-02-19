@@ -21,29 +21,48 @@ class Board {
 		this.width = width;
 		this.height = height;
 
+		this.selected = null;
+
 		this.boardArray = Array(this.height);
+
 		this.boardTable = htmlTable;
 
-		for (let i = 0; i < this.height; i++) {
-			this.boardArray[i] = Array(width);
+		for (let y = 0; y < this.height; y++) {
+			this.boardArray[y] = Array(width);
 			const row = this.boardTable.insertRow();
-			for (let j = 0; j < this.width; j++) {
-				this.boardArray[i][j] = null;
+			for (let x = 0; x < this.width; x++) {
+				this.boardArray[y][x] = null;
 				const cell = row.insertCell();
 
+				this.boardTable.addEventListener("click", (e) => {
+					if (this.selected === null) {
+						if (!this.isEmpty(x, y)) {
+							this.selected = [x, y];
+						}
+					} else {
+						const [fromX, fromY] = this.selected;
+						this.get(fromX, fromY).moveTo(x, y);
+						this.selected = null;
+					}
+				});
+
 				cell.classList.add("tile");
-				cell.classList.add((i + j) % 2 === 0 ? "light" : "dark");
-				cell.title = toChessNotation(j, i);
+				cell.classList.add((y + x) % 2 === 0 ? "light" : "dark");
+				cell.title = toChessNotation(x, y);
 			}
 		}
 	}
 
-	clear() {
+	reset() {
 		for (let x = 0; x < this.width; x++) {
 			for (let y = 0; y < this.height; y++) {
 				this.resetTile(x, y);
 			}
 		}
+	}
+
+	resetTile(x, y) {
+		this.set(x, y, null);
 	}
 
 	isInBoard(x, y) {
@@ -54,26 +73,22 @@ class Board {
 		return this.get(x, y) === null;
 	}
 
-	resetTile(x, y) {
-		this.set(x, y, null);
-	}
-
-	get(x, y) {
-		return this.boardArray[this.height - y - 1][x];
-	}
-
 	markCell(x, y) {
 		const cell = this.getTableCell(x, y);
 		cell.classList.add("marked");
 	}
 
+	get(x, y) {
+		return this.boardArray[y][x];
+	}
+
 	getTableCell(x, y) {
-		return this.boardTable.rows[this.height - y - 1].cells[x];
+		return this.boardTable.rows[y].cells[x];
 	}
 
 	set(x, y, value) {
-		this.boardArray[this.height - y - 1][x] = value;
-		this.getTableCell(x, y).innerHTML = value;
+		this.boardArray[y][x] = value;
+		this.getTableCell(x, y).innerHTML = value === null ? "" : value;
 	}
 }
 
@@ -91,7 +106,6 @@ class Move {
 
 	generateMoves(peice) {
 		const moves = [];
-
 		let curX = peice.x + this.xChange;
 		let curY = peice.y + this.yChange;
 
@@ -159,6 +173,9 @@ class Peice {
 	}
 
 	_setLocation(x, y) {
+		if (this.x !== undefined && this.y !== undefined) {
+			this.board.resetTile(x, y);
+		}
 		[this.x, this.y] = [x, y];
 		this.board.set(x, y, this);
 		this.possibleMoves = this.generatePossibleMoves();
@@ -170,7 +187,6 @@ class Peice {
 	}
 
 	toString() {
-		console.log(this.svg.outerHTML)
 		return this.svg.outerHTML;
 	}
 }
@@ -241,6 +257,8 @@ const Queen = createPeiceSubclass(board, "queen", "Q", 9, [
 const r = new Rook(Colors.WHITE, 1, 1);
 const p = new Pawn(Colors.BLACK, 1, 5);
 const q = new Pawn(Colors.BLACK, 1, 6);
+
+
 for (const [x, y] of r.generatePossibleMoves()) {
 	board.markCell(x, y);
 }
