@@ -63,6 +63,7 @@ body {
 
 }
 
+
 .tile.marked:not(:empty)::after {
     width: 80%;
     background-color: transparent;
@@ -76,4 +77,14 @@ body {
 
 .tile.dark {
 	background-color: #769656;
+}
+
+
+.tile img {
+	z-index: 10;
+	cursor: grab;
+}
+
+.tile img:active {
+	cursor: grabbing;
 }

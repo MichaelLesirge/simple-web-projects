@@ -160,7 +160,6 @@ class Peice {
 
 	_setLocation(x, y) {
 		[this.x, this.y] = [x, y];
-		this.svg.title = `${this.type} ${toChessNotation(x, y)}`;
 		this.board.set(x, y, this);
 		this.possibleMoves = this.generatePossibleMoves();
 	}
