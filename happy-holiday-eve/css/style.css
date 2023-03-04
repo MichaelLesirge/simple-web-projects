@@ -12,11 +12,18 @@ body {
     overflow-y: hidden;
 }
 
-.select-holiday {
+.static {
     position: fixed;
     left: 50%;
-    top: 0.2rem;
     transform: translateX(-50%);
+}
+
+.select-holiday {
+    top: 0.2rem;
+}
+
+.count-down {
+    bottom: 40%;
 }
 
 .container {

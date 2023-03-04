@@ -5,5 +5,6 @@ Random website ideas I decided to make for no real reason besided for the fun of
 1. [rock-paper-scissors-battle](https://raw.githack.com/michael-lesirge/random-simple-web-projects/main/rock-paper-scissors-battle/index.html)
 2. [customisable-dice-roller](https://raw.githack.com/michael-lesirge/random-simple-web-projects/main/customisable-dice-roller/index.html)
 3. [happy-holiday-eve](https://raw.githack.com/michael-lesirge/random-simple-frontend-projects/main/happy-holiday-eve/index.html)
+4. [chess](https://raw.githack.com/michael-lesirge/random-simple-frontend-projects/main/chess/index.html) (incomplete)
 
 - [tic-tac-toe](https://raw.githack.com/michael-lesirge/tic-tac-toe/main/HTML-CSS-JS/) from https://github.com/michael-lesirge/tic-tac-toe.
