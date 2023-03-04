@@ -150,7 +150,7 @@ class Peice {
 		this.color = color;
 
 		this.svg = document.createElement("img");
-		this.svg.src = `peices/${this.color}_${this.type}.svg`;
+		this.svg.src = `peices/${this.color}/${this.type}.svg`;
 		this.svg.alt = `${toCapitalized(color)} ${this.type}`;
 		this.svg.width = 80;
 		this.svg.height = 80;
