@@ -36,6 +36,8 @@ body {
 	resize: both;
 	border: 1px solid black;
 	color: black;
+
+	border-spacing: 2px;
 }
 
 .board .tile {
@@ -44,6 +46,16 @@ body {
 
 	width: 5rem;
 	height: 5rem;
+
+	overflow: hidden;
+	white-space: nowrap;
+
+	user-select: none;
+}
+
+.board .tile img {
+	object-fit: contain;
+	vertical-align: middle;
 }
 
 .tile.marked::after {
@@ -82,9 +94,4 @@ body {
 
 .tile img {
 	z-index: 10;
-	cursor: grab;
-}
-
-.tile img:active {
-	cursor: grabbing;
 }

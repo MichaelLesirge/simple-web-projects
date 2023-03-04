@@ -3,18 +3,48 @@
 const boardWidth = 8;
 const boardHeight = 8;
 
-function generateAlphabet(capital = false) {
-	return [...Array(26)].map((_, i) => String.fromCharCode(i + (capital ? 65 : 97)));
-}
-
-const alphbet = generateAlphabet();
-
 const Colors = {
 	WHITE: "white",
 	BLACK: "black",
 };
 
 const neerSideColor = Colors.WHITE;
+
+class Cell {
+	constructor(x, y, htmlTableCell) {
+		this.x = x;
+		this.y = y;
+		this.HTMLcell = htmlTableCell;
+
+		this.HTMLcell.classList.add("tile");
+		this.HTMLcell.classList.add((y + x) % 2 === 0 ? "light" : "dark");
+		this.HTMLcell.title = toChessNotation(x, y);
+
+		this.set(null);
+	}
+
+	reset() {
+		this.unmark();
+		this.set(null);
+	}
+
+	set(value) {
+		this.HTMLcell.innerHTML = value ?? "";
+		this.value = value;
+	}
+
+	isEmpty() {
+		return this.value === null;
+	}
+
+	mark() {
+		this.HTMLcell.classList.add("marked");
+	}
+
+	unmark() {
+		this.HTMLcell.classList.remove("marked");
+	}
+}
 
 class Board {
 	constructor(width, height, htmlTable) {
@@ -31,64 +61,43 @@ class Board {
 			this.boardArray[y] = Array(width);
 			const row = this.boardTable.insertRow();
 			for (let x = 0; x < this.width; x++) {
-				this.boardArray[y][x] = null;
-				const cell = row.insertCell();
+				const cell = new Cell(x, this.height - y - 1, row.insertCell());
+				this.boardArray[y][x] = cell;
 
-				this.boardTable.addEventListener("click", (e) => {
-					if (this.selected === null) {
-						if (!this.isEmpty(x, y)) {
-							this.selected = [x, y];
+				cell.HTMLcell.addEventListener("click", (e) => {
+					this.resetMarks();
+					if (cell.value) {
+						for (const [x, y] of cell.value.generatePossibleMoves()) {
+							board.get(x, y).mark();
 						}
-					} else {
-						const [fromX, fromY] = this.selected;
-						this.get(fromX, fromY).moveTo(x, y);
-						this.selected = null;
 					}
 				});
-
-				cell.classList.add("tile");
-				cell.classList.add((y + x) % 2 === 0 ? "light" : "dark");
-				cell.title = toChessNotation(x, y);
 			}
 		}
+	}
+
+	resetMarks() {
+		this.forEach((cell) => cell.unmark());
 	}
 
 	reset() {
-		for (let x = 0; x < this.width; x++) {
-			for (let y = 0; y < this.height; y++) {
-				this.resetTile(x, y);
-			}
-		}
-	}
-
-	resetTile(x, y) {
-		this.set(x, y, null);
+		this.forEach((cell) => cell.reset());
 	}
 
 	isInBoard(x, y) {
 		return x > -1 && x < this.width && y > -1 && y < this.height;
 	}
 
-	isEmpty(x, y) {
-		return this.get(x, y) === null;
-	}
-
-	markCell(x, y) {
-		const cell = this.getTableCell(x, y);
-		cell.classList.add("marked");
-	}
-
 	get(x, y) {
-		return this.boardArray[y][x];
+		return this.boardArray[this.height - y - 1][x];
 	}
 
-	getTableCell(x, y) {
-		return this.boardTable.rows[y].cells[x];
-	}
-
-	set(x, y, value) {
-		this.boardArray[y][x] = value;
-		this.getTableCell(x, y).innerHTML = value === null ? "" : value;
+	forEach(func) {
+		for (let x = 0; x < this.width; x++) {
+			for (let y = 0; y < this.height; y++) {
+				func(this.get(x, y));
+			}
+		}
 	}
 }
 
@@ -114,12 +123,12 @@ class Move {
 		while (
 			going &&
 			peice.board.isInBoard(curX, curY) &&
-			(peice.board.isEmpty(curX, curY) || peice.board.get(curX, curY).color !== peice.color) &&
+			(peice.board.get(curX, curY).isEmpty() || peice.board.get(curX, curY).color !== peice.color) &&
 			this.condition(board, peice, curX, curY)
 		) {
 			moves.push([curX, curY]);
 
-			going = this.canRepeat && peice.board.isEmpty(curX, curY);
+			going = this.canRepeat && peice.board.get(curX, curY).isEmpty();
 
 			curX += this.xChange;
 			curY += this.yChange;
@@ -133,7 +142,7 @@ class Move {
 }
 
 function toChessNotation(x, y) {
-	return `${alphbet[x]}${boardWidth - y}`;
+	return `${String.fromCharCode(x + "a".charCodeAt(0))}${y + 1}`;
 }
 
 function toCapitalized(string) {
@@ -141,7 +150,7 @@ function toCapitalized(string) {
 }
 
 class Peice {
-	constructor(board, type, shortHandName, points, moves, color, x = 0, y = 0) {
+	constructor(board, type, shortHandName, points, directional, moves, color, x = 0, y = 0) {
 		this.board = board;
 
 		this.type = type;
@@ -157,7 +166,7 @@ class Peice {
 
 		this.timesMoved = 0;
 
-		if (this.color !== neerSideColor) moves = moves.map((m) => m.getReverseMove());
+		if (directional && this.color !== neerSideColor) moves = moves.map((m) => m.getReverseMove());
 
 		this.moves = moves;
 
@@ -177,7 +186,7 @@ class Peice {
 			this.board.resetTile(x, y);
 		}
 		[this.x, this.y] = [x, y];
-		this.board.set(x, y, this);
+		this.board.get(x, y).set(this);
 		this.possibleMoves = this.generatePossibleMoves();
 	}
 
@@ -191,74 +200,59 @@ class Peice {
 	}
 }
 
-function createPeiceSubclass(board, type, shortHandName, points, moves) {
+function createPeiceSubclass(board, type, shortHandName, points, moves, directional = false) {
 	return class extends Peice {
 		constructor(color, x = 0, y = 0) {
-			super(board, type, shortHandName, points, moves, color, x, y);
+			super(board, type, shortHandName, points, directional, moves, color, x, y);
 		}
 	};
 }
 
+function makeMoveVariations(xChange, yChange, canRepeat = false, condition = (board, peice, x, y) => true) {
+	return [
+		new Move(xChange, yChange, canRepeat, condition),
+		new Move(-xChange, yChange, canRepeat, condition),
+		new Move(xChange, -yChange, canRepeat, condition),
+		new Move(-xChange, -yChange, canRepeat, condition),
+	];
+}
+
 // todo make move group creator that simplfies his code
 const King = createPeiceSubclass(board, "king", "K", Infinity, [
-	new Move(1, 1),
-	new Move(0, 1),
-	new Move(-1, 1),
-	new Move(1, 0),
-	new Move(-1, 0),
-	new Move(1, -1),
-	new Move(0, -1),
-	new Move(-1, -1),
+	...makeMoveVariations(1, 1),
+	...makeMoveVariations(0, 1),
+	...makeMoveVariations(1, 0),
 ]);
 
-const Pawn = createPeiceSubclass(board, "pawn", "", 1, [
-	new Move(0, 1),
-	new Move(1, 1, false, (board, peice, x, y) => !board.isEmpty(x, y) && board.get(x, y).color !== peice.color),
-	new Move(-1, 1, false, (board, peice, x, y) => !board.isEmpty(x, y) && board.get(x, y).color !== peice.color),
-	new Move(0, 2, false, (board, peice, x, y) => peice.timesMoved === 0),
-]);
+const Pawn = createPeiceSubclass(
+	board,
+	"pawn",
+	"",
+	1,
+	[
+		new Move(0, 1, false),
+		new Move(1, 1, false, (board, peice, x, y) => !board.get(x, y).isEmpty() && board.get(x, y).color !== peice.color),
+		new Move(-1, 1, false, (board, peice, x, y) => !board.get(x, y).isEmpty() && board.get(x, y).color !== peice.color),
+		new Move(0, 2, false, (board, peice, x, y) => peice.timesMoved === 0),
+	],
+	true
+);
 
-const Knight = createPeiceSubclass(board, "knight", "N", 3, [
-	new Move(1, 2),
-	new Move(2, 1),
-	new Move(2, -1),
-	new Move(-1, -2),
-	new Move(-1, 2),
-	new Move(-2, 1),
-	new Move(-2, -1),
-	new Move(1, -2),
-]);
+const Knight = createPeiceSubclass(board, "knight", "N", 3, [...makeMoveVariations(1, 2), ...makeMoveVariations(2, 1)]);
 
-const Bishop = createPeiceSubclass(board, "bishop", "B", 3, [
-	new Move(1, 1, true),
-	new Move(-1, 1, true),
-	new Move(1, -1, true),
-	new Move(-1, -1, true),
-]);
+const Bishop = createPeiceSubclass(board, "bishop", "B", 3, [...makeMoveVariations(1, 1, true)]);
 
-const Rook = createPeiceSubclass(board, "rook", "R", 5, [
-	new Move(1, 0, true),
-	new Move(-1, 0, true),
-	new Move(0, 1, true),
-	new Move(0, -1, true),
-]);
+const Rook = createPeiceSubclass(board, "rook", "R", 5, [...makeMoveVariations(0, 1, true), ...makeMoveVariations(1, 0, true)]);
 
 const Queen = createPeiceSubclass(board, "queen", "Q", 9, [
-	new Move(1, 1, true),
-	new Move(0, 1, true),
-	new Move(-1, 1, true),
-	new Move(1, 0, true),
-	new Move(-1, 0, true),
-	new Move(1, -1, true),
-	new Move(0, -1, true),
-	new Move(-1, -1, true),
+	...makeMoveVariations(1, 1, true),
+	...makeMoveVariations(0, 1, true),
+	...makeMoveVariations(1, 0, true),
 ]);
 
 const r = new Rook(Colors.WHITE, 1, 1);
-const p = new Pawn(Colors.BLACK, 1, 5);
-const q = new Pawn(Colors.BLACK, 1, 6);
-
-
-for (const [x, y] of r.generatePossibleMoves()) {
-	board.markCell(x, y);
-}
+const p1 = new Pawn(Colors.BLACK, 1, 6);
+const p2 = new Pawn(Colors.BLACK, 6, 1);
+const p3 = new Pawn(Colors.BLACK, 5, 1);
+const n = new Knight(Colors.BLACK, 4, 4);
+const k = new King(Colors.BLACK, 7, 7);
