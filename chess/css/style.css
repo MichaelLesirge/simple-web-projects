@@ -44,8 +44,8 @@ body {
 	position: relative;
     text-align: center;
 
-	width: 5rem;
-	height: 5rem;
+	width: 9vmin;
+	height: 9vmin;
 
 	overflow: hidden;
 	white-space: nowrap;
@@ -67,7 +67,7 @@ body {
     transform: translate(-50%, -50%);
 
 	content: " ";
-	width: 1.5rem;
+	width: 2vmin;
     aspect-ratio: 1;
     border-radius: 50%;
 
@@ -79,7 +79,7 @@ body {
 .tile.marked:not(:empty)::after {
     width: 80%;
     background-color: transparent;
-    border: 0.3rem solid rgba(0, 0, 0, 0.2);
+    border: 0.8vmin solid rgba(0, 0, 0, 0.2);
 }
 
 

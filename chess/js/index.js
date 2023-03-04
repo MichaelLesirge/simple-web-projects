@@ -123,7 +123,7 @@ class Move {
 		while (
 			going &&
 			peice.board.isInBoard(curX, curY) &&
-			(peice.board.get(curX, curY).isEmpty() || peice.board.get(curX, curY).color !== peice.color) &&
+			(peice.board.get(curX, curY).isEmpty() || peice.board.get(curX, curY).value.color !== peice.color) &&
 			this.condition(board, peice, curX, curY)
 		) {
 			moves.push([curX, curY]);
@@ -161,8 +161,8 @@ class Peice {
 		this.svg = document.createElement("img");
 		this.svg.src = `peices/${this.color}/${this.type}.svg`;
 		this.svg.alt = `${toCapitalized(color)} ${this.type}`;
-		this.svg.width = 80;
-		this.svg.height = 80;
+		this.svg.style.width = "100%";
+		this.svg.style.height = "100%";
 
 		this.timesMoved = 0;
 
@@ -252,7 +252,8 @@ const Queen = createPeiceSubclass(board, "queen", "Q", 9, [
 
 const r = new Rook(Colors.WHITE, 1, 1);
 const p1 = new Pawn(Colors.BLACK, 1, 6);
-const p2 = new Pawn(Colors.BLACK, 6, 1);
-const p3 = new Pawn(Colors.BLACK, 5, 1);
+const p2 = new Pawn(Colors.BLACK, 4, 3);
+const b1 = new Bishop(Colors.BLACK, 6, 1);
+const b2 = new Bishop(Colors.BLACK, 5, 1);
 const n = new Knight(Colors.BLACK, 4, 4);
 const k = new King(Colors.BLACK, 7, 7);
