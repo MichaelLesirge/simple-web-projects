@@ -39,7 +39,7 @@ function isInPast(date) {
 }
 
 function isToday(date) {
-	return date.setHours(0, 0, 0, 0) == new Date().setHours(0, 0, 0, 0);
+	return new Date(date).setHours(0, 0, 0, 0) == new Date().setHours(0, 0, 0, 0);
 }
 
 function getTimeTo(date) {
@@ -75,23 +75,24 @@ selectHolidayInput.onchange = (event) => {
 	localStorage.setItem("current", holidayId);
 };
 
+let last;
 setInterval(() => {
 	now = new Date();
 
 	const holiday = holidays[holidayId];
 
-	let [days, hours, minutes, seconds] = getTimeTo(holiday.startDate);
-
-	if (isToday(holiday.startDate)) {
-		[days, hours, minutes, seconds] = [0, 0, 0, 0];
-	} else if (isInPast(holiday.startDate)) {
+	if (isInPast(holiday.startDate)) {
 		holiday.startDate.setFullYear(holiday.startDate.getFullYear() + 1);
 	}
 
-	const daysRoundedUp = days + Boolean(hours || minutes || seconds);
+	const [days, hours, minutes, seconds] = isToday(holiday.startDate) ? [0, 0, 0, 0] : getTimeTo(holiday.startDate);
 	
-	message.innerText = `${holiday.message} ${"Eve ".repeat(daysRoundedUp)}`;
-	message.title = `${holiday.message} Eve × ${daysRoundedUp}`;
+	const daysRoundedUp = days + Boolean(hours || minutes || seconds);
+
+	if (last !== daysRoundedUp) {
+		message.innerText = `${holiday.message} ${"Eve ".repeat(daysRoundedUp)}!`;
+		message.title = `${holiday.message} Eve × ${daysRoundedUp}`;
+	}
 
 	countDownClockElement.innerText = [
 		makeClockFormat(days),
@@ -100,10 +101,10 @@ setInterval(() => {
 		makeClockFormat(seconds),
 	].join(":");
 
-	countDownClockElement.title = `${makeClockTitleFormat(days, "day")}, ${makeClockTitleFormat(hours, "hour")}, ${makeClockTitleFormat(minutes, "minute")}, and ${makeClockTitleFormat(seconds, "second")} to ${holiday.startDate.toString().split("00:00:00")[0]}`
-	
-});
+	countDownClockElement.title = `${makeClockTitleFormat(days, "day")}, ${makeClockTitleFormat(hours, "hour")}, ${makeClockTitleFormat(minutes, "minute")}, and ${makeClockTitleFormat(seconds, "second")} to ${holiday.startDate.toString().split("00:00:00")[0]}`;
 
+	last = daysRoundedUp;
+});
 
 function makeClockFormat(time_unit_amount, padding = 2) {
 	return String(time_unit_amount).padStart(padding, "0");
