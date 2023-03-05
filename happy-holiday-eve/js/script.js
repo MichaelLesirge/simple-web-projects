@@ -84,12 +84,27 @@ setInterval(() => {
 	eveMessageElement.title = `Eve × ${days}`;
 
 	countDownClockElement.innerText = [
-		String(days).padStart(2, "0"),
-		String(hours).padStart(2, "0"),
-		String(minutes).padStart(2, "0"),
-		String(seconds).padStart(2, "0"),
+		makeClockFormat(days),
+		makeClockFormat(hours),
+		makeClockFormat(minutes),
+		makeClockFormat(seconds),
 	].join(":");
+	
+	countDownClockElement.title = [	
+		makeClockTitleFormat(days, "day"),
+		makeClockTitleFormat(hours, "hour"),
+		makeClockTitleFormat(minutes, "minute"),
+		makeClockTitleFormat(seconds, "second"),
+	].join(", ");
 });
+
+function makeClockFormat(time_unit_amount, padding=2) {
+	return String(time_unit_amount).padStart(padding, "0");
+}
+
+function makeClockTitleFormat(time_unit_amount, time_name) {
+	return `${time_unit_amount} ${time_name}${time_unit_amount >= 2 ? "s" : ""}`
+}
 
 // TODO add differnt condions if message overflows
 // window.scrollTo({ right: 0, behavior: 'auto' });
