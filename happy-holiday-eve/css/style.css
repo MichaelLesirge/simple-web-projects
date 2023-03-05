@@ -23,7 +23,7 @@ body {
 }
 
 .count-down {
-    bottom: 40%;
+    bottom: calc(50% - 8rem);
 }
 
 .container {

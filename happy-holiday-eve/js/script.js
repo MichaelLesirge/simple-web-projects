@@ -1,6 +1,6 @@
 "use strict";
 
-const today = new Date();
+let today = new Date();
 const oneDay = 24 * 60 * 60 * 1000;
 
 const holidays = {
@@ -15,11 +15,11 @@ const holidays = {
 		startDate: new Date(today.getFullYear(), 11, 25),
 	},
 	// Waiting for hebrew calendar implantation in javascript
-	// TODO maybe add end date and say "Happy first/second/third... day of " 
+	// TODO maybe add end date and say "Happy first/second/third... day of "
 	han: {
-	    name: "Hanukkah",
-	    merryMessage: "Happy",
-	    startDate: today,
+		name: "Hanukkah",
+		merryMessage: "Happy",
+		startDate: today,
 	},
 	kz: {
 		name: "Kwanzaa",
@@ -28,29 +28,30 @@ const holidays = {
 	},
 };
 
-const holidaySpan = document.querySelector("#holiday-name");
-const eveMessageSpan = document.querySelector("#eve-message");
-const merryMessageSpan = document.querySelector("#merry-message");
+function getTimeTo(date) {
+	let delta = Math.abs(date - today) / 1000;
 
-function setHoliday(holiday) {
-	holidaySpan.innerText = holiday.name;
-	merryMessageSpan.innerText = holiday.merryMessage;
+	const days = Math.floor(delta / 86400);
+	delta -= days * 86400;
 
-	const daysTillHoliday = getDaysTill(holiday.startDate);
+	const hours = Math.floor(delta / 3600) % 24;
+	delta -= hours * 3600;
 
-	eveMessageSpan.innerText = "Eve ".repeat(daysTillHoliday);
-	eveMessageSpan.title = `Eve × ${daysTillHoliday}`;
+	const minutes = Math.floor(delta / 60) % 60;
+	delta -= minutes * 60;
 
-	console.log(daysTillHoliday);
+	const seconds = Math.floor(delta);
+
+	return [days, hours, minutes, seconds];
 }
 
-function getDaysTill(date) {
-	return Math.round((date - today) / oneDay);
-}
-
-setHoliday(holidays.ny);
-
+const holidayElement = document.querySelector("#holiday-name");
+const eveMessageElement = document.querySelector("#eve-message");
+const merryMessageElement = document.querySelector("#merry-message");
 const selectHolidayInput = document.querySelector("#holidays-select");
+const countDownClockElement = document.querySelector("#count-down-clock");
+
+let holiday = holidays.ny;
 
 // add each holiday to menu
 for (const [name, holiday] of Object.entries(holidays)) {
@@ -61,9 +62,34 @@ for (const [name, holiday] of Object.entries(holidays)) {
 }
 
 selectHolidayInput.onchange = (event) => {
-	setHoliday(holidays[event.target.value]);
-	if (event.target.value == "han") setTimeout(() => alert("Unknown start date because I don't know how Hebrew calendar works or how to code that. Sorry!"), 100);
+
+	if (event.target.value == "han") {
+		alert("Unknown start date because I don't know how Hebrew calendar works or how to code that. Sorry!");
+		return
+	}
+
+	holiday = holidays[event.target.value];
+
+	holidayElement.innerText = holiday.name;
+	merryMessageElement.innerText = holiday.merryMessage;
+
 };
+
+setInterval(() => {
+	today = new Date()
+
+	const [days, hours, minutes, seconds] = getTimeTo(holiday.startDate);
+
+	eveMessageElement.innerText = "Eve ".repeat(days);
+	eveMessageElement.title = `Eve × ${days}`;
+
+	countDownClockElement.innerText = [
+		String(days).padStart(2, "0"),
+		String(hours).padStart(2, "0"),
+		String(minutes).padStart(2, "0"),
+		String(seconds).padStart(2, "0"),
+	].join(":");
+});
 
 // TODO add differnt condions if message overflows
 // window.scrollTo({ right: 0, behavior: 'auto' });
