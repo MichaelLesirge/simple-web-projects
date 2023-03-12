@@ -149,7 +149,7 @@ function toCapitalized(string) {
 	return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
-class Peice {
+class Piece {
 	constructor(board, type, shortHandName, points, directional, moves, color, x = 0, y = 0) {
 		this.board = board;
 
@@ -201,7 +201,7 @@ class Peice {
 }
 
 function createPeiceSubclass(board, type, shortHandName, points, moves, directional = false) {
-	return class extends Peice {
+	return class extends Piece {
 		constructor(color, x = 0, y = 0) {
 			super(board, type, shortHandName, points, directional, moves, color, x, y);
 		}
@@ -224,18 +224,12 @@ const King = createPeiceSubclass(board, "king", "K", Infinity, [
 	...makeMoveVariations(1, 0),
 ]);
 
-const Pawn = createPeiceSubclass(
-	board,
-	"pawn",
-	"",
-	1,
-	[
+const Pawn = createPeiceSubclass(board, "pawn", "", 1, [
 		new Move(0, 1, false),
 		new Move(1, 1, false, (board, peice, x, y) => !board.get(x, y).isEmpty() && board.get(x, y).color !== peice.color),
 		new Move(-1, 1, false, (board, peice, x, y) => !board.get(x, y).isEmpty() && board.get(x, y).color !== peice.color),
 		new Move(0, 2, false, (board, peice, x, y) => peice.timesMoved === 0),
-	],
-	true
+	], true
 );
 
 const Knight = createPeiceSubclass(board, "knight", "N", 3, [...makeMoveVariations(1, 2), ...makeMoveVariations(2, 1)]);
