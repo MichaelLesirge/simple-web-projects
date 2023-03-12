@@ -1,9 +1,16 @@
-let count = 0;
-
 // make circle follow cursor slowly
 // make circle grow on mouse down and shrink fast when mouse is lifted
 
-setInterval(() => {
-    document.body.style.background = `radial-gradient(circle, rgba(11, 137, 140, 1) ${count % 50}%, rgba(0, 0, 0, 1) 100%)`;
-    count++;
-}, 100)
+const blob = document.getElementById("blob");
+
+document.addEventListener("mousemove", (event) => {
+    const {clientX, clientY} = event;
+
+    blob.animate({
+        left: `${clientX}px`,
+        top: `${clientY}px`,
+    }, {duration: 300, fill: "forwards"})
+
+    blob.style.left = clientX + "px";
+    blob.style.top = clientY + "px";
+})
