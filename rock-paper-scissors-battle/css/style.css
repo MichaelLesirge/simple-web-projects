@@ -178,6 +178,12 @@ body {
     background-color: lightslategray;
 }
 
+.btn#reset-sliders {
+    color: white;
+    font-size: inherit;
+    background-color: transparent;
+}
+
 .btn:hover {
     filter: brightness(130%);
     box-shadow: rgba(50, 50, 93, .1) 0 0 0 1px inset, rgba(50, 50, 93, .2) 0 3px 7px 0, rgba(0, 0, 0, .1) 0 2px 2px 0, rgba(50, 151, 211, .3) 0 0 0 2px;

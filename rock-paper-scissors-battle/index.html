@@ -18,29 +18,29 @@
 		<main class="container">
 			<h1 class="title">Rock Paper Scissor Battle Royal</h1>
 			<form class="settings">
-                <div class="slider-group speed">                   
+                <div class="slider-group speed" title="how fast each entity moves">                   
                     <label for="speed-slider">Speed</label>
-                    <input type="range" min="0" max="100" class="slider" id="speed-slider" />
+                    <input type="range" min="0" max="100" class="slider" id="speed-slider" title=""/>
                     <span class="current-val"></span>
                 </div>
-                <div class="slider-group count">                   
+                <div class="slider-group count" title="how many entities there are">                   
                     <label for="count-slider">Count</label>
-                    <input type="range" min="0" max="300" step="3" class="slider" id="count-slider" />
+                    <input type="range" min="0" max="300" step="3" class="slider" id="count-slider"  title=""/>
                     <span class="current-val"></span>
                 </div>
-                <div class="slider-group scale">                   
+                <div class="slider-group scale" title="how large the entities are">                   
                     <label for="fps-slider">Scale</label>
-                    <input type="range" min="25" max="300" class="slider" id="fps-slider" />
+                    <input type="range" min="25" max="300" class="slider" id="fps-slider" title=""/>
                     <span class="current-val"></span>
                 </div>
-				<button class="btn" id="reset-sliders" type="reset">Reset</button>
+				<button class="btn" id="reset-sliders" type="reset" title="reset settings">Reset</button>
 			</form>
             <div class="arena-container">
                 <div class="arena"></div>
             </div>
 			<div>
 				<button id="start" class="btn">Start Battle!</button>
-				<button id="reset" class="btn">Reset Battle</button>
+				<button id="reset" class="btn">New Battle</button>
 			</div>
 		</main>
 	</body>
