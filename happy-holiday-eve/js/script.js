@@ -1,7 +1,6 @@
 "use strict";
 
 let now = new Date();
-const oneDay = 24 * 60 * 60 * 1000;
 
 const selectHolidayInput = document.querySelector("#holidays-select");
 const messageElement = document.querySelector("#message");
