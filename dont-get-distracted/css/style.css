@@ -19,8 +19,8 @@ body {
 }
 
 #blob {
-    top: 0;
-    left: 0;
+    top: -100%;
+    left: -100%;
 
     background: aquamarine;
 
