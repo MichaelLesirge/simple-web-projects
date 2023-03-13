@@ -12,5 +12,5 @@ document.addEventListener("mousemove", (event) => {
         top: `${clientY}px`,
     }, {duration: duration, fill: "forwards"})
 
-    duration = 300;
+    duration = 100;
 })

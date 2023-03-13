@@ -43,8 +43,7 @@ body {
     background-color: cyan;
 
     /* filter: blur(10vmin); */
-    scale: 1 1.5;
-    animation: rotate infinite 20s;
+    animation: rotate infinite alternate 10s;
 }
 
 #blur {
@@ -60,14 +59,13 @@ body {
 
 @keyframes rotate {
     from {
-        rotate: 0deg;
         filter: hue-rotate(0deg);
-    }
-    50% {
-        filter: hue-rotate(20deg);
+        scale: 1.5 1;
     }
     to {
-        rotate: 360deg;
-        filter: hue-rotate(0deg);
+        filter: hue-rotate(50deg);
+        scale: 1 1.5;
+        rotate: 10deg;
     }
+
 }
