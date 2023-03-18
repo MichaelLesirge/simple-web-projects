@@ -1,0 +1,1 @@
+Random things I sometimes paste into the javascipt console to do stuff. Horrible formating in all of them because they were just meant to be a quick copy and paste.

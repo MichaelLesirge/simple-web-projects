@@ -1,0 +1,1 @@
+document.addEventListener("click", (event) => {console.log(event);event.target.remove()})

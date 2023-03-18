@@ -1,0 +1,1 @@
+c=(a)=>{getEventListeners(a).pointerdown[0].listener({preventDefault:()=>{},stopPropagation:()=>{}})};t=document.querySelectorAll("div.MatchModeQuestionGridTile");t.forEach(a=>{0<a.children.length&&t.forEach(b=>{0<a.children.length&&a!==b&&(c(a),c(b))})});
