@@ -1,5 +1,15 @@
-# Stuff to improve or add
+# TODOS
 
-## All
+# In Progress
+- Chess
+- Custom dice roller
+
+## Improvements
 - Make home page for website (github.io) with nice looking screenshots and descriptions of all side projects. No more raw.githack.com
-- Improve Javascript code read in genral 
+
+## Future Projects
+- Tab clock. Each URL would be a time amount. 
+    - buttons to open all URLs in differnt formats
+- classic TODO app CRUD but with no backend, instead uses localstorage
+    - allow users to order them and stuff by dragging
+    - allow users to add date that they must be complete
