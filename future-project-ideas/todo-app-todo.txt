@@ -1,3 +1,0 @@
-- classic TODO app CRUD but with no backend, instead uses localstorage
-- allow users to order them and stuff by dragging
-- allow users to add date that they must be complete
