@@ -1,0 +1,1 @@
+[document.querySelector("div#container.style-scope.ytd-masthead"), document.querySelector("div#below.style-scope.ytd-watch-flexy")].forEach(e => e.remove())
