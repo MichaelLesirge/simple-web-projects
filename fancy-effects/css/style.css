@@ -61,10 +61,15 @@ body {
 
 .main {
     place-self: center;
+    text-align: center;
+}
+
+.title {
+    font-size: 7rem;
 }
 
 .hacker-text {
-    font-size: 7rem;
+    font-family: monospace;
 }
 
 @keyframes rotate {
