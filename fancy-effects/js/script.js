@@ -24,6 +24,8 @@ function randChar(charSet) {
 }
 
 const randomCharSet = charRange("a", "z") + charRange("A", "Z") + charRange("0", "9") + "`-=[]\\;',./~_+{}|:\"<>?".repeat(2);
+const iterWait = 50;
+const addAfter = 3000;
 
 document.querySelectorAll(".hacker-text").forEach((element) => {
     let isActive = false;
@@ -36,12 +38,20 @@ document.querySelectorAll(".hacker-text").forEach((element) => {
         let charSet = startString + randomCharSet;
 
         let startChars = Array.from(startString);
-        let curChars = startChars.map(_ => randChar(charSet));
+        let curChars = new Array(startChars.length);
+
+        let count = 0
 
         let intervalId = setInterval(() => {
+            count++;
+
             for (let i = 0; i < curChars.length; i++) {
-                curChars[i] = curChars[i] == startString[i] ? curChars[i] : randChar(charSet);
-                if (curChars[i] == " ") curChars[i] = startChars[i];
+                // curChars[i] = curChars[i] === startString[i] ? curChars[i] : randChar(charSet);
+                if (curChars[i] !== startChars[i]) {
+                    curChars[i] = randChar(charSet);
+                    if (count * iterWait > addAfter) charSet += " ";
+                }
+                if (curChars[i] === " ") curChars[i] = startChars[i];
             }
 
             const curString = curChars.join("");
@@ -51,10 +61,7 @@ document.querySelectorAll(".hacker-text").forEach((element) => {
                 clearInterval(intervalId);
                 isActive = false;
             }
-
-            charSet += randChar(startString)
-
-        }, 50)
+        }, iterWait)
 
     })
 })
