@@ -11,14 +11,14 @@ const Colors = {
 const neerSideColor = Colors.WHITE;
 
 class Cell {
-	constructor(x, y, htmlTableCell) {
-		this.x = x;
-		this.y = y;
+	constructor(row, col, htmlTableCell) {
+		this.x = row;
+		this.y = col;
 		this.HTMLcell = htmlTableCell;
 
 		this.HTMLcell.classList.add("tile");
-		this.HTMLcell.classList.add((y + x) % 2 === 0 ? "light" : "dark");
-		this.HTMLcell.title = toChessNotation(x, y);
+		this.HTMLcell.classList.add((col + row) % 2 === 0 ? "light" : "dark");
+		this.HTMLcell.title = toChessNotation(row, col);
 
 		this.set(null);
 	}
@@ -57,19 +57,23 @@ class Board {
 
 		this.boardTable = htmlTable;
 
-		for (let y = 0; y < this.height; y++) {
-			this.boardArray[y] = Array(width);
-			const row = this.boardTable.insertRow();
-			for (let x = 0; x < this.width; x++) {
-				const cell = new Cell(x, this.height - y - 1, row.insertCell());
-				this.boardArray[y][x] = cell;
+		for (let row = 0; row < this.height; row++) {
+			this.boardArray[row] = Array(width);
+			const tableRow = this.boardTable.insertRow();
+			for (let col = 0; col < this.width; col++) {
+				const cell = new Cell(col, this.height - row - 1, tableRow.insertCell());
+				this.boardArray[row][col] = cell;
 
 				cell.HTMLcell.addEventListener("click", (e) => {
 					this.resetMarks();
 					if (cell.value) {
-						for (const [x, y] of cell.value.generatePossibleMoves()) {
-							board.get(x, y).mark();
+						this.selected = cell.value;
+						for (const [row, col] of this.selected.generatePossibleMoves()) {
+							board.get(row, col).mark();
 						}
+					}
+					else {
+						this.selected = null;
 					}
 				});
 			}
@@ -84,18 +88,22 @@ class Board {
 		this.forEach((cell) => cell.reset());
 	}
 
-	isInBoard(x, y) {
-		return x > -1 && x < this.width && y > -1 && y < this.height;
+	resetTile(row, col) {
+		this.get(row, col).reset();
 	}
 
-	get(x, y) {
-		return this.boardArray[this.height - y - 1][x];
+	isInBoard(row, col) {
+		return row > -1 && row < this.width && col > -1 && col < this.height;
+	}
+
+	get(row, col) {
+		return this.boardArray[this.height - col - 1][row];
 	}
 
 	forEach(func) {
-		for (let x = 0; x < this.width; x++) {
-			for (let y = 0; y < this.height; y++) {
-				func(this.get(x, y));
+		for (let row = 0; row < this.width; row++) {
+			for (let col = 0; col < this.height; col++) {
+				func(this.get(row, col));
 			}
 		}
 	}
@@ -104,9 +112,9 @@ class Board {
 const board = new Board(boardWidth, boardHeight, document.querySelector("table.board"));
 
 class Move {
-	constructor(xChange, yChange, canRepeat = false, condition = (board, peice, x, y) => true) {
-		this.xChange = xChange;
-		this.yChange = yChange;
+	constructor(rowChange, colChange, canRepeat = false, condition = (board, peice, row, col) => true) {
+		this.rowChange = rowChange;
+		this.colChange = colChange;
 
 		this.canRepeat = canRepeat;
 
@@ -115,34 +123,34 @@ class Move {
 
 	generateMoves(peice) {
 		const moves = [];
-		let curX = peice.x + this.xChange;
-		let curY = peice.y + this.yChange;
+		let curRow = peice.row + this.rowChange;
+		let curCol = peice.col + this.colChange;
 
 		let going = true;
 
 		while (
 			going &&
-			peice.board.isInBoard(curX, curY) &&
-			(peice.board.get(curX, curY).isEmpty() || peice.board.get(curX, curY).value.color !== peice.color) &&
-			this.condition(board, peice, curX, curY)
+			peice.board.isInBoard(curRow, curCol) &&
+			(peice.board.get(curRow, curCol).isEmpty() || peice.board.get(curRow, curCol).value.color !== peice.color) &&
+			this.condition(board, peice, curRow, curCol)
 		) {
-			moves.push([curX, curY]);
+			moves.push([curRow, curCol]);
 
-			going = this.canRepeat && peice.board.get(curX, curY).isEmpty();
+			going = this.canRepeat && peice.board.get(curRow, curCol).isEmpty();
 
-			curX += this.xChange;
-			curY += this.yChange;
+			curRow += this.rowChange;
+			curCol += this.colChange;
 		}
 		return moves;
 	}
 
 	getReverseMove() {
-		return new Move(this.xChange, -this.yChange, this.canRepeat, this.condition);
+		return new Move(this.rowChange, -this.colChange, this.canRepeat, this.condition);
 	}
 }
 
-function toChessNotation(x, y) {
-	return `${String.fromCharCode(x + "a".charCodeAt(0))}${y + 1}`;
+function toChessNotation(row, col) {
+	return `${String.fromCharCode(row + "a".charCodeAt(0))}${col + 1}`;
 }
 
 function toCapitalized(string) {
@@ -150,7 +158,7 @@ function toCapitalized(string) {
 }
 
 class Piece {
-	constructor(board, type, shortHandName, points, directional, moves, color, x = 0, y = 0) {
+	constructor(board, type, shortHandName, points, directional, moves, color, row, col) {
 		this.board = board;
 
 		this.type = type;
@@ -170,7 +178,7 @@ class Piece {
 
 		this.moves = moves;
 
-		this._setLocation(x, y);
+		this._setLocation(row, col);
 	}
 
 	generatePossibleMoves() {
@@ -181,17 +189,17 @@ class Piece {
 		return moves;
 	}
 
-	_setLocation(x, y) {
-		if (this.x !== undefined && this.y !== undefined) {
-			this.board.resetTile(x, y);
+	_setLocation(row, col) {
+		if (this.row !== undefined && this.col !== undefined) {
+			this.board.resetTile(this.row, this.col);
 		}
-		[this.x, this.y] = [x, y];
-		this.board.get(x, y).set(this);
+		[this.row, this.col] = [row, col];
+		this.board.get(row, col).set(this);
 		this.possibleMoves = this.generatePossibleMoves();
 	}
 
-	moveTo(x, y) {
-		this._setLocation(x, y);
+	moveTo(row, col) {
+		this._setLocation(row, col);
 		this.timesMoved++;
 	}
 
@@ -202,18 +210,18 @@ class Piece {
 
 function createPeiceSubclass(board, type, shortHandName, points, moves, directional = false) {
 	return class extends Piece {
-		constructor(color, x = 0, y = 0) {
-			super(board, type, shortHandName, points, directional, moves, color, x, y);
+		constructor(color, row = 0, col = 0) {
+			super(board, type, shortHandName, points, directional, moves, color, row, col);
 		}
 	};
 }
 
-function makeMoveVariations(xChange, yChange, canRepeat = false, condition = (board, peice, x, y) => true) {
+function makeMoveVariations(rowChange, colChange, canRepeat = false, condition = (board, peice, row, col) => true) {
 	return [
-		new Move(xChange, yChange, canRepeat, condition),
-		new Move(-xChange, yChange, canRepeat, condition),
-		new Move(xChange, -yChange, canRepeat, condition),
-		new Move(-xChange, -yChange, canRepeat, condition),
+		new Move(rowChange, colChange, canRepeat, condition),
+		new Move(-rowChange, colChange, canRepeat, condition),
+		new Move(rowChange, -colChange, canRepeat, condition),
+		new Move(-rowChange, -colChange, canRepeat, condition),
 	];
 }
 
@@ -251,3 +259,5 @@ const b1 = new Bishop(Colors.BLACK, 6, 1);
 const b2 = new Bishop(Colors.BLACK, 5, 1);
 const n = new Knight(Colors.BLACK, 4, 4);
 const k = new King(Colors.BLACK, 7, 7);
+
+setTimeout(() => k.moveTo(6, 6), 2000)
