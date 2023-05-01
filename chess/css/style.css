@@ -75,13 +75,15 @@ body {
 
 }
 
-
-.tile.marked:not(:empty)::after {
+.tile.marked.enemy-marked::after {
     width: 80%;
     background-color: transparent;
     border: 0.8vmin solid rgba(0, 0, 0, 0.2);
 }
 
+.tile.selected {
+	background-color: #bbcb2b !important;
+}
 
 .tile.light {
 	background-color: #eeeed2;
@@ -90,7 +92,6 @@ body {
 .tile.dark {
 	background-color: #769656;
 }
-
 
 .tile img {
 	z-index: 10;
