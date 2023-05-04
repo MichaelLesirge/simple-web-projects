@@ -96,3 +96,8 @@ body {
 .tile img {
 	z-index: 10;
 }
+
+.who-to-move {
+	width: 14rem;
+	text-align: left;
+}

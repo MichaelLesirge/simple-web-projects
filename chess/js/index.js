@@ -9,11 +9,14 @@ const PlayerColors = {
 };
 
 const neerSideColor = PlayerColors.WHITE;
+const startingColor = PlayerColors.WHITE;
 
 const SquareColors = {
 	LIGHT: "light",
 	DARK: "dark"
 }
+
+const whoToMoveMessage = document.querySelector(".who-to-move")
 
 class Square {
 	constructor(row, col, color, htmlTableCell, listener) {
@@ -31,7 +34,12 @@ class Square {
 
 	reset() {
 		this.unmark();
+		this.unselect()
 		this.set(null);
+	}
+
+	getTaken() {
+		this.set(null)
 	}
 
 	set(value) {
@@ -70,27 +78,28 @@ class Board {
 		this.width = width;
 		this.height = height;
 
-		this.setSelected(null)
+		this.setSelected(null);
+		this.currentColor = startingColor;
 
 		this.boardArray = Array(this.height);
 
 		this.boardTable = htmlTable;
 
 		const listener = (square) => {
-			
-			if (square.isEmpty()) {
+			if (!square.isEmpty() && this.currentColor === square.get().color) {
+				this.setSelected(square);
+			}
+			else {
 				if (this.marked.includes(square)) {
 					this.move(this.selected, square)
+					this.switchCurrentPlayer()
 				}
 				this.setSelected(null);
 			}
-			else {
-				this.setSelected(square);
-			}
 			
-
+			
 		}
-
+		
 		for (let row = 0; row < this.height; row++) {
 			this.boardArray[row] = Array(width);
 			const tableRow = this.boardTable.insertRow();
@@ -99,6 +108,11 @@ class Board {
 				this.boardArray[row][col] = square;
 			}
 		}
+	}
+	
+	switchCurrentPlayer() {
+		this.currentColor = PlayerColors.WHITE == this.currentColor ? PlayerColors.BLACK : PlayerColors.WHITE;
+		whoToMoveMessage.innerText = toCapitalized(this.currentColor) + " to move"
 	}
 	
 	setSelected(selectedSquare) {
@@ -133,8 +147,11 @@ class Board {
 	}
 
 	move(oldSquare, newSquare) {
+		if (oldSquare.isEmpty()) throw "tried to move form empty square";
+
 		newSquare.set(oldSquare.get());
-		oldSquare.reset()
+		newSquare.get().timesMoved++;
+		oldSquare.getTaken();
 	}
 
 	forEach(func) {
@@ -202,7 +219,7 @@ class Piece {
 		this.color = color;
 
 		this.svg = document.createElement("img");
-		this.svg.src = `peices/${this.color}/${this.type}.svg`;
+		this.svg.src = `pieces/${this.color}/${this.type}.svg`;
 		this.svg.alt = `${toCapitalized(color)} ${this.type}`;
 		this.svg.style.width = "100%";
 		this.svg.style.height = "100%";
@@ -252,10 +269,10 @@ const King = createPeiceSubclass("king", "K", Infinity, [
 ]);
 
 const Pawn = createPeiceSubclass("pawn", "", 1, [
-		new Move(0, 1, false),
+		new Move(0, 1, false, (board, peice, newRow, newCol) => board.get(newRow, newCol).isEmpty()),
 		new Move(1, 1, false, (board, peice, newRow, newCol) => !board.get(newRow, newCol).isEmpty() && board.get(newRow, newCol).color !== peice.color),
 		new Move(-1, 1, false, (board, peice, newRow, newCol) => !board.get(newRow, newCol).isEmpty() && board.get(newRow, newCol).color !== peice.color),
-		new Move(0, 2, false, (board, peice, newRow, newCol) => peice.timesMoved === 0),
+		new Move(0, 2, false, (board, peice, newRow, newCol) => peice.timesMoved === 0 && board.get(newRow, newCol).isEmpty()),
 	], true
 );
 
