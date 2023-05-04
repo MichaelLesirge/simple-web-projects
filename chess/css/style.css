@@ -3,6 +3,10 @@
 	padding: 0;
 }
 
+:root {
+	--tile-size: 9vmin;
+}
+
 body {
 	background-color: #312e2b;
 	color: white;
@@ -44,8 +48,8 @@ body {
 	position: relative;
     text-align: center;
 
-	width: 9vmin;
-	height: 9vmin;
+	width: var(--tile-size);
+	height: var(--tile-size);
 
 	overflow: hidden;
 	white-space: nowrap;
@@ -95,6 +99,16 @@ body {
 
 .tile img {
 	z-index: 10;
+}
+
+.game-info {
+	box-sizing: border-box;
+	padding: 2rem;
+
+	height: calc(var(--tile-size) * 8);
+	aspect-ratio: 0.618;
+
+	background-color: #272522;
 }
 
 .who-to-move {
