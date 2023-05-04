@@ -79,6 +79,10 @@ body {
 
 }
 
+/* .tile:hover {
+	outline: 1px solid rgba(255, 255, 255, 0.5);
+} */
+
 .tile.marked.enemy-marked::after {
     width: 80%;
     background-color: transparent;

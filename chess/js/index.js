@@ -16,6 +16,8 @@ const SquareColors = {
 	DARK: "dark",
 };
 
+let debug = false;
+
 class Square {
 	constructor(row, col, color, htmlTableCell, selectedListener, takenListener) {
 		this.row = row;
@@ -83,14 +85,17 @@ class Board {
 
 		this.pieces = [];
 
-		const listener = (square) => playerMove(square, this);
+		const listener = (square) =>  {
+			console.log(square)
+			playerMove(square, this);
+		}
 
 		for (let row = 0; row < this.height; row++) {
 			this.boardArray[row] = Array(width);
 			const tableRow = this.boardTable.insertRow();
 			for (let col = 0; col < this.width; col++) {
 				const square = new Square(
-					col, this.height - row - 1,
+					this.height - row - 1, col,
 					(col + row) % 2 === 0 ? SquareColors.LIGHT : SquareColors.DARK,
 					tableRow.insertCell(),
 					listener, () => {}
@@ -123,7 +128,7 @@ class Board {
 	}
 
 	generatePieceMoves() {
-		this.forEach((square) => { if (!square.isEmpty()) square.get().getPossibleMoves(this, square) })
+		this.forEach((square) => { if (!square.isEmpty()) square.get().generatePossibleMoves(this, square) })
 	}
 
 	isInBoard(row, col) {
@@ -131,20 +136,23 @@ class Board {
 	}
 
 	get(row, col) {
-		return this.boardArray[this.height - col - 1][row];
+		if (!this.isInBoard(row, col)) throw "Tried to get location not in board"
+		return this.boardArray[this.height - row - 1][col];
 	}
-
+	
 	move(oldSquare, newSquare) {
 		if (oldSquare.isEmpty()) throw "tried to move form empty square";
 
 		newSquare.set(oldSquare.get());
 		newSquare.get().timesMoved++;
 		oldSquare.set(null);
+		board.generatePieceMoves();
 	}
 
 	add(piece, row, col) {
 		this.pieces.push(this.pieces);
 		this.get(row,col).set(piece);
+		board.generatePieceMoves();
 	}
 
 	forEach(func) {
@@ -166,10 +174,13 @@ class Move {
 		this.condition = condition;
 	}
 
-	generateMoves(board, piece, fromSquare) {
+	generateMoves(board, piece, fromSquare, debug) {
+		debug = debug && this.rowChange === 0 && this.colChange === 1;
 		const moves = [];
+		if (debug) console.log([fromSquare.row, this.rowChange], [fromSquare.col, this.colChange])
 		let curRow = fromSquare.row + this.rowChange;
 		let curCol = fromSquare.col + this.colChange;
+		if (debug) console.log([curRow], [curCol])
 
 		let going = true;
 
@@ -186,16 +197,17 @@ class Move {
 			curRow += this.rowChange;
 			curCol += this.colChange;
 		}
+
 		return moves;
 	}
 
 	getReverseMove() {
-		return new Move(this.rowChange, -this.colChange, this.canRepeat, this.condition);
+		return new Move(-this.rowChange, this.colChange, this.canRepeat, this.condition);
 	}
 }
 
 function toChessNotation(row, col) {
-	return `${String.fromCharCode("a".charCodeAt(0) + row)}${col + 1}`;
+	return `${String.fromCharCode("a".charCodeAt(0) + col)}${row + 1}`;
 }
 
 function toCapitalized(string) {
@@ -217,19 +229,26 @@ class Piece {
 
 		this.timesMoved = 0;
 
+		this.currentMoves = [];
+
 		if (directional && this.color !== neerSideColor) moves = moves.map((m) => m.getReverseMove());
 
 		this.moves = moves;
 	}
 
-	getPossibleMoves(board, curSquare) {
-		const moves = [];
-		for (const move of this.moves) {
-			moves.push(...move.generateMoves(board, this, curSquare));
-		}
-		return moves;
+	getPossibleMoves() {
+		// if (this.type === "knight" && this.color === PlayerColors.WHITE) { console.trace() }
+		return this.currentMoves;
 	}
-
+	
+	generatePossibleMoves(board, curSquare) {
+		const moves = [];
+		for (const move of this.moves) {	
+			moves.push(...move.generateMoves(board, this, curSquare, debug && (this.type === "pawn" && this.color == PlayerColors.WHITE && curSquare.col === 7)));
+		}
+		this.currentMoves = moves;
+	}
+	
 	toString() {
 		return this.svg.outerHTML;
 	}
@@ -254,18 +273,17 @@ function makeMoveVariations(rowChange, colChange, canRepeat = false, condition =
 
 // todo make move group creator that simplfies his code
 const King = createpieceSubclass("king", "K", Infinity, [
-	...makeMoveVariations(1, 1),
-	...makeMoveVariations(0, 1),
-	...makeMoveVariations(1, 0),
+	...makeMoveVariations(1, 1, false),
+	...makeMoveVariations(0, 1, false),
+	...makeMoveVariations(1, 0, false),
 ]);
 
-const Pawn = createpieceSubclass( "pawn", "", 1, [
-		new Move(0, 1, false, (board, piece, newRow, newCol) => board.get(newRow, newCol).isEmpty()),
-		new Move(1, 1, false,(board, piece, newRow, newCol) => !board.get(newRow, newCol).isEmpty() && board.get(newRow, newCol).color !== piece.color),
-		new Move(-1, 1, false, (board, piece, newRow, newCol) => !board.get(newRow, newCol).isEmpty() && board.get(newRow, newCol).color !== piece.color),
-		new Move(0, 2, false, (board, piece, newRow, newCol) => piece.timesMoved === 0 && board.get(newRow, newCol).isEmpty()),
-	], true
-);
+const Pawn = createpieceSubclass("pawn", "", 1, [
+	new Move(1, 0, false, (board, piece, newRow, newCol) => board.get(newRow, newCol).isEmpty()),
+	new Move(2, 0, false, (board, piece, newRow, newCol) => piece.timesMoved === 0 && board.get(newRow, newCol).isEmpty()),
+	new Move(1, 1, false,(board, piece, newRow, newCol) => !board.get(newRow, newCol).isEmpty() && board.get(newRow, newCol).color !== piece.color),
+	new Move(1, -1, false, (board, piece, newRow, newCol) => !board.get(newRow, newCol).isEmpty() && board.get(newRow, newCol).color !== piece.color),
+], true);
 
 const Knight = createpieceSubclass("knight", "N", 3, [...makeMoveVariations(1, 2), ...makeMoveVariations(2, 1)]);
 
@@ -285,47 +303,47 @@ let currentColor = startingColor;
 
 function switchCurrentPlayer() {
 	currentColor = PlayerColors.WHITE == currentColor ? PlayerColors.BLACK : PlayerColors.WHITE;
-	whoToMoveMessage.innerText = toCapitalized(this.currentColor) + " to move";
+	whoToMoveMessage.innerText = toCapitalized(currentColor) + " to move";
 }
 
 const playerTrun = (square, board) => {
 	if (!square.isEmpty() && currentColor === square.get().color) {
 		board.setSelected(square);
-	} else {
-		if (board.selected.getPossibleMoves().includes(square)) {
-			board.move(this.selected, square);
+	} else if (board.selected != null) {
+		if (board.selected.get().getPossibleMoves().includes(square)) {
+			board.move(board.selected, square);
 			switchCurrentPlayer();
 		}
 		board.setSelected(null);
 	}
-
-	// board.pieces.forEach(() => )
 }
 
 const board = new Board(boardWidth, boardHeight, document.querySelector("table.board"), playerTrun);
 
 // Place the black pieces
-board.add(new Rook(PlayerColors.BLACK), 0, 7);
-board.add(new Knight(PlayerColors.BLACK), 1, 7);
-board.add(new Bishop(PlayerColors.BLACK), 2, 7);
-board.add(new Queen(PlayerColors.BLACK), 3, 7);
-board.add(new King(PlayerColors.BLACK), 4, 7);
-board.add(new Bishop(PlayerColors.BLACK), 5, 7);
-board.add(new Knight(PlayerColors.BLACK), 6, 7);
+board.add(new Rook(PlayerColors.BLACK), 7, 0);
+board.add(new Knight(PlayerColors.BLACK), 7, 1);
+board.add(new Bishop(PlayerColors.BLACK), 7, 2);
+board.add(new Queen(PlayerColors.BLACK), 7, 3);
+board.add(new King(PlayerColors.BLACK), 7, 4);
+board.add(new Bishop(PlayerColors.BLACK), 7, 5);
+board.add(new Knight(PlayerColors.BLACK), 7, 6);
 board.add(new Rook(PlayerColors.BLACK), 7, 7);
-for (let row = 0; row < 8; row++) {
-	board.add(new Pawn(PlayerColors.BLACK), row, 6);
+for (let col = 0; col < 8; col++) {
+	board.add(new Pawn(PlayerColors.BLACK), 6, col);
 }
 
 // Place the white pieces
 board.add(new Rook(PlayerColors.WHITE), 0, 0);
-board.add(new Knight(PlayerColors.WHITE), 1, 0);
-board.add(new Bishop(PlayerColors.WHITE), 2, 0);
-board.add(new Queen(PlayerColors.WHITE), 3, 0);
-board.add(new King(PlayerColors.WHITE), 4, 0);
-board.add(new Bishop(PlayerColors.WHITE), 5, 0);
-board.add(new Knight(PlayerColors.WHITE), 6, 0);
-board.add(new Rook(PlayerColors.WHITE), 7, 0);
-for (let row = 0; row < 8; row++) {
-	board.add(new Pawn(PlayerColors.WHITE), row, 1);
+board.add(new Knight(PlayerColors.WHITE), 0, 1);
+board.add(new Bishop(PlayerColors.WHITE), 0, 2);
+board.add(new Queen(PlayerColors.WHITE), 0, 3);
+board.add(new King(PlayerColors.WHITE), 0, 4);
+board.add(new Bishop(PlayerColors.WHITE), 0, 5);
+board.add(new Knight(PlayerColors.WHITE), 0, 6);
+board.add(new Rook(PlayerColors.WHITE), 0, 7);
+for (let col = 0; col < 8; col++) {
+	board.add(new Pawn(PlayerColors.WHITE), 1, col);
 }
+
+debug = true;
