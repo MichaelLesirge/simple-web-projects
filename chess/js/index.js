@@ -16,7 +16,6 @@ const SquareColors = {
 	DARK: "dark",
 };
 
-let debug = false;
 
 class Square {
 	constructor(row, col, color, htmlTableCell, selectedListener, takenListener) {
@@ -165,7 +164,7 @@ class Board {
 }
 
 class Move {
-	constructor(rowChange, colChange, canRepeat = false, condition = (board, piece, row, col) => true) {
+	constructor(rowChange, colChange, canRepeat = false, condition = (board, piece, square) => true) {
 		this.rowChange = rowChange;
 		this.colChange = colChange;
 
@@ -174,13 +173,10 @@ class Move {
 		this.condition = condition;
 	}
 
-	generateMoves(board, piece, fromSquare, debug) {
-		debug = debug && this.rowChange === 0 && this.colChange === 1;
+	generateMoves(board, piece, fromSquare) {
 		const moves = [];
-		if (debug) console.log([fromSquare.row, this.rowChange], [fromSquare.col, this.colChange])
 		let curRow = fromSquare.row + this.rowChange;
 		let curCol = fromSquare.col + this.colChange;
-		if (debug) console.log([curRow], [curCol])
 
 		let going = true;
 
@@ -188,7 +184,7 @@ class Move {
 			going &&
 			board.isInBoard(curRow, curCol) &&
 			(board.get(curRow, curCol).isEmpty() || board.get(curRow, curCol).value.color !== piece.color) &&
-			this.condition(board, piece, curRow, curCol)
+			this.condition(board, piece, board.get(curRow, curCol))
 		) {
 			moves.push(board.get(curRow, curCol));
 
@@ -237,14 +233,13 @@ class Piece {
 	}
 
 	getPossibleMoves() {
-		// if (this.type === "knight" && this.color === PlayerColors.WHITE) { console.trace() }
 		return this.currentMoves;
 	}
 	
 	generatePossibleMoves(board, curSquare) {
 		const moves = [];
 		for (const move of this.moves) {	
-			moves.push(...move.generateMoves(board, this, curSquare, debug && (this.type === "pawn" && this.color == PlayerColors.WHITE && curSquare.col === 7)));
+			moves.push(...move.generateMoves(board, this, curSquare));
 		}
 		this.currentMoves = moves;
 	}
@@ -262,7 +257,7 @@ function createpieceSubclass(type, shortHandName, points, moves, directional = f
 	};
 }
 
-function makeMoveVariations(rowChange, colChange, canRepeat = false, condition = (board, piece, newRow, newCol) => true) {
+function makeMoveVariations(rowChange, colChange, canRepeat = false, condition = (board, piece, square) => true) {
 	return [
 		new Move(rowChange, colChange, canRepeat, condition),
 		new Move(-rowChange, colChange, canRepeat, condition),
@@ -271,18 +266,19 @@ function makeMoveVariations(rowChange, colChange, canRepeat = false, condition =
 	];
 }
 
-// todo make move group creator that simplfies his code
 const King = createpieceSubclass("king", "K", Infinity, [
-	...makeMoveVariations(1, 1, false),
-	...makeMoveVariations(0, 1, false),
-	...makeMoveVariations(1, 0, false),
+	...makeMoveVariations(1, 1, false, kingMoveCondition),
+	...makeMoveVariations(0, 1, false, kingMoveCondition),
+	...makeMoveVariations(1, 0, false, kingMoveCondition),
+	// TODO add castling
 ]);
 
 const Pawn = createpieceSubclass("pawn", "", 1, [
-	new Move(1, 0, false, (board, piece, newRow, newCol) => board.get(newRow, newCol).isEmpty()),
-	new Move(2, 0, false, (board, piece, newRow, newCol) => piece.timesMoved === 0 && board.get(newRow, newCol).isEmpty()),
-	new Move(1, 1, false,(board, piece, newRow, newCol) => !board.get(newRow, newCol).isEmpty() && board.get(newRow, newCol).color !== piece.color),
-	new Move(1, -1, false, (board, piece, newRow, newCol) => !board.get(newRow, newCol).isEmpty() && board.get(newRow, newCol).color !== piece.color),
+	new Move(1, 0, false, (board, piece, square) => square.isEmpty()),
+	new Move(2, 0, false, (board, piece, square) => piece.timesMoved === 0 && square.isEmpty()),
+	new Move(1, 1, false, (board, piece, square) => !square.isEmpty() && square.color !== piece.color),
+	new Move(1, -1, false, (board, piece, square) => !square.isEmpty() && square.color !== piece.color),
+	// Todo add enpassant. I don't even want to think about promotion yet
 ], true);
 
 const Knight = createpieceSubclass("knight", "N", 3, [...makeMoveVariations(1, 2), ...makeMoveVariations(2, 1)]);
@@ -345,5 +341,3 @@ board.add(new Rook(PlayerColors.WHITE), 0, 7);
 for (let col = 0; col < 8; col++) {
 	board.add(new Pawn(PlayerColors.WHITE), 1, col);
 }
-
-debug = true;
