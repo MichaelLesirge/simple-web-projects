@@ -267,9 +267,9 @@ function makeMoveVariations(rowChange, colChange, canRepeat = false, condition =
 }
 
 const King = createpieceSubclass("king", "K", Infinity, [
-	...makeMoveVariations(1, 1, false, kingMoveCondition),
-	...makeMoveVariations(0, 1, false, kingMoveCondition),
-	...makeMoveVariations(1, 0, false, kingMoveCondition),
+	...makeMoveVariations(1, 1, falsef),
+	...makeMoveVariations(0, 1, falsef),
+	...makeMoveVariations(1, 0, falsef),
 	// TODO add castling
 ]);
 
