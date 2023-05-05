@@ -183,7 +183,7 @@ class Move {
 		while (
 			going &&
 			board.isInBoard(curRow, curCol) &&
-			(board.get(curRow, curCol).isEmpty() || board.get(curRow, curCol).value.color !== piece.color) &&
+			(board.get(curRow, curCol).isEmpty() || board.get(curRow, curCol).get().color !== piece.color) &&
 			this.condition(board, piece, board.get(curRow, curCol))
 		) {
 			moves.push(board.get(curRow, curCol));
@@ -237,11 +237,7 @@ class Piece {
 	}
 	
 	generatePossibleMoves(board, curSquare) {
-		const moves = [];
-		for (const move of this.moves) {	
-			moves.push(...move.generateMoves(board, this, curSquare));
-		}
-		this.currentMoves = moves;
+		this.currentMoves = this.moves.flatMap((move) => move.generateMoves(board, this, curSquare));	
 	}
 	
 	toString() {
@@ -267,9 +263,9 @@ function makeMoveVariations(rowChange, colChange, canRepeat = false, condition =
 }
 
 const King = createpieceSubclass("king", "K", Infinity, [
-	...makeMoveVariations(1, 1, falsef),
-	...makeMoveVariations(0, 1, falsef),
-	...makeMoveVariations(1, 0, falsef),
+	...makeMoveVariations(1, 1, false),
+	...makeMoveVariations(0, 1, false),
+	...makeMoveVariations(1, 0, false),
 	// TODO add castling
 ]);
 
