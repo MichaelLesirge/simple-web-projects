@@ -135,7 +135,7 @@ class Board {
 	}
 
 	get(row, col) {
-		if (!this.isInBoard(row, col)) throw "Tried to get location not in board"
+		if (!this.isInBoard(row, col)) throw `Tried to get location (${row}, ${col}) not in board.`
 		return this.boardArray[this.height - row - 1][col];
 	}
 	
@@ -144,14 +144,14 @@ class Board {
 
 		newSquare.set(oldSquare.get());
 		newSquare.get().timesMoved++;
-		oldSquare.set(null);
+		oldSquare.set(null)
 		board.generatePieceMoves();
 	}
 
-	add(piece, row, col) {
+	add(row, col, piece) {
 		this.pieces.push(this.pieces);
-		this.get(row,col).set(piece);
-		board.generatePieceMoves();
+		this.get(row, col).set(piece);
+		this.generatePieceMoves();
 	}
 
 	forEach(func) {
@@ -313,27 +313,13 @@ const playerTrun = (square, board) => {
 const board = new Board(boardWidth, boardHeight, document.querySelector("table.board"), playerTrun);
 
 // Place the black pieces
-board.add(new Rook(PlayerColors.BLACK), 7, 0);
-board.add(new Knight(PlayerColors.BLACK), 7, 1);
-board.add(new Bishop(PlayerColors.BLACK), 7, 2);
-board.add(new Queen(PlayerColors.BLACK), 7, 3);
-board.add(new King(PlayerColors.BLACK), 7, 4);
-board.add(new Bishop(PlayerColors.BLACK), 7, 5);
-board.add(new Knight(PlayerColors.BLACK), 7, 6);
-board.add(new Rook(PlayerColors.BLACK), 7, 7);
-for (let col = 0; col < 8; col++) {
-	board.add(new Pawn(PlayerColors.BLACK), 6, col);
-}
 
-// Place the white pieces
-board.add(new Rook(PlayerColors.WHITE), 0, 0);
-board.add(new Knight(PlayerColors.WHITE), 0, 1);
-board.add(new Bishop(PlayerColors.WHITE), 0, 2);
-board.add(new Queen(PlayerColors.WHITE), 0, 3);
-board.add(new King(PlayerColors.WHITE), 0, 4);
-board.add(new Bishop(PlayerColors.WHITE), 0, 5);
-board.add(new Knight(PlayerColors.WHITE), 0, 6);
-board.add(new Rook(PlayerColors.WHITE), 0, 7);
-for (let col = 0; col < 8; col++) {
-	board.add(new Pawn(PlayerColors.WHITE), 1, col);
-}
+const piecesLayout = [Rook, Knight, Bishop, Queen, King, Bishop, Knight, Rook];
+const pieces = new Map();
+
+piecesLayout.forEach((type, i) => pieces.set([0, i], new type(PlayerColors.WHITE)));
+piecesLayout.forEach((type, i) => pieces.set([1, i], new Pawn(PlayerColors.WHITE)));
+piecesLayout.forEach((type, i) => pieces.set([7, i], new type(PlayerColors.BLACK)));
+piecesLayout.forEach((type, i) => pieces.set([6, i], new Pawn(PlayerColors.BLACK)));
+
+pieces.forEach((piece, location) => board.add(...location, piece))
