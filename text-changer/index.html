@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+
+    <title>Text Changer</title>
+</head>
+
+<body>
+    <main class="content">
+        <div class="text container">
+            <div>
+                <label for="input">Input Text</label>
+                <textarea name="input" class="text-box" id="input" cols="40" rows="10" placeholder="Enter your text here"></textarea>
+            </div>
+            <img src="down.svg" alt="down arror" width="40">
+            <div>
+                <label for="output">Output Text</label>
+                <textarea name="output" class="text-box" id="output" cols="40" rows="10" readonly></textarea>
+            </div>
+        </div>
+        <div class="all-controls container">
+            <div class="control-group control-top">
+                <button class="control-button" id="reset-buttom">Reset controls</button>
+                <button class="control-button" id="reset-buttom">Reset boxes</button>
+            </div>
+            <div id="control-groups" class="control-groups"></div>
+        </div>
+    </main>
+</body>
+
+</html>

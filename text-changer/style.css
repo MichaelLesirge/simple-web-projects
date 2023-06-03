@@ -1,0 +1,101 @@
+:root {
+    --dark-color-1: #312e2b;
+    --dark-color-2: #272522;
+    --dark-color-3: #888686;
+}
+
+* {
+	margin: 0;
+	padding: 0;
+}
+
+body,
+html {
+	width: 100%;
+	height: 100%;
+}
+
+body {
+	background: var(--dark-color-1);
+	color: var(--dark-color-3);
+}
+
+
+.content {
+	display: grid;
+	grid-template-columns: 1fr 1.618fr;
+}
+
+.content .container {
+    height: 100%;
+    
+    padding: 1rem;
+    margin: 2rem;
+    
+    background-color: var(--dark-color-2);
+    border-radius: 0.1rem;
+}
+
+.content .text {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-direction: column;
+    
+}
+
+.text input,
+.text label {
+    display: block;
+}
+
+.content .text .text-box {
+    resize: vertical;
+}
+
+.content .all-controls {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+
+    color: white;
+}
+
+
+.content .all-controls .control-groups {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.content .all-controls .control-group {
+    display: flex;
+    flex-direction: column;
+    
+    border: 1px solid var(--dark-color-3);
+    
+    padding: 0.3rem;
+    margin: 0.5rem;
+    
+    border-radius: 0.1rem;
+}
+
+.content .all-controls .control-group.control-top {
+    flex-direction: row;
+    gap: 0.5rem;
+}
+
+.content .all-controls .control-group .control-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .5rem;
+    border-radius: 0.5rem;
+    padding: .2rem;
+    user-select: none;
+}
+
+.content .all-controls .control-group .control-item:hover {
+    background-color: rgba(0, 255, 255, 0.03);
+}
+
