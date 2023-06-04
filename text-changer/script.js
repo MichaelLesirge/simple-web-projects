@@ -6,36 +6,24 @@ String.prototype.toCapitalized = function toCapitalized() {
 
 const converters = {
 	"Case": {
-		"UPPER CASE": (text) => text.toUpperCase(),
-		"lower case": (text) => text.toLocaleLowerCase(),
-		"Title case": (text) => text.toCapitalized(),
+		"Upper Case": (text) => text.toUpperCase(),
+		"Lower Case": (text) => text.toLocaleLowerCase(),
+		"Title Case": (text) => text.split(" ").map((word) => word.toCapitalized()).join(" "),
+		"Random Case": (text) => text.split("").map((char) => Math.random() > 0.5 ? char.toUpperCase() : char.toLowerCase()).join(""),
 	},
 	"Code Style": {
-		"snake_case": (text) => text.replaceAll(" ", "_").toLowerCase(),
-		"SCREAMING_SNAKE_CASE": (text) => text.replaceAll(" ", "_").toUpperCase(),
-		"camelCase": (text) => text.split(" ").map((word, index) => (index === 0 ? word.toLocaleLowerCase() : word.toCapitalized())).join(""),
-		"PascalCase": (text) => text.split(" ").map((word) => word.toCapitalized()).join(""),
+		"Snake Case": (text) => text.replaceAll(" ", "_").toLowerCase(),
+		"Screaming Snake Case": (text) => text.replaceAll(" ", "_").toUpperCase(),
+		"Camel Case": (text) => text.split(" ").map((word, index) => (index === 0 ? word.toLocaleLowerCase() : word.toCapitalized())).join(""),
+		"Pascal Case": (text) => text.split(" ").map((word) => word.toCapitalized()).join(""),
 	},
 	"Binary Encoding": {
-		"UTF-8": (text) => {
-			const encoder = new TextEncoder();
-			const encodedText = encoder.encode(text);
-			return Array.from(encodedText)
-				.map((byte) => byte.toString(2))
-				.join(" ");
-		},
-		"ASCII": (text) => {
-			let binary = "";
-			for (let i = 0; i < text.length; i++) {
-				const charCode = text.charCodeAt(i);
-				binary += charCode.toString(2).padStart(8, "0") + " ";
-			}
-			return binary.trim();
-		},
-		"Unicode": (text) => {
-			const codePoints = Array.from(text).map((char) => char.charCodeAt(0));
-			return codePoints.join(" ");
-		},
+		"ASCII": (text) => Array.from(text).map((char) => char.charCodeAt(0).toString(2).padStart(8, "0")).join(" "),
+		"Unicode UTF-8": (text) => Array.from(new TextEncoder().encode(text)).map((byte) => byte.toString(2)).join(" "),
+	},
+	"Unicode": {
+		"Decimal": (text) => Array.from(text).map((char) => char.charCodeAt(0).toString(10)).join(" "),
+		"Code": (text) => Array.from(text).map((char) => "U+" + char.charCodeAt(0).toString(16).toUpperCase().padStart(4, "0")).join(" ")
 	},
 	"Cursed": {
 		"Low": (text) => text,
@@ -43,7 +31,7 @@ const converters = {
 		"High": (text) => text,
 	},
 	"Direction": {
-		"Reverse": (text) => text.split().reverse().join(""),
+		"Reverse": (text) => text.split("").reverse().join(""),
 	},
 };
 
@@ -73,7 +61,8 @@ for (const [sectionName, sectionItems] of Object.entries(converters)) {
     for (const [itemName, converter] of [["Default", (text) => text], ...Object.entries(sectionItems)]) {
 		
 		const labelElement = document.createElement("label");
-        labelElement.innerText = itemName
+        labelElement.innerText = itemName;
+		labelElement.title = converter(itemName);
         labelElement.setAttribute("for", sectionName +  " " + itemName);
 
         const inputElement = document.createElement("input");
