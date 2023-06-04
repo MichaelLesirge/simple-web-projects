@@ -1,0 +1,29 @@
+{
+	"name": "WhyBlocker",
+	"version": "0.1.0",
+	"description": "Why are you on this website",
+	"permissions": [
+		"tabs",
+		"storage"
+	],
+	"host_permissions": ["*://*.youtube.com/*", "*://*.reddit.com/*"],
+	"background": {
+		"service_worker": "background.js"
+	},
+	"content_scripts": [
+		{
+		  "matches": ["*://*.youtube.com/*", "*://*.youtube.com/watch*", "*://*.reddit.com/*"],
+		  "js": ["contentScript.js"]
+		}
+	  ],
+	"web_accessible_resources": [{ 
+		"resources": [],
+		"matches": [],
+		"use_dynamic_url": true
+	}],
+	"action": {
+		"default_title": "Why are you doing this",
+		"default_popup": "popup/popup.html"
+	},
+	"manifest_version": 3
+}
