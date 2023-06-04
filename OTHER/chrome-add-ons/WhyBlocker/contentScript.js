@@ -10,10 +10,11 @@ function randChars(charSet, length) {
 	return Array.from({ length: length }, () => charSet[Math.floor(Math.random() * charSet.length)]).join("");
 }
 
+const timesBypassed = (localStorage.getItem("whyblock-bypassed-addon-count") ?? 0)
+
 const randCharsLen = 8;
 
 const randomCharSetLetters = charRange("a", "z") + charRange("A", "Z");
-const messageWhy = `Why are you on this website? Are you doing something productive on it? Have you done your daily LeetCode?`;
 const message = `I am using ${window.location.hostname} for a good reason. ${randChars(randomCharSetLetters, randCharsLen)}`;
 
 // Create a container element for the popup
@@ -45,12 +46,12 @@ popupContent.style.outline = "auto";
 
 // Create the large text element
 const popupTitle = document.createElement("h1");
-popupTitle.textContent = "WhyBlocker: Why are you doing this?";
+popupTitle.innerHTML = "WhyBlocker: Why are you doing this?";
 const popupParagraph1 = document.createElement("h3");
-popupParagraph1.style.userSelect = "none";
 const popupParagraph2 = document.createElement("h2");
-popupParagraph1.textContent = messageWhy;
-popupParagraph2.style.userSelect = "none";
+popupParagraph1.innerHTML = `Why are you on this website? Are you doing something productive on it? Have you done your daily <a href="https://leetcode.com/problemset/all/">LeetCode</a>?`;;
+popupParagraph2.oncopy = () => {alert("No copy for you!"); return false;}
+popupParagraph2.oncut = () => {alert("No cut for you!"); return false;}
 const revserseMessage = message.split("").reverse().join(""); // reverse message to prevent copy and past from html
 popupParagraph2.innerHTML = `<!--You really tried to get around it by using inspect? How clever. -->
 Please type <span dir="rtl" style="color: red; unicode-bidi:bidi-override;">"${revserseMessage}"</span> to continue`;
@@ -59,6 +60,8 @@ Please type <span dir="rtl" style="color: red; unicode-bidi:bidi-override;">"${r
 const inputBox = document.createElement("textarea");
 inputBox.rows = 10;
 inputBox.cols = 32;
+inputBox.onpaste = () => {alert("No paste for you!"); return false;}
+inputBox.ondrop = () => {alert("No drag for you!"); return false;}
 inputBox.placeholder = "Enter message to continue";
 inputBox.required = true;
 
@@ -69,6 +72,7 @@ submitButton.addEventListener("click", function (event) {
 	event.preventDefault();
 	const inputMessage = inputBox.value.trim();
 	if (inputMessage === message) {
+		localStorage.setItem("whyblock-bypassed-addon-count", timesBypassed + 1)
 		popupContainer.remove();
 	} else {
 		// Invalid input or incorrect code
