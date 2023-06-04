@@ -1,2 +1,7 @@
-- Leave daily helpful cybersecurty tip popups
-- 
+# Distraction blocker
+
+- Make popup be the place where you add things to be blocked (don't allow removels)
+- Show time spent on blocked websites total, last week, and last day and show times you have bypassed block
+- Add moveable timer popup when on blocked pages that shows current time and time spent on session
+- Add toggleable spoken reminders using speechSynthesis web API
+- Show times gone to page data in popup

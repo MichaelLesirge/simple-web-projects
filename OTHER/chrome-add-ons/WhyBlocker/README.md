@@ -1,2 +1,2 @@
-# email-scam-protector
-Google addon to warn users if email is pretending to be from a large company and may be a scam. A friend I have came up with the idea and wanted me to make it.
+# WhyBlocker
+Chrome add on that makes you type in message exspaining why you are on a certain website that is listed as blocked. Adds more friction to wasting time.
