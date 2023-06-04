@@ -1,33 +1,20 @@
-"use stric";
+"use strict";
 
 String.prototype.toCapitalized = function toCapitalized() {
-	return this.charAt(0).toUpperCase() + this.slice(1);
+	return this.charAt(0).toUpperCase() + this.slice(1).toLowerCase();
 };
 
 const converters = {
 	"Case": {
-		"Upper": (text) => text.toUpperCase(),
-		"Lower": (text) => text.toLocaleLowerCase(),
-		"Title": (text) => text.toCapitalized(),
+		"UPPER CASE": (text) => text.toUpperCase(),
+		"lower case": (text) => text.toLocaleLowerCase(),
+		"Title case": (text) => text.toCapitalized(),
 	},
 	"Code Style": {
-		"snake_case": (text) => text.replace(" ", "_").toLowerCase(),
-		"SCREAMING_SNAKE_CASE": (text) => text.replace(" ", "_").toUpperCase(),
-		"camelCase": (text) => {
-			const words = text.split(" ");
-			const camelCaseWords = words.map((word, index) => {
-				if (index === 0) {
-					return word.toLowerCase();
-				}
-				return word.capitlise();
-			});
-			return camelCaseWords.join("");
-		},
-		"PascalCase": (text) => {
-			const words = text.split(" ");
-			const pascalCaseWords = words.map((word) => word.capitlise());
-			return pascalCaseWords.join("");
-		},
+		"snake_case": (text) => text.replaceAll(" ", "_").toLowerCase(),
+		"SCREAMING_SNAKE_CASE": (text) => text.replaceAll(" ", "_").toUpperCase(),
+		"camelCase": (text) => text.split(" ").map((word, index) => (index === 0 ? word.toLocaleLowerCase() : word.toCapitalized())).join(""),
+		"PascalCase": (text) => text.split(" ").map((word) => word.toCapitalized()).join(""),
 	},
 	"Binary Encoding": {
 		"UTF-8": (text) => {
@@ -60,52 +47,58 @@ const converters = {
 	},
 };
 
-// create all inputs and labels from object. add to list on click and remove on unclick of check
-// make slider-input pair for cursedness level and text rotation
-// each section is raidual
-
 const inputBox = document.querySelector("#input");
-const outputBox = document.querySelector("#input");
+const outputBox = document.querySelector("#output");
 
 const controlGroupsContainer = document.querySelector("#control-groups");
 
-const usedConversions = []
+let usedConversions = [];
+
+function updateBox(event) {
+	let text = inputBox.value;
+	for (const converter of usedConversions) {
+		text = converter(text);
+	}
+	outputBox.value = text;
+}
 
 for (const [sectionName, sectionItems] of Object.entries(converters)) {
-	const section = document.createElement("div");
-    section.classList.add("control-group");
+	const sectionElement = document.createElement("div");
+    sectionElement.classList.add("control-group");
 
-    const sectionTitle = document.createElement("h3");
-    sectionTitle.innerText = sectionName;
-    section.appendChild(sectionTitle);
+    const sectionTitleElement = document.createElement("h3");
+    sectionTitleElement.innerText = sectionName;
+    sectionElement.appendChild(sectionTitleElement);
 
-    for (const [itemName, itemConverter] of Object.entries(sectionItems)) {
-        const controlItem = document.createElement("form");
-        controlItem.classList.add("control-item")
+    for (const [itemName, converter] of [["Default", (text) => text], ...Object.entries(sectionItems)]) {
+		
+		const labelElement = document.createElement("label");
+        labelElement.innerText = itemName
+        labelElement.setAttribute("for", sectionName +  " " + itemName);
 
-        const label = document.createElement("label");
-        label.innerText = itemName
-        label.setAttribute("for", itemName);
-        controlItem.appendChild(label)
-        
-        const input = document.createElement("input");
-        input.id = input.name = itemName;
-        input.type = "radio"
-        controlItem.appendChild(input)
+        const inputElement = document.createElement("input");
+        inputElement.id = sectionName +  " " + itemName;
+		inputElement.name = sectionName;
+        inputElement.type = "radio"
+        labelElement.appendChild(inputElement)
+		
+		if (itemName === "Default") {
+			inputElement.setAttribute("checked", true)
+		}
 
-        input.addEventListener("change", (e) => {
-            
-        })
+        inputElement.addEventListener("input", (event) => {
+			usedConversions = usedConversions.filter((e) => Object.values(sectionItems).indexOf(e) === -1);
+			usedConversions.push(converter);
+			console.log(usedConversions)
+		})
 
-        input.addEventListener("click", (e) => {
-            console.log(e.target.checked)
-            if (e.target.checked) {
-                e.target.checked = false;
-            }
-        })
+		inputElement.addEventListener("change", updateBox)
 
-        section.appendChild(controlItem)
+        sectionElement.appendChild(labelElement)
     }
 
-    controlGroupsContainer.appendChild(section);
+    controlGroupsContainer.appendChild(sectionElement);
 }
+
+
+inputBox.addEventListener("input", updateBox)
