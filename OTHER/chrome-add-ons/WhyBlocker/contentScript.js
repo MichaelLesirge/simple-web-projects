@@ -10,7 +10,7 @@ function randChars(charSet, length) {
 	return Array.from({ length: length }, () => charSet[Math.floor(Math.random() * charSet.length)]).join("");
 }
 
-const randCharsLen = 8
+const randCharsLen = 8;
 
 const randomCharSetLetters = charRange("a", "z") + charRange("A", "Z");
 const messageWhy = `Why are you on this website? Are you doing something productive on it? Have you done your daily LeetCode?`;
@@ -18,7 +18,7 @@ const message = `I am using ${window.location.hostname} for a good reason. ${ran
 
 // Create a container element for the popup
 const popupContainer = document.createElement("div");
-popupContainer.style.color = "black"
+popupContainer.style.color = "black";
 popupContainer.style.position = "fixed";
 popupContainer.style.top = "0";
 popupContainer.style.left = "0";
@@ -51,20 +51,19 @@ popupParagraph1.style.userSelect = "none";
 const popupParagraph2 = document.createElement("h2");
 popupParagraph1.textContent = messageWhy;
 popupParagraph2.style.userSelect = "none";
-popupParagraph2.innerHTML = `Please type <span style="color: red;">"${message}"</span> to continue`;
+const revserseMessage = message.split("").reverse().join(""); // reverse message to prevent copy and past from html
+popupParagraph2.innerHTML = `<!--You really tried to get around it by using inspect? How clever. -->
+Please type <span dir="rtl" style="color: red; unicode-bidi:bidi-override;">"${revserseMessage}"</span> to continue`;
 
 // Create the input box
-const form = document.createElement("form");
 const inputBox = document.createElement("textarea");
 inputBox.rows = 10;
 inputBox.cols = 32;
 inputBox.placeholder = "Enter message to continue";
 inputBox.required = true;
-form.appendChild(inputBox);
 
 // Create a button to submit the form
 const submitButton = document.createElement("button");
-// submitButton.style.width = '10rem'
 submitButton.textContent = "Submit";
 submitButton.addEventListener("click", function (event) {
 	event.preventDefault();
@@ -81,7 +80,7 @@ submitButton.addEventListener("click", function (event) {
 popupContent.appendChild(popupTitle);
 popupContent.appendChild(popupParagraph1);
 popupContent.appendChild(popupParagraph2);
-popupContent.appendChild(form);
+popupContent.appendChild(inputBox);
 popupContent.appendChild(submitButton);
 popupContainer.appendChild(popupContent);
 
