@@ -15,7 +15,7 @@ const timesBypassed = (localStorage.getItem("whyblock-bypassed-addon-count") ?? 
 const randCharsLen = 8;
 
 const randomCharSetLetters = charRange("a", "z") + charRange("A", "Z");
-const message = `I am using ${window.location.hostname} for a good reason. ${randChars(randomCharSetLetters, randCharsLen)}`;
+const message = `I am using ${window.location.hostname} for a good reason. ${randChars(randomCharSetLetters, randCharsLen + timesBypassed)}`;
 
 // Create a container element for the popup
 const popupContainer = document.createElement("div");
