@@ -55,7 +55,7 @@ const outputBox = document.querySelector("#output");
 
 const allControls = document.querySelector("form.all-controls");
 const controlGroupsContainer = allControls.querySelector("#control-groups");
-const controlConversions = allControls.querySelector("#conversions");
+const conversionsSeriesElement = allControls.querySelector("#conversions");
 
 let usedConversions = [];
 
@@ -101,10 +101,15 @@ for (const [sectionName, sectionItems] of Object.entries(converters)) {
     controlGroupsContainer.appendChild(sectionElement);
 }
 
+function updateInfo() {
+	conversionsSeriesElement.innerText = ["Input", ...usedConversions.map(e => e.name), "Output"].join(" → ")
+}
+
+
+updateInfo()
 allControls.addEventListener("change", updateBox)
-allControls.addEventListener("change", () => {
-	controlConversions.innerText = usedConversions.map(e => e.name).join(" → ")
-})
+updateBox()
+allControls.addEventListener("change", updateInfo)
 
 inputBox.addEventListener("input", updateBox);
 
