@@ -33,10 +33,10 @@ const converters = {
 		"Decimal": (text) => Array.from(text, (char) => char.charCodeAt(0).toString(10)).join(" "),
 		"Code": (text) => Array.from(text, (char) => "U+" + char.charCodeAt(0).toString(16).toUpperCase().padStart(4, "0")).join(" ")
 	},
-	"Cursed": {
-		"Low": (text) => curseText(text, 5),
-		"Meduim": (text) => curseText(text, 25),
-		"High": (text) => curseText(text, 50),
+	"Glitched": {
+		"Slightly Cursed": (text) => curseText(text, 5),
+		"Meduim Cursed": (text) => curseText(text, 25),
+		"Very Cursed": (text) => curseText(text, 50),
 	},
 	"Direction": {
 		"Reverse": (text) => text.split("").reverse().join(""),
@@ -53,15 +53,15 @@ const converters = {
 const inputBox = document.querySelector("#input");
 const outputBox = document.querySelector("#output");
 
-const controlGroupsContainer = document.querySelector("#control-groups");
+const allControls = document.querySelector("form.all-controls");
+const controlGroupsContainer = allControls.querySelector("#control-groups");
+const controlConversions = allControls.querySelector("#conversions");
 
 let usedConversions = [];
 
-function updateBox(event) {
+function updateBox() {
 	let text = inputBox.value;
-	for (const converter of usedConversions) {
-		text = converter(text);
-	}
+	for (const converter of usedConversions) text = converter(text);
 	outputBox.value = text;
 }
 
@@ -92,11 +92,8 @@ for (const [sectionName, sectionItems] of Object.entries(converters)) {
 
         inputElement.addEventListener("input", (event) => {
 			usedConversions = usedConversions.filter((e) => Object.values(sectionItems).indexOf(e) === -1);
-			usedConversions.push(converter);
-			console.log(usedConversions);
+			if (itemName !== "Default") usedConversions.push(converter);
 		})
-
-		inputElement.addEventListener("change", updateBox);
 
         sectionElement.appendChild(labelElement);
     }
@@ -104,5 +101,17 @@ for (const [sectionName, sectionItems] of Object.entries(converters)) {
     controlGroupsContainer.appendChild(sectionElement);
 }
 
+allControls.addEventListener("change", updateBox)
+allControls.addEventListener("change", () => {
+	controlConversions.innerText = usedConversions.map(e => e.name).join(" → ")
+})
 
-inputBox.addEventListener("input", updateBox)
+inputBox.addEventListener("input", updateBox);
+
+const clearButton = document.querySelector("#clear-buttom");
+const swapButton = document.querySelector("#swap-buttom");
+
+[clearButton, swapButton].forEach((e) => e.addEventListener("click", updateBox));
+
+clearButton.addEventListener("click", () => inputBox.value = outputBox.value = "");
+swapButton.addEventListener("click", () => inputBox.value = outputBox.value);
