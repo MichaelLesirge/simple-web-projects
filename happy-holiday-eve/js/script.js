@@ -96,7 +96,7 @@ setInterval(() => {
 
 	if (last !== daysRoundedUp) {
 		message.innerText = `${holiday.message} ${"Eve ".repeat(daysRoundedUp)}!`;
-		message.title = `${holiday.message} Eve × ${daysRoundedUp}`;
+		document.title = message.title = `${holiday.message} Eve × ${daysRoundedUp}`;
 	}
 
 	countDownClockElement.innerText = [

@@ -33,6 +33,20 @@ const converters = {
 	"Direction": {
 		"Reverse": (text) => text.split("").reverse().join(""),
 	},
+	// "Meme": {
+	// 	"Leetspeak": (text) => {
+	// 		leet_converter = {
+	// 			"a": "@",
+	// 			"b": "ß",
+	// 			"c": "©",
+	// 			"e": "3",
+	// 			"o": "0",
+	// 			"p": "9",
+
+	// 		}
+	// 		return text
+	// 	},
+	// },
 };
 
 const inputBox = document.querySelector("#input");
