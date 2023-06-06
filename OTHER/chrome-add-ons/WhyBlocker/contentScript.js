@@ -10,83 +10,60 @@ function randChars(charSet, length) {
 	return Array.from({ length: length }, () => charSet[Math.floor(Math.random() * charSet.length)]).join("");
 }
 
-const timesBypassed = Number.parseInt((localStorage.getItem("whyblock-bypassed-addon-count") ?? 0))
-
 const randCharsLen = 8;
 
+function createElementFromHTML(htmlString) {
+	const tempDiv = document.createElement("div");
+	tempDiv.innerHTML = htmlString.trim();
+	return tempDiv.firstChild;
+}
+
 const randomCharSetLetters = charRange("a", "z") + charRange("A", "Z");
-const message = `I am using ${window.location.hostname} for a good reason. ${randChars(randomCharSetLetters, randCharsLen + timesBypassed)}`;
+const message = `I am using ${window.location.hostname} for a good reason. ${randChars(randomCharSetLetters, randCharsLen)}`;
 
-// Create a container element for the popup
-const popupContainer = document.createElement("div");
-popupContainer.style.color = "black";
-popupContainer.style.position = "fixed";
-popupContainer.style.top = "0";
-popupContainer.style.left = "0";
-popupContainer.style.width = "100vw";
-popupContainer.style.height = "100vh";
-popupContainer.style.backgroundColor = "rgba(0, 0, 0, 0.5)";
-popupContainer.style.display = "flex";
-popupContainer.style.justifyContent = "center";
-popupContainer.style.alignItems = "center";
-popupContainer.style.zIndex = "9999";
+const htmlPopup = createElementFromHTML(`
+	<div id="whyblocker-popup-main-body-unique-1000" style="color: black; position: fixed; top: 0px; left: 0px; width: 100vw; height: 100vh; background-color: rgba(0, 0, 0, 0.5); display: flex; justify-content: center; align-items: center; z-index: 9999;">
+		<div style="background-color: white; padding: 1rem; text-align: center; width: 50%; aspect-ratio: 1.61803 / 1; display: flex; flex-direction: column; justify-content: space-around; align-items: center; outline: auto;">
+			<h1>WhyBlocker: Why are you doing this?</h1>
+			<h3>Why are you on this website? Are you doing something productive on it? Have you done your daily <ahref="https://leetcode.com/problemset/all/">LeetCode</ahref=>?</h3>
+			<h2 class="message-whyblocker-popup">
+				<!--You really tried to get around it by using inspect? How clever. -->
+				Please type <span dir="rtl" style="color: red; unicode-bidi:bidi-override; white-space:nowrap;">"${message.split("").reverse().join("")}"</span> to continue
+			</h2>
+			<textarea class="text-area-whyblocker-popup" rows="10" cols="32" placeholder="Enter message to continue" required=""></textarea>
+			<button class="submit-whyblocker-popup">Submit</button>
+		</div>
+	</div>
+`);
 
-// Create the popup content
-const popupContent = document.createElement("div");
-popupContent.style.backgroundColor = "white";
-popupContent.style.padding = "1rem";
-popupContent.style.textAlign = "center";
-popupContent.style.width = "50%";
-popupContent.style.aspectRatio = 1.61803398875;
-popupContent.style.display = "flex";
-popupContent.style.flexDirection = "column";
-popupContent.style.justifyContent = "space-around";
-popupContent.style.alignItems = "center";
-popupContent.style.outline = "auto";
+const messageBody = htmlPopup.querySelector(".message-whyblocker-popup");
+messageBody.oncopy = () => {
+	alert("No copy for you!");
+	return false;
+};
+messageBody.oncut = () => {
+	alert("No cut for you!");
+	return false;
+};
 
-// Create the large text element
-const popupTitle = document.createElement("h1");
-popupTitle.innerHTML = "WhyBlocker: Why are you doing this?";
-const popupParagraph1 = document.createElement("h3");
-const popupParagraph2 = document.createElement("h2");
-popupParagraph1.innerHTML = `Why are you on this website? Are you doing something productive on it? Have you done your daily <a href="https://leetcode.com/problemset/all/">LeetCode</a>?`;;
-popupParagraph2.oncopy = () => {alert("No copy for you!"); return false;}
-popupParagraph2.oncut = () => {alert("No cut for you!"); return false;}
-const revserseMessage = message.split("").reverse().join(""); // reverse message to prevent copy and past from html
-popupParagraph2.innerHTML = `<!--You really tried to get around it by using inspect? How clever. -->
-Please type <span dir="rtl" style="color: red; unicode-bidi:bidi-override; white-space:nowrap;">"${revserseMessage}"</span> to continue`;
+const inputBox = htmlPopup.querySelector(".text-area-whyblocker-popup");
+inputBox.onpaste = () => {
+	alert("No paste for you!");
+	return false;
+};
+inputBox.ondrop = () => {
+	alert("No drag for you!");
+	return false;
+};
 
-// Create the input box
-const inputBox = document.createElement("textarea");
-inputBox.rows = 10;
-inputBox.cols = 32;
-inputBox.onpaste = () => {alert("No paste for you!"); return false;}
-inputBox.ondrop = () => {alert("No drag for you!"); return false;}
-inputBox.placeholder = "Enter message to continue";
-inputBox.required = true;
-
-// Create a button to submit the form
-const submitButton = document.createElement("button");
-submitButton.textContent = "Submit";
-submitButton.addEventListener("click", function (event) {
+htmlPopup.querySelector(".submit-whyblocker-popup").addEventListener("click", function (event) {
 	event.preventDefault();
 	const inputMessage = inputBox.value.trim();
 	if (inputMessage === message) {
-		localStorage.setItem("whyblock-bypassed-addon-count", timesBypassed + 1)
-		popupContainer.remove();
+		htmlPopup.remove();
 	} else {
-		// Invalid input or incorrect code
 		alert("Invalid input or incorrect code. Please try again.");
 	}
 });
 
-// Append elements to the popup container
-popupContent.appendChild(popupTitle);
-popupContent.appendChild(popupParagraph1);
-popupContent.appendChild(popupParagraph2);
-popupContent.appendChild(inputBox);
-popupContent.appendChild(submitButton);
-popupContainer.appendChild(popupContent);
-
-// Append the popup container to the body of the current page
-document.body.appendChild(popupContainer);
+document.body.appendChild(htmlPopup);
