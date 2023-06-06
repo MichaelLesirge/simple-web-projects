@@ -10,7 +10,7 @@ function randChars(charSet, length) {
 	return Array.from({ length: length }, () => charSet[Math.floor(Math.random() * charSet.length)]).join("");
 }
 
-const timesBypassed = (localStorage.getItem("whyblock-bypassed-addon-count") ?? 0)
+const timesBypassed = Number.parseInt((localStorage.getItem("whyblock-bypassed-addon-count") ?? 0))
 
 const randCharsLen = 8;
 
@@ -54,7 +54,7 @@ popupParagraph2.oncopy = () => {alert("No copy for you!"); return false;}
 popupParagraph2.oncut = () => {alert("No cut for you!"); return false;}
 const revserseMessage = message.split("").reverse().join(""); // reverse message to prevent copy and past from html
 popupParagraph2.innerHTML = `<!--You really tried to get around it by using inspect? How clever. -->
-Please type <span dir="rtl" style="color: red; unicode-bidi:bidi-override;">"${revserseMessage}"</span> to continue`;
+Please type <span dir="rtl" style="color: red; unicode-bidi:bidi-override; white-space:nowrap;">"${revserseMessage}"</span> to continue`;
 
 // Create the input box
 const inputBox = document.createElement("textarea");
