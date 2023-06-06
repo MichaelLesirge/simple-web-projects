@@ -3,7 +3,6 @@
 	"version": "0.1.0",
 	"description": "Why are you on this website",
 	"permissions": [
-		"tabs",
 		"storage"
 	],
 	"host_permissions": ["*://*.youtube.com/*", "*://*.reddit.com/*"],
