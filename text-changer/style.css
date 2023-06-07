@@ -9,6 +9,8 @@
 	padding: 0;
 }
 
+/* page struture */
+
 body,
 html {
 	width: 100%;
@@ -33,7 +35,7 @@ body {
     height: 100%;
 }
 
-@media only screen and (max-width: 1000px) {
+@media only screen and (max-width: 750px) {
     .content {
         grid-template-rows: 1fr 1.6180339887fr;
         grid-template-columns: 1fr;
@@ -49,6 +51,8 @@ body {
     border-radius: 0.1rem;
 }
 
+/* text box area */
+
 .content .text {
     display: grid;
     grid-template-rows: 1fr 0.3fr 1fr;
@@ -58,6 +62,13 @@ body {
     display: flex;
     flex-direction: column;
     min-height: 7rem;
+    border: 1px solid var(--dark-color-3);
+    padding: 3px;
+}
+
+.content .text .textarea-container label {
+    display: flex;
+    justify-content: space-between;
 }
 
 .content .text .img-container {
@@ -73,42 +84,52 @@ body {
 
 .text label {
     display: block;
+    color: white;
 }
 
 .content .text .text-box {
     resize: vertical;
 }
 
+/* Controls */
+
 .content .all-controls {
     display: flex;
     flex-direction: column;
     flex-wrap: wrap;
 
+    gap: 1rem;
+
     color: white;
 }
 
-
 .content .all-controls .control-groups {
     display: flex;
-    gap: 1rem;
     flex-wrap: wrap;
+    gap: 1rem;
 }
 
 .content .all-controls .control-group {
-    display: flex;
-    flex-direction: column;
+    width: max-content;
+    box-sizing: border-box;
     
     border: 1px solid var(--dark-color-3);
     
     padding: 0.3rem;
-    margin: 0.5rem;
-    
+        
     border-radius: 0.1rem;
 }
 
+.content .all-controls .control-group ul {
+    list-style: none;
+}
+
 .content .all-controls .control-group.control-top {
+    display: flex;
     flex-direction: row;
-    gap: 0.5rem;
+    justify-content: space-between;
+    gap: 1rem;
+    width: 100%;
 }
 
 .content .all-controls .control-group label {

@@ -4,34 +4,59 @@ String.prototype.toCapitalized = function () {
 	return this.charAt(0).toUpperCase() + this.slice(1).toLowerCase();
 };
 
+function matchCase(string, case_template_string) {
+	if (string.length !== case_template_string.length) throw Error("strings did not match len");
+	const stringArray = Array.from(string);
+	for (let i = 0; i < stringArray.length; i++) {
+		stringArray[i] = (case_template_string[i] === case_template_string[i].toLowerCase()) ? stringArray[i].toLowerCase() : stringArray[i].toUpperCase()
+	}
+	return stringArray.join("")
+}
+
 function randChar(startCharCode, stopCharCode) {
     return String.fromCharCode(Math.floor(Math.random() * (stopCharCode - startCharCode)) + startCharCode)
 }
 
 function curseText(text, amount) {
-	return Array.from(text, (char) => char + (/[a-zA-Z0-9]/.test(char) ? Array.from({length: amount}, () => randChar(768, 879)).join("") : "")).join("")
+	return convertString(text, (char) => char + ([" ", "\n"].includes(char) ? "" : Array.from({length: amount}, () => randChar(768, 879)).join("")))
+}
+
+function formatBinary(binary_str_array) {
+	const bytes = []
+	binary_str_array.forEach((binary) => {
+		for (let i = 0; i < binary.length; i += 8) {
+			const byte = binary.slice(i, i + 8).padStart(8, "0")
+			bytes.push(byte)
+		}
+	})
+	return bytes.join(" ")
+}
+
+function convertString(text, func, split_seporator = "", join_seporator = undefined) {
+	return text.split(split_seporator).map(func).join(join_seporator ?? split_seporator)
 }
 
 const converters = {
 	"Case": {
 		"Lower Case": (text) => text.toLowerCase(),
 		"Upper Case": (text) => text.toUpperCase(),
-		"Title Case": (text) => text.split(" ").map((word) => word.toCapitalized()).join(" "),
-		"Random Case": (text) => text.split("").map((char) => Math.random() > 0.5 ? char.toUpperCase() : char.toLowerCase()).join(""),
+		"Title Case": (text) => convertString(text, (word) => word.toCapitalized(), " "),
+		"Random Case": (text) => convertString(text, (char) => Math.random() > 0.5 ? char.toUpperCase() : char.toLowerCase()),
 	},
 	"Code Style": {
 		"Snake Case": (text) => text.replaceAll(" ", "_").toLowerCase(),
 		"Screaming Snake Case": (text) => text.replaceAll(" ", "_").toUpperCase(),
-		"Camel Case": (text) => text.split(" ").map((word, index) => (index === 0 ? word.toLocaleLowerCase() : word.toCapitalized())).join(""),
-		"Pascal Case": (text) => text.split(" ").map((word) => word.toCapitalized()).join(""),
+		"Camel Case": (text) => convertString(text, (word, index) => (index === 0 ? word.toLowerCase() : word.toCapitalized()), " ", ""),
+		"Pascal Case": (text) => convertString(text, (word) => word.toCapitalized(), " ", "")
 	},
 	"Binary Encoding": {
-		"ASCII": (text) => Array.from(text, (char) => char.charCodeAt().toString(2).padStart(8, "0")).join(" "),
-		"Unicode UTF-8": (text) => Array.from(new TextEncoder().encode(text)).map((byte) => byte.toString(2)).join(" "),
+		"ASCII": (text) => formatBinary(Array.from(text, (char) => char.charCodeAt().toString(2))),
+		"Unicode UTF-8": (text) => formatBinary(Array.from(new TextEncoder().encode(text)).map((byte) => byte.toString(2))),
+		// "Unicode UTF-16": (text) => formatBinary(Array.from(new TextEncoder().encode(text)).map((byte) => byte.toString(2))),
 	},
 	"Unicode": {
-		"Decimal": (text) => Array.from(text, (char) => char.charCodeAt().toString(10)).join(" "),
-		"Code": (text) => Array.from(text, (char) => "U+" + char.charCodeAt().toString(16).toUpperCase().padStart(4, "0")).join(" ")
+		"Decimal": (text) => convertString(text, (char) => char.charCodeAt().toString(10), "", " "),
+		"Code": (text) => convertString(text, (char) => "U+" + char.charCodeAt().toString(16).toUpperCase().padStart(4, "0"), "", " ")
 	},
 	"Glitched": {
 		"Slightly Cursed": (text) => curseText(text, 5),
@@ -39,32 +64,25 @@ const converters = {
 		"Very Cursed": (text) => curseText(text, 50),
 	},
 	"Direction": {
-		"Reverse": (text) => text.split("").reverse().join(""),
+		"Reverse": (text) => Array.from(text).reverse().join(""),
 	},
 	"Meme": {
-		"Leetspeak": (text) => {
+		"Leet speak": (text) => {
 			const leet_converter = {"e": "3", "t": "7", "i": "1", "o": "0", "a": "4", "s": "5", "g": "9", "l": "1", "z": "2", "b": "8"}
-			return text.split("").map((char) => (char.toLowerCase() in leet_converter && Math.random()) > 0.001 ? leet_converter[char] : char).join("")
+			return matchCase(convertString(text.toLowerCase().replaceAll("leet", "1337"), (char) => char in leet_converter && Math.random() < 0.75 ? leet_converter[char] : char), text)
 		},
-		"Cow": (text) => text.split(" ").map((word) => Array.from(word, (char, i) => char === char.toLowerCase() ? (i ? "o" : "m") : (i ? "O" : "M")).join("")).join(" "),
+		"Cow": (text) => matchCase(convertString(text, (word) => convertString(word, (char, i) => i ? "o" : "m"), " "), text),
+		"Among Us": (text) => convertString(text, (char) => [" ", "\n"].includes(char) ? char : Math.random() < 0.01 ? "ඞ්" : "ඞ"),
 	},
 	"Fancy": {
-		"Circle": (text) => Array.from(text, (char) => {
+		"Circled": (text) => convertString(text, (char) => {
 			let charCode = char.charCodeAt();
-			if (/[1-9]/.test(char)) charCode += 9312 - ("1".charCodeAt());
-			if (/[0]/.test(char)) charCode = 9450 ;
-			if (/[a-z]/.test(char)) charCode += 9424 - ("a".charCodeAt());
-			if (/[A-Z]/.test(char)) charCode += 9398 - ("A".charCodeAt());
+			if (/[1-9]/.test(char)) charCode += "①".charCodeAt() - "1".charCodeAt();
+			if (/[0]/.test(char)) charCode = "⓪".charCodeAt();
+			if (/[a-z]/.test(char)) charCode += "ⓐ".charCodeAt() - ("a".charCodeAt());
+			if (/[A-Z]/.test(char)) charCode += "Ⓐ".charCodeAt() - ("A".charCodeAt());
 			return String.fromCharCode(charCode);
-		}).join(""),
-		"Filled Circle": (text) => Array.from(text, (char) => {
-			let charCode = char.charCodeAt();
-			if (/[1-9]/.test(char)) charCode += 9312 - ("1".charCodeAt());
-			if (/[0]/.test(char)) charCode = 9450 ;
-			if (/[a-z]/.test(char)) charCode += 9424 - ("a".charCodeAt());
-			if (/[A-Z]/.test(char)) charCode += 9398 - ("A".charCodeAt());
-			return String.fromCharCode(charCode);
-		}).join(""),
+		}),
 	}
 };
 
@@ -85,18 +103,24 @@ for (const [sectionName, sectionItems] of Object.entries(converters)) {
     sectionTitleElement.innerText = sectionName;
     sectionElement.appendChild(sectionTitleElement);
 
+	const choiceList = document.createElement("ul");
+	sectionElement.appendChild(choiceList)
+
     for (const [itemName, converter] of [["Default", (text) => text], ...Object.entries(sectionItems)]) {
 		
+		const optionListItemElement = document.createElement("li");
+
 		const labelElement = document.createElement("label");
         labelElement.innerText = itemName;
 		labelElement.title = converter(itemName);
         labelElement.setAttribute("for", sectionName +  " " + itemName);
+		optionListItemElement.appendChild(labelElement)
 		
         const inputElement = document.createElement("input");
-        inputElement.id = sectionName +  " " + itemName;
+        inputElement.id = sectionName + " " + itemName;
 		inputElement.name = sectionName;
         inputElement.type = "radio";
-        labelElement.appendChild(inputElement);
+		labelElement.appendChild(inputElement)
 		
 		if (itemName === "Default") {
 			inputElement.setAttribute("checked", true);
@@ -107,7 +131,7 @@ for (const [sectionName, sectionItems] of Object.entries(converters)) {
 			if (itemName !== "Default") usedConversions.push(converter);
 		})
 
-        sectionElement.appendChild(labelElement);
+        choiceList.appendChild(optionListItemElement);
     }
 	
     controlGroupsContainer.appendChild(sectionElement);
@@ -140,3 +164,9 @@ function createControlButotn(id, func) {
 createControlButotn("reset-button", (event) => usedConversions = []);
 createControlButotn("clear-button", (event) => inputBox.value = "");
 createControlButotn("swap-button", (event) => inputBox.value = outputBox.value);
+createControlButotn("copy-button", (event) => {
+		outputBox.select();
+		outputBox.setSelectionRange(0, outputBox.value.length);
+
+		navigator.clipboard.writeText(outputBox.value);
+});

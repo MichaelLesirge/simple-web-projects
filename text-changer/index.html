@@ -16,25 +16,32 @@
     <main class="content">
         <div class="text container">
             <div class="textarea-container">
-                <label for="input">Input Text</label>
+                <label for="input">
+                    Input Text 
+                    <div>
+                        <button style="display: inline;" id="clear-button" type="button" title="Clear text box data">Clear</button>
+                    </div>
+                </label>
                 <textarea name="input" class="text-box" id="input" placeholder="Enter your text here..."></textarea>
             </div>
             <div class="img-container">
-                <img src="down.svg" alt="down arror" width="40">
+                <img src="down.svg" alt="down arror" width="40" height="40">
             </div>
             <div class="textarea-container">
-                <label for="output">Output Text</label>
+                <label for="output">
+                    Output Text
+                    <div>
+                        <button style="display: inline;" id="swap-button" type="button" title="Set input box value to output">Swap boxes</button>
+                        <button style="display: inline;" id="copy-button" type="button" title="Copy output to clipboard">Copy boxes</button>
+                    </div>
+                </label>
                 <textarea name="output" class="text-box" id="output" readonly></textarea>
             </div>
         </div>
         <form class="all-controls container">
             <div class="control-group control-top">
-                <button class="control-button" id="reset-button" type="reset" title="Reset all controls to default">Reset controls</button>
-                <button class="control-button" id="clear-button" type="button" title="Clear text box data">Reset boxes</button>
-                <button class="control-button" id="swap-button" type="button" title="Set input box value to output">Swap boxes</button>
-                <span id="conversions">
-
-                </span>
+                <span id="conversions"></span>
+                <button class="control-button" id="reset-button" type="reset" title="Reset all controls to default">Reset Conversions</button>
             </div>
             <div id="control-groups" class="control-groups"></div>
         </form>
