@@ -7,15 +7,15 @@ String.prototype.toCapitalized = function () {
 function randChar(startCharCode, stopCharCode) {
     return String.fromCharCode(Math.floor(Math.random() * (stopCharCode - startCharCode)) + startCharCode)
 }
- 
+
 function curseText(text, amount) {
 	return Array.from(text, (char) => char + (/[a-zA-Z0-9]/.test(char) ? Array.from({length: amount}, () => randChar(768, 879)).join("") : "")).join("")
 }
 
 const converters = {
 	"Case": {
-		"Upper Case": (text) => text.toUpperCase(),
 		"Lower Case": (text) => text.toLowerCase(),
+		"Upper Case": (text) => text.toUpperCase(),
 		"Title Case": (text) => text.split(" ").map((word) => word.toCapitalized()).join(" "),
 		"Random Case": (text) => text.split("").map((char) => Math.random() > 0.5 ? char.toUpperCase() : char.toLowerCase()).join(""),
 	},
@@ -26,12 +26,12 @@ const converters = {
 		"Pascal Case": (text) => text.split(" ").map((word) => word.toCapitalized()).join(""),
 	},
 	"Binary Encoding": {
-		"ASCII": (text) => Array.from(text, (char) => char.charCodeAt(0).toString(2).padStart(8, "0")).join(" "),
+		"ASCII": (text) => Array.from(text, (char) => char.charCodeAt().toString(2).padStart(8, "0")).join(" "),
 		"Unicode UTF-8": (text) => Array.from(new TextEncoder().encode(text)).map((byte) => byte.toString(2)).join(" "),
 	},
 	"Unicode": {
-		"Decimal": (text) => Array.from(text, (char) => char.charCodeAt(0).toString(10)).join(" "),
-		"Code": (text) => Array.from(text, (char) => "U+" + char.charCodeAt(0).toString(16).toUpperCase().padStart(4, "0")).join(" ")
+		"Decimal": (text) => Array.from(text, (char) => char.charCodeAt().toString(10)).join(" "),
+		"Code": (text) => Array.from(text, (char) => "U+" + char.charCodeAt().toString(16).toUpperCase().padStart(4, "0")).join(" ")
 	},
 	"Glitched": {
 		"Slightly Cursed": (text) => curseText(text, 5),
@@ -48,6 +48,24 @@ const converters = {
 		},
 		"Cow": (text) => text.split(" ").map((word) => Array.from(word, (char, i) => char === char.toLowerCase() ? (i ? "o" : "m") : (i ? "O" : "M")).join("")).join(" "),
 	},
+	"Fancy": {
+		"Circle": (text) => Array.from(text, (char) => {
+			let charCode = char.charCodeAt();
+			if (/[1-9]/.test(char)) charCode += 9312 - ("1".charCodeAt());
+			if (/[0]/.test(char)) charCode = 9450 ;
+			if (/[a-z]/.test(char)) charCode += 9424 - ("a".charCodeAt());
+			if (/[A-Z]/.test(char)) charCode += 9398 - ("A".charCodeAt());
+			return String.fromCharCode(charCode);
+		}).join(""),
+		"Filled Circle": (text) => Array.from(text, (char) => {
+			let charCode = char.charCodeAt();
+			if (/[1-9]/.test(char)) charCode += 9312 - ("1".charCodeAt());
+			if (/[0]/.test(char)) charCode = 9450 ;
+			if (/[a-z]/.test(char)) charCode += 9424 - ("a".charCodeAt());
+			if (/[A-Z]/.test(char)) charCode += 9398 - ("A".charCodeAt());
+			return String.fromCharCode(charCode);
+		}).join(""),
+	}
 };
 
 const inputBox = document.querySelector("#input");
@@ -58,12 +76,6 @@ const controlGroupsContainer = allControls.querySelector("#control-groups");
 const conversionsSeriesElement = allControls.querySelector("#conversions");
 
 let usedConversions = [];
-
-function updateBox() {
-	let text = inputBox.value;
-	for (const converter of usedConversions) text = converter(text);
-	outputBox.value = text;
-}
 
 for (const [sectionName, sectionItems] of Object.entries(converters)) {
 	const sectionElement = document.createElement("div");
@@ -79,7 +91,7 @@ for (const [sectionName, sectionItems] of Object.entries(converters)) {
         labelElement.innerText = itemName;
 		labelElement.title = converter(itemName);
         labelElement.setAttribute("for", sectionName +  " " + itemName);
-
+		
         const inputElement = document.createElement("input");
         inputElement.id = sectionName +  " " + itemName;
 		inputElement.name = sectionName;
@@ -89,34 +101,42 @@ for (const [sectionName, sectionItems] of Object.entries(converters)) {
 		if (itemName === "Default") {
 			inputElement.setAttribute("checked", true);
 		}
-
+		
         inputElement.addEventListener("input", (event) => {
-			usedConversions = usedConversions.filter((e) => Object.values(sectionItems).indexOf(e) === -1);
+			usedConversions = usedConversions.filter((f) => Object.values(sectionItems).indexOf(f) === -1);
 			if (itemName !== "Default") usedConversions.push(converter);
 		})
 
         sectionElement.appendChild(labelElement);
     }
-
+	
     controlGroupsContainer.appendChild(sectionElement);
 }
 
-function updateInfo() {
-	conversionsSeriesElement.innerText = ["Input", ...usedConversions.map(e => e.name), "Output"].join(" → ")
+function applyFunctionPipeline(input, funcs) {
+	return funcs.reduce((prev, func) => func(prev), input)
 }
 
+function displayFuntionPipline(funcs, separator = "→") {
+	return ["Input", ...funcs.map((f) => f.name), "Output"].join(" " + separator + " ")
+}
 
-updateInfo()
-allControls.addEventListener("change", updateBox)
-updateBox()
-allControls.addEventListener("change", updateInfo)
+function updateDisplay() {
+	outputBox.value = applyFunctionPipeline(inputBox.value, usedConversions);
+	conversionsSeriesElement.innerText = displayFuntionPipline(usedConversions)
+}
 
-inputBox.addEventListener("input", updateBox);
+updateDisplay()
+allControls.addEventListener("change", updateDisplay);
 
-const clearButton = document.querySelector("#clear-buttom");
-const swapButton = document.querySelector("#swap-buttom");
+inputBox.addEventListener("input", (event) => outputBox.value = applyFunctionPipeline(inputBox.value, usedConversions));
 
-[clearButton, swapButton].forEach((e) => e.addEventListener("click", updateBox));
+function createControlButotn(id, func) {
+	const btn = document.getElementById(id)
+	btn.addEventListener("click", func)
+	btn.addEventListener("click", updateDisplay)
+}
 
-clearButton.addEventListener("click", () => inputBox.value = outputBox.value = "");
-swapButton.addEventListener("click", () => inputBox.value = outputBox.value);
+createControlButotn("reset-button", (event) => usedConversions = []);
+createControlButotn("clear-button", (event) => inputBox.value = "");
+createControlButotn("swap-button", (event) => inputBox.value = outputBox.value);
