@@ -18,7 +18,7 @@ function createElementFromHTML(htmlString) {
 	return tempDiv.firstChild;
 }
 
-const randomCharSetLetters = charRange("a", "z") + charRange("A", "Z");
+const randomCharSetLetters = (charRange("a", "z") + charRange("A", "Z")).replaceAll("l", "").replaceAll("I", "");
 const message = `I am using ${window.location.hostname} for a good reason. ${randChars(randomCharSetLetters, randCharsLen)}`;
 
 const htmlPopup = createElementFromHTML(`
