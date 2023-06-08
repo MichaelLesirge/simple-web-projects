@@ -2,6 +2,8 @@
     --dark-color-1: #312e2b;
     --dark-color-2: #272522;
     --dark-color-3: #888686;
+
+    --text-style: capitalize;
 }
 
 * {
@@ -124,7 +126,9 @@ body {
     list-style: none;
 }
 
+
 .content .all-controls .control-group.control-top {
+    text-transform: var(--text-style);
     display: flex;
     flex-direction: row;
     justify-content: space-between;
@@ -132,7 +136,14 @@ body {
     width: 100%;
 }
 
+.content .all-controls .control-group h3 {
+    text-decoration: underline;
+    text-transform: var(--text-style);
+}
+
 .content .all-controls .control-group label {
+    text-transform: var(--text-style);
+    box-sizing: border-box;
     display: flex;
     align-items: center;
     justify-content: space-between;

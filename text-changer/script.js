@@ -67,7 +67,7 @@ const converters = {
 		"Reverse": (text) => Array.from(text).reverse().join(""),
 	},
 	"Meme": {
-		"Leet speak": (text) => {
+		"Leet Speak": (text) => {
 			const leet_converter = {"e": "3", "t": "7", "i": "1", "o": "0", "a": "4", "s": "5", "g": "9", "l": "1", "z": "2", "b": "8"}
 			return matchCase(convertString(text.toLowerCase().replaceAll("leet", "1337"), (char) => char in leet_converter && Math.random() < 0.75 ? leet_converter[char] : char), text)
 		},
