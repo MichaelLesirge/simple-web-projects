@@ -19,51 +19,66 @@ function createElementFromHTML(htmlString) {
 }
 
 const randomCharSetLetters = (charRange("a", "z") + charRange("A", "Z")).replaceAll("l", "").replaceAll("I", "");
-const message = `I am using ${window.location.hostname} for a good reason. ${randChars(randomCharSetLetters, randCharsLen)}`;
 
-const htmlPopup = createElementFromHTML(`
-	<div id="whyblocker-popup-main-body-unique-1000" style="color: black; position: fixed; top: 0px; left: 0px; width: 100vw; height: 100vh; background-color: rgba(0, 0, 0, 0.5); display: flex; justify-content: center; align-items: center; z-index: 9999;">
-		<div style="background-color: white; padding: 1rem; text-align: center; width: 50%; aspect-ratio: 1.61803 / 1; display: flex; flex-direction: column; justify-content: space-around; align-items: center; outline: auto;">
-			<h1>WhyBlocker: Why are you doing this?</h1>
-			<h3>Why are you on this website? Are you doing something productive on it? Have you done your daily <ahref="https://leetcode.com/problemset/all/">LeetCode</ahref=>?</h3>
-			<h2 class="message-whyblocker-popup">
-				<!--You really tried to get around it by using inspect? How clever. -->
-				Please type <span dir="rtl" style="color: red; unicode-bidi:bidi-override; white-space:nowrap;">"${message.split("").reverse().join("")}"</span> to continue
-			</h2>
-			<textarea class="text-area-whyblocker-popup" rows="10" cols="32" placeholder="Enter message to continue" required=""></textarea>
-			<button class="submit-whyblocker-popup">Submit</button>
+function createPopup() {
+	const message = `I am using ${window.location.hostname} for a good reason. ${randChars(randomCharSetLetters, randCharsLen)}`;
+
+	const htmlPopup = createElementFromHTML(`
+		<div id="whyblocker-popup-main-body-unique-1000" style="color: black; position: fixed; top: 0px; left: 0px; width: 100vw; height: 100vh; background-color: rgba(0, 0, 0, 0.5); display: flex; justify-content: center; align-items: center; z-index: 9999;">
+			<div style="background-color: white; padding: 1rem; text-align: center; width: 50%; aspect-ratio: 1.61803 / 1; display: flex; flex-direction: column; justify-content: space-around; align-items: center; outline: auto;">
+				<h1>WhyBlocker: Why are you doing this?</h1>
+				<h3>Why are you on this website? Are you doing something productive on it? Have you done your daily <ahref="https://leetcode.com/problemset/all/">LeetCode</ahref=>?</h3>
+				<h2 class="message-whyblocker-popup">
+					<!--You really tried to get around it by using inspect? How clever. -->
+					Please type <span dir="rtl" style="color: red; unicode-bidi:bidi-override; white-space:nowrap;">"${message
+						.split("")
+						.reverse()
+						.join("")}"</span> to continue
+				</h2>
+				<textarea class="text-area-whyblocker-popup" rows="10" cols="32" placeholder="Enter message to continue" required=""></textarea>
+				<button class="submit-whyblocker-popup">Submit</button>
+			</div>
 		</div>
-	</div>
-`);
+	`);
 
-const messageBody = htmlPopup.querySelector(".message-whyblocker-popup");
-messageBody.oncopy = () => {
-	alert("No copy for you!");
-	return false;
-};
-messageBody.oncut = () => {
-	alert("No cut for you!");
-	return false;
-};
+	const messageBody = htmlPopup.querySelector(".message-whyblocker-popup");
+	messageBody.oncopy = () => {
+		alert("No copy for you!");
+		return false;
+	};
+	messageBody.oncut = () => {
+		alert("No cut for you!");
+		return false;
+	};
 
-const inputBox = htmlPopup.querySelector(".text-area-whyblocker-popup");
-inputBox.onpaste = () => {
-	alert("No paste for you!");
-	return false;
-};
-inputBox.ondrop = () => {
-	alert("No drag for you!");
-	return false;
-};
+	const inputBox = htmlPopup.querySelector(".text-area-whyblocker-popup");
+	inputBox.onpaste = () => {
+		alert("No paste for you!");
+		return false;
+	};
+	inputBox.ondrop = () => {
+		alert("No drag for you!");
+		return false;
+	};
 
-htmlPopup.querySelector(".submit-whyblocker-popup").addEventListener("click", function (event) {
-	event.preventDefault();
-	const inputMessage = inputBox.value.trim();
-	if (inputMessage === message) {
-		htmlPopup.remove();
-	} else {
-		alert("Invalid input or incorrect code. Please try again.");
+	htmlPopup.querySelector(".submit-whyblocker-popup").addEventListener("click", function (event) {
+		event.preventDefault();
+		const inputMessage = inputBox.value.trim();
+		if (inputMessage === message) {
+			htmlPopup.remove();
+		} else {
+			alert("Invalid input or incorrect code. Please try again.");
+		}
+	});
+
+	document.body.appendChild(htmlPopup);
+}
+
+
+let curTab;
+setInterval(() => {
+	if (curTab !== location.href) {
+		createPopup();
+		curTab = location.href
 	}
-});
-
-document.body.appendChild(htmlPopup);
+}, 1000)
