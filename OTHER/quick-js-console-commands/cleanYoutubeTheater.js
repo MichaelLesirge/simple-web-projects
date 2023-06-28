@@ -1,0 +1,1 @@
+["div#container.style-scope.ytd-masthead", "div#below.style-scope.ytd-watch-flexy"].forEach(e => document.querySelector(e).remove());setTimeout(() => {document.body.style.overflow = "hidden"; document.querySelector("#movie_player > div.html5-video-container > video").style.width = "100vw"}, 5000);console.log("Exit console within 5 seconds")
