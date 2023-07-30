@@ -15,21 +15,13 @@ const holidays = {
 		message: "Merry Christmas",
 		startDate: new Date(now.getFullYear(), 11, 25),
 	},
-	han: {
-		message: "Happy Hanukkah",
-		startDate: now,
-	},
-	kz: {
-		message: "Happy Kwanzaa",
-		startDate: new Date(now.getFullYear(), 11, 26),
-	},
 };
 
 let customCount = 0;
 
 const customs = JSON.parse(localStorage.getItem("customs")) ?? [];
 for (const [message, date] of customs) {
-	addCustomOption(message, parceDate(date), holidays);
+	addCustomOption(message, parseDate(date), holidays);
 }
 
 // add each holiday to menu
@@ -37,10 +29,19 @@ for (const [key, holiday] of Object.entries(holidays)) {
 	addOption(key, holiday.message);
 }
 
+const max_len_option = Object.values(holidays).reduce((sum, val) => Math.max(sum, val.message.length), 0)
+
 addOption(
 	"custom",
-	centerText(" custom ", Object.values(holidays).reduce((sum, val) => Math.max(sum, val.message.length), 0),"-")
+	centerText(" custom ", max_len_option, "-")
 );
+
+addOption(
+	"clear",
+	centerText(" clear ", max_len_option, "-")
+);
+
+const default_option = Object.entries(holidays)[0][0]
 
 function addOption(key, message) {
 	const option = document.createElement("option");
@@ -49,22 +50,16 @@ function addOption(key, message) {
 	selectHolidayInput.add(option);
 }
 
-let holidayKey = localStorage.getItem("current") ?? Object.entries(holidays)[0][0];
+let holidayKey = localStorage.getItem("current") ?? default_option;
 selectHolidayInput.value = holidayKey;
 
 selectHolidayInput.onchange = (event) => {
-	if (event.target.value == "han") {
-		setTimeout(() => {
-			alert("Unknown start date because I don't know how Hebrew calendar works or how to code that. Sorry!");
-			selectHolidayInput.value = holidayKey;
-		}, 200);
-		return;
-	} else if (event.target.value == "custom") {
+	if (event.target.value == "custom") {
 		let message = prompt("Enter message: ");
-		let date = parceDate(prompt("Enter date (mm/dd): "));
+		let date = parseDate(prompt("Enter date (mm/dd): "));
 		
 		while (date === null) {
-			date = parceDate(prompt("Invalid date. Enter correct date (mm/dd): "));
+			date = parseDate(prompt("Invalid date. Enter correct date (mm/dd): "));
 		}
 
 		const key = addCustomOption(message, date, holidays);
@@ -72,8 +67,12 @@ selectHolidayInput.onchange = (event) => {
 
 		addOption(key, holidays[key].message)
 
-		selectHolidayInput.value = key;
-
+		event.target.value = key;
+	}
+	else if (event.target.value == "clear") {
+		localStorage.clear()
+		event.target.value = default_option;
+		location.reload()
 	}
 
 	holidayKey = event.target.value;
@@ -136,7 +135,7 @@ function saveCustomOption(message, date) {
 	);
 }
 
-function parceDate(dateText) {
+function parseDate(dateText) {
 	const split = dateText.split("/");
 	const date = new Date(now.getFullYear(), split[0] - 1, split[1]);
 	if (date.getDate() === NaN) return;
