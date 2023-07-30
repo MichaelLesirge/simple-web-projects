@@ -2,7 +2,7 @@
 
 // set up sidebar info containers
 let lastMoved = undefined;
-let zIndexeMax = 0;
+let zIndexMax = 0;
 document.querySelectorAll(".info-container").forEach((container, index) => {
 	const containerRect = container.getBoundingClientRect();
 	const infoContainer = container.querySelector(".info");
@@ -12,17 +12,17 @@ document.querySelectorAll(".info-container").forEach((container, index) => {
 		const label = container.querySelector(".info-container-toggle");
 		label.addEventListener("click", toggle);
 
-		const showArror = "<";
-		const hideArror = ">";
+		const showArrow = "<";
+		const hideArrow = ">";
 	
 		const showMessage = "show stats";
 		const hideMessage = "hide stats";
 	
-		label.innerText = hideArror;
+		label.innerText = hideArrow;
 		label.title = hideMessage;	
 	
 		function toggle() {
-			label.innerText = label.innerText === hideArror ? showArror : hideArror;
+			label.innerText = label.innerText === hideArrow ? showArrow : hideArrow;
 			label.title = label.title === showMessage ? hideMessage : showMessage;
 			container.classList.toggle("hidden");
 		}
@@ -51,9 +51,9 @@ document.querySelectorAll(".info-container").forEach((container, index) => {
 			container.classList.add("grabbed");
 	
 			if (index !== lastMoved) {
-				zIndexeMax++;
+				zIndexMax++;
 				lastMoved = index;
-				container.style.zIndex = zIndexeMax;
+				container.style.zIndex = zIndexMax;
 			}
 	
 			offset = container.offsetTop - event.clientY;
@@ -97,14 +97,26 @@ form.addEventListener("submit", (event) => {
 	
 });
 
-document.querySelectorAll("input.num-only").forEach((clearInput) => {
-	clearInput.addEventListener("keypress", (event) => {
-		if (!/\d/.test(event.key)) {
+document.querySelectorAll("input.num-only").forEach((input) => {
+	// TODO if deselected with no text set to default
+	input.addEventListener("keypress", (event) => {
+		if (!/[\d-]/.test(event.key)) {
 			event.preventDefault();
 			return false;
 		}
 	});
 });
+
+document.querySelectorAll("select.value-title").forEach((select) => {
+	select.addEventListener("change", (event) => {
+		let selected_option = null
+		event.target.querySelectorAll("option").forEach((child) => {
+			if (child.value === event.target.value) selected_option = child;
+		})
+		event.target.title = selected_option.title
+		console.log(selected_option, selected_option.title)
+	})
+})
 
 // TODO make clear-input not overflow by shrinking font
 
