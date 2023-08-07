@@ -3,6 +3,8 @@
 # In Progress
 - Chess
 - Custom dice roller
+- Google addon that allows you to add time spent timer and 'why' message to list of websites (don't allow removal from list) 
+
 
 ## Improvements
 - Make home page for website (github.io) with nice looking screenshots and descriptions of all side projects. No more raw.githack.com
@@ -14,3 +16,9 @@
     - allow users to order them and stuff by dragging
     - allow users to add date that they must be complete
 - Right triangle side solver. Give it some sides and have it fill in rest if it can
+- Make a photo printer that most efficiently puts photos on the page
+- Name website
+    - Spin wheel to choose random
+    - Create teams of x size or create x teams (option to round uneven teams or have 1 smaller team)
+    - Create competition bracket with single or double elimination  
+- Google addon that lets you have access to all video speeds on youtube 
