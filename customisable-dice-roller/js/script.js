@@ -1,6 +1,24 @@
 "use strict";
 
-// set up sidebar info containers
+function sum(array, m = (v) => v) {
+	return array.map(m).reduce((a, b) => (a + b))
+}
+
+class Dice {
+	constructor(min, max) {
+		this.min = min;
+		this.max = max;
+		this.range_len = max-min+1;
+		this.range = Array.from({length: this.range_len}, (_, i) => i + min);
+
+		this.average = (max + min) / 2;
+	}
+}
+
+const dice = [new Dice(1, 6), new Dice(1, 6)]
+console.log(sum(dice, d => d.average))
+
+// --- set up sidebar info containers ---
 let lastMoved = undefined;
 let zIndexMax = 0;
 document.querySelectorAll(".info-container").forEach((container, index) => {
@@ -90,13 +108,14 @@ document.querySelectorAll(".info-container").forEach((container, index) => {
 	}
 });
 
-// add dice
+// -- add new dice ---
 const form = document.querySelector(".create-dice");
 form.addEventListener("submit", (event) => {
 	event.preventDefault();
 	
 });
 
+// --- class="num-only" ---
 document.querySelectorAll("input.num-only").forEach((input) => {
 	// TODO if deselected with no text set to default
 	input.addEventListener("keypress", (event) => {
@@ -107,18 +126,23 @@ document.querySelectorAll("input.num-only").forEach((input) => {
 	});
 });
 
+// --- class="value-title---" ---
 document.querySelectorAll("select.value-title").forEach((select) => {
-	select.addEventListener("change", (event) => {
+	const update = () => {
 		let selected_option = null
-		event.target.querySelectorAll("option").forEach((child) => {
-			if (child.value === event.target.value) selected_option = child;
+		select.querySelectorAll("option").forEach((child) => {
+			if (child.value === select.value) selected_option = child;
 		})
-		event.target.title = selected_option.title
-		console.log(selected_option, selected_option.title)
-	})
+		if (selected_option) select.title = selected_option.title;
+	}
+	
+	select.addEventListener("change", update)
+	update()
 })
 
 // TODO make clear-input not overflow by shrinking font
+
+// --- dice input color change ---
 
 const formDice = form.querySelector("#input-dice");
 const inputDiceColor = formDice.querySelector("#dice-color");
