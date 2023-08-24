@@ -5,7 +5,6 @@
 - Custom dice roller
 - Google addon that allows you to add time spent timer and 'why' message to list of websites (don't allow removal from list) 
 
-
 ## Improvements
 - Make home page for website (github.io) with nice looking screenshots and descriptions of all side projects. No more raw.githack.com
 
@@ -21,4 +20,5 @@
     - Spin wheel to choose random
     - Create teams of x size or create x teams (option to round uneven teams or have 1 smaller team)
     - Create competition bracket with single or double elimination  
-- Google addon that lets you have access to all video speeds on youtube 
+- Google addon that lets you have access to all video speeds on youtube (and edpuzzle) 
+- My own version of https://mondrianandme.com/
