@@ -1,0 +1,28 @@
+#body {
+    position: absolute;
+
+    top: 50%;
+    left: 50%;
+
+    width: 10rem;
+    height: 2rem;
+
+    text-align: center;
+    transform: translate(-50%, -50%);
+
+}
+
+#face {
+    font-size: 2rem;
+}
+
+#text {
+    position: absolute;
+
+    text-align: end;
+
+    top: 100%;
+    left: 75%;
+
+    width: max-content;
+}
