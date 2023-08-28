@@ -8,7 +8,7 @@ const PlayerColors = {
 	BLACK: "black",
 };
 
-const neerSideColor = PlayerColors.WHITE;
+const nearSideColor = PlayerColors.WHITE;
 const startingColor = PlayerColors.WHITE;
 
 const SquareColors = {
@@ -227,7 +227,7 @@ class Piece {
 
 		this.currentMoves = [];
 
-		if (directional && this.color !== neerSideColor) moves = moves.map((m) => m.getReverseMove());
+		if (directional && this.color !== nearSideColor) moves = moves.map((m) => m.getReverseMove());
 
 		this.moves = moves;
 	}
@@ -245,7 +245,7 @@ class Piece {
 	}
 }
 
-function createpieceSubclass(type, shortHandName, points, moves, directional = false) {
+function createPieceSubclass(type, shortHandName, points, moves, directional = false) {
 	return class extends Piece {
 		constructor(color) {
 			super(type, shortHandName, points, directional, moves, color);
@@ -262,28 +262,28 @@ function makeMoveVariations(rowChange, colChange, canRepeat = false, condition =
 	];
 }
 
-const King = createpieceSubclass("king", "K", Infinity, [
+const King = createPieceSubclass("king", "K", Infinity, [
 	...makeMoveVariations(1, 1, false),
 	...makeMoveVariations(0, 1, false),
 	...makeMoveVariations(1, 0, false),
 	// TODO add castling
 ]);
 
-const Pawn = createpieceSubclass("pawn", "", 1, [
+const Pawn = createPieceSubclass("pawn", "", 1, [
 	new Move(1, 0, false, (board, piece, square) => square.isEmpty()),
 	new Move(2, 0, false, (board, piece, square) => piece.timesMoved === 0 && square.isEmpty()),
 	new Move(1, 1, false, (board, piece, square) => !square.isEmpty() && square.color !== piece.color),
 	new Move(1, -1, false, (board, piece, square) => !square.isEmpty() && square.color !== piece.color),
-	// Todo add enpassant. I don't even want to think about promotion yet
+	// Todo add en passant. I don't even want to think about promotion yet
 ], true);
 
-const Knight = createpieceSubclass("knight", "N", 3, [...makeMoveVariations(1, 2), ...makeMoveVariations(2, 1)]);
+const Knight = createPieceSubclass("knight", "N", 3, [...makeMoveVariations(1, 2), ...makeMoveVariations(2, 1)]);
 
-const Bishop = createpieceSubclass("bishop", "B", 3, [...makeMoveVariations(1, 1, true)]);
+const Bishop = createPieceSubclass("bishop", "B", 3, [...makeMoveVariations(1, 1, true)]);
 
-const Rook = createpieceSubclass("rook", "R", 5, [...makeMoveVariations(0, 1, true), ...makeMoveVariations(1, 0, true)]);
+const Rook = createPieceSubclass("rook", "R", 5, [...makeMoveVariations(0, 1, true), ...makeMoveVariations(1, 0, true)]);
 
-const Queen = createpieceSubclass("queen", "Q", 9, [
+const Queen = createPieceSubclass("queen", "Q", 9, [
 	...makeMoveVariations(1, 1, true),
 	...makeMoveVariations(0, 1, true),
 	...makeMoveVariations(1, 0, true),
@@ -298,7 +298,7 @@ function switchCurrentPlayer() {
 	whoToMoveMessage.innerText = toCapitalized(currentColor) + " to move";
 }
 
-const playerTrun = (square, board) => {
+const playerTurn = (square, board) => {
 	if (!square.isEmpty() && currentColor === square.get().color) {
 		board.setSelected(square);
 	} else if (board.selected != null) {
@@ -310,7 +310,7 @@ const playerTrun = (square, board) => {
 	}
 }
 
-const board = new Board(boardWidth, boardHeight, document.querySelector("table.board"), playerTrun);
+const board = new Board(boardWidth, boardHeight, document.querySelector("table.board"), playerTurn);
 
 // Place the black pieces
 
