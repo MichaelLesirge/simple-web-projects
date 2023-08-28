@@ -1,5 +1,5 @@
 # Random projects made for the web
-Random website ideas I decided to make for no real reason besided for the fun of it or I thought it would be funny at the time. No frameworks or anything are used just plain HTML CSS and JS
+Random website ideas I decided to make for no real reason besides for the fun of it, or I thought it would be funny at the time. No frameworks or anything, just plain old HTML, CSS, and JS. No backend for anything either.
 
 ## Links to projects (In order of how good I think they are)
 1. [rock-paper-scissors-battle](https://raw.githack.com/michael-lesirge/random-simple-web-projects/main/rock-paper-scissors-battle/index.html)
