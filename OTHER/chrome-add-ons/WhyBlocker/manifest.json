@@ -5,13 +5,13 @@
 	"permissions": [
 		"storage"
 	],
-	"host_permissions": ["*://*.youtube.com/*", "*://*.reddit.com/*"],
+	"host_permissions": ["*://*.youtube.com/*"],
 	"background": {
 		"service_worker": "background.js"
 	},
 	"content_scripts": [
 		{
-		  "matches": ["*://*.youtube.com/*", "*://*.youtube.com/watch*", "*://*.reddit.com/*"],
+		  "matches": ["*://*.youtube.com/*", "*://*.youtube.com/watch*"],
 		  "js": ["contentScript.js"],
 		  "runAt": "document_end"
 		}
