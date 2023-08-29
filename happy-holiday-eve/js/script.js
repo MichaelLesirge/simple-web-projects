@@ -7,6 +7,7 @@ const messageElement = document.querySelector("#message");
 const countDownClockElement = document.querySelector("#count-down-clock");
 
 const holidays = {
+	// make it say "happy first/second/third day of _ for multi day holidays and add some to defaults
 	ny: {
 		message: "Happy New Years",
 		startDate: new Date(now.getFullYear(), 0, 1),
