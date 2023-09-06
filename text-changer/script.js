@@ -141,13 +141,13 @@ function applyFunctionPipeline(input, funcs) {
 	return funcs.reduce((prev, func) => func(prev), input)
 }
 
-function displayFuntionPipline(funcs, separator = "→") {
+function displayFunctionPipeline(funcs, separator = "→") {
 	return ["Input", ...funcs.map((f) => f.name), "Output"].join(" " + separator + " ")
 }
 
 function updateDisplay() {
 	outputBox.value = applyFunctionPipeline(inputBox.value, usedConversions);
-	conversionsSeriesElement.innerText = displayFuntionPipline(usedConversions)
+	conversionsSeriesElement.innerText = displayFunctionPipeline(usedConversions)
 }
 
 updateDisplay()
@@ -155,16 +155,16 @@ allControls.addEventListener("change", updateDisplay);
 
 inputBox.addEventListener("input", (event) => outputBox.value = applyFunctionPipeline(inputBox.value, usedConversions));
 
-function createControlButotn(id, func) {
+function createControlButton(id, func) {
 	const btn = document.getElementById(id)
 	btn.addEventListener("click", func)
 	btn.addEventListener("click", updateDisplay)
 }
 
-createControlButotn("reset-button", (event) => usedConversions = []);
-createControlButotn("clear-button", (event) => inputBox.value = "");
-createControlButotn("swap-button", (event) => inputBox.value = outputBox.value);
-createControlButotn("copy-button", (event) => {
+createControlButton("reset-button", (event) => usedConversions = []);
+createControlButton("clear-button", (event) => inputBox.value = "");
+createControlButton("swap-button", (event) => inputBox.value = outputBox.value);
+createControlButton("copy-button", (event) => {
 		outputBox.select();
 		outputBox.setSelectionRange(0, outputBox.value.length);
 
