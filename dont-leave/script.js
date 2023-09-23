@@ -9,40 +9,37 @@ const faces = {
     evil: "(•`_´•)و",
 };
 
-function clearTextIn(time = 2000) {
-	setTimeout(() => (text.innerText = ""), time);
-}
+let count = 0;
+let done = false;
 
-let times_left = 0;
-
-const messages = ["Hi!", "Don't leave me, I like you here!", "Your scaring me, but I thought you were going to leave!", "Stop doing that, it's scary.", "stop scaring me like that.", "Don't pretend to leave me ever again!", "I'm serious, stop!", "I'm getting angry here, stop that!", "Don't you dare do that again!", "this is your last warning... Stop leaving now."];
+const messages = ["Please don't leave!", "Come back! Don't go.", "Stop it, come back here.", "Don't you dare leave me.", "No! Stop scaring me and pretending to leave.", "Don't you dare try to leave again.", "This is you last warning. Do not leave."];
 
 document.addEventListener("mouseleave", () => {
-	if (text.innerText === messages[0]) clearTextIn(0);
-    if (times_left < messages.length) {face.innerText = faces.sad}
-	times_left++;
-});
+    if (done) return;
 
-document.addEventListener("mouseenter", () => {
-	if (times_left == messages.length) {
-		fetch("https://api.ipify.org?format=json")
-			.then((response) => response.json())
-			.then((data) => {
-				fetch(`https://api.ipregistry.co/${data.ip}?key=ups3qbswcwz89lxj`)
-					.then((response) => response.json())
-					.then((data) => {
-						face.innerText = faces.evil;
+    if (count == messages.length) {
+        done = true;
+        face.innerText = faces.evil;
+        fetch("https://api.ipify.org?format=json")
+            .then((response) => response.json())
+            .then((data) => {
+                fetch(`https://api.ipregistry.co/${data.ip}?key=ups3qbswcwz89lxj`)
+                    .then((response) => response.json())
+                    .then((data) => {
+                        face.innerText = faces.evil;
                         const textarea = document.createElement("textarea");
                         face.appendChild(textarea);
-
+    
                         delete data.currency;
+                        delete data.location.country.flag;
+                        delete data.location.country.languages;
                         textarea.rows = 16;
                         textarea.cols = 60;
-                        const ip_info = JSON.stringify(data, undefined, 2).split("\n");
+                        const ipInfo = JSON.stringify(data, undefined, 2).split("\n");
                         let i = 0;
                         const interval = setInterval(() => {
-                            if (i < ip_info.length) {
-                                textarea.value += ip_info[i] + "\n";
+                            if (i < ipInfo.length) {
+                                textarea.value += ipInfo[i] + "\n";
                                 textarea.scrollTop = textarea.scrollHeight;
                             }
                             else {
@@ -51,13 +48,18 @@ document.addEventListener("mouseenter", () => {
                             }
                             i++;
                         }, 500)
-					});
-			});
-	} else if (times_left < messages.length) {
-		face.innerText = faces.happy;
-        text.innerText = messages[times_left]
-        clearTextIn(900)
-	}
+                    });
+            });
+
+    } else if (count < messages.length) {
+        face.innerText = faces.sad;
+        text.innerText = messages[count]
+    }
+    count++;
 });
 
-clearTextIn(1000);
+document.addEventListener("mouseenter", () => {
+    if (done) return;
+    face.innerText = faces.happy;
+    text.innerText = "";
+})
