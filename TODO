@@ -9,6 +9,12 @@
 - Make home page for website (github.io) with nice looking screenshots and descriptions of all side projects. No more raw.githack.com
 
 ## Future Projects
+- Auto Wiki Words. Type in text and it auto links all words to the Wikipedia page for them.
+    - Have slider for percent linked
+    - Next ot slider have manuel button that allows you to click each word to try and link it
+    - Use await fetch("https://en.wikipedia.org/wiki/chess")
+    - Have box for allow redirect (default on), and matchcase (default off)
+    - Also have urban dictionary and merriam webster version
 - Tab clock. Each URL would be a time amount. 
     - buttons to open all URLs in different formats
 - classic TODO app CRUD but with no backend, instead uses localstorage
