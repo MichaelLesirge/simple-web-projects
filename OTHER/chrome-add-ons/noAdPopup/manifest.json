@@ -1,0 +1,29 @@
+{
+	"name": "No No Ad Popop",
+	"version": "0.1.0",
+	"description": "Why are you on this website",
+	"permissions": [
+		"storage"
+	],
+	"host_permissions": ["*://*.youtube.com/*"],
+	"background": {
+		"service_worker": "background.js"
+	},
+	"content_scripts": [
+		{
+		  "matches": ["*://*.youtube.com/*", "*://*.youtube.com/watch*"],
+		  "js": ["contentScript.js"],
+		  "runAt": "document_end"
+		}
+	  ],
+	"web_accessible_resources": [{ 
+		"resources": [],
+		"matches": [],
+		"use_dynamic_url": true
+	}],
+	"action": {
+		"default_title": "No Youtube Anti-Adblock",
+		"default_popup": "popup/popup.html"
+	},
+	"manifest_version": 3
+}
