@@ -1,6 +1,8 @@
-Option for I̅ to be M
+Option for I̅ to be M, simple find and replace on output
 
 Option to represent *1000 as brackets or as ̅
+
+Option for only standard unicode ( instaed of C, 
 
 0 is "nulla" 
 
@@ -13,3 +15,54 @@ Have sheet of what all roman numerals mean that generates more when you reach th
 Have sheet of what all major numbers mean that generates more when you reach the end (1, 5, 10, 50). Use big font
 
 Object with all special cases and check boxes to change them on all pages
+
+# Rules
+https://www.tuomas.salste.net/doc/roman/numeri-romani.html
+https://en.wikipedia.org/wiki/Roman_numerals
+https://romannumerals.guide/19000 + https://romannumerals.guide/how-roman-numerals-work#large-numbers
+
+0: nūlla
+
+9999 = MMMMMMMMMCMXCIX = V̅MMMMCMXCIX
+11000=X̅I̅=CCIↃↃCIↃ
+
+5000=V̅=IↃↃ=ↁ
+
+10000=X̅=ⅭⅭIↃↃ=ↂ
+
+Apostrophus ⅭIↃ, (I):
+Each additional set of C and Ↄ surrounding CIↃ raises the value by a factor of ten. Highest value or this is 100,000
+IↃ = 500         ⅭIↃ = 1,000
+IↃↃ = 5,000      ⅭⅭIↃↃ = 10,000
+IↃↃↃ = 50,000    ⅭⅭⅭIↃↃↃ = 100,000
+
+Vinculum U+0305 Combine Overline
+Using the vinculum, conventional Roman numerals are multiplied by 1,000 by adding a "bar" or "overline", thus:[49]
+I̅V̅ = 4,000
+X̅X̅V̅ = 25,000
+
+1000    M   CIↃ      ↀ
+100000  C̅   ⅭⅭⅭIↃↃↃ ↈ    I (in a box) 
+
+Single Line: 3 zeros
+Double Line: 6 zeros
+
+Box: 5 zeros
+
+Brackets start at 3 zeros but each extra one gives one more
+
+
+1: Ⅰ, I
+5: Ⅴ, V
+10: Ⅹ, X
+50: Ⅼ, L
+100: Ⅽ, C
+500: Ⅾ, D
+1000: Ⅿ, M
+
+Speical
+1000: ↀ
+5000: ↁ
+10000: ↂ
+50000: ↇ
+100000: ↈ

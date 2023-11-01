@@ -1,0 +1,67 @@
+* {
+    box-sizing: border-box;
+    
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    font-family: "Luxurious Roman", sans-serif;
+
+    height: 100%;
+    width: 100%;
+}
+
+body {
+    display: grid;
+
+    grid-template-rows: repeat(3, 1fr);
+    grid-template-columns: 5fr 1fr;
+    /* grid-template-rows: 5fr 1fr; */
+
+    grid-template-areas: 
+        "decimal    decimal"
+        "explain    setting"
+        "numeral    numeral";
+
+    height: 100%;
+    width: 100%;
+
+    background-color: #D2B48C;
+}
+
+.center-box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    flex-direction: column;
+}
+
+.input-box.decimal {
+    grid-area: decimal;
+}
+
+.input-box.numeral {
+    grid-area: numeral;
+}
+
+.input-box input {
+    width: 75%;
+    height: 75%;
+    padding: 3rem;
+
+    font-family: inherit;
+
+    font-size: 7rem;
+
+    text-align: center;
+}
+
+.explanation {
+    grid-area: explain;
+}
+
+.settings {
+    grid-area: setting;
+}
