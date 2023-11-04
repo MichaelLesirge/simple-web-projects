@@ -14,10 +14,11 @@ const largeUnitWords = [
     "hundred", "thousand", "million", "billion", "trillion", "quadrillion", "quintillion", "sextillion", "septillion", "octillion", "nonillion", "decillion", "undecillion", "duodecillion", "tredecillion", "quatttuor-decillion", "quindecillion", "sexdecillion", "septen-decillion", "octodecillion", "novemdecillion", "vigintillion"
 ];
 
-export default function numToWord(n) {
+export function numToWord(n, title=false) {
     if (n === 0) return "zero";
-    const wordComponents = numToWordComponents(Math.abs(n));
+    let wordComponents = numToWordComponents(Math.abs(n));
     if (n < 0) wordComponents.unshift("negative");
+    if (title) wordComponents = wordComponents.map((w) => w[0].toUpperCase() + w.substring(1))
     return wordComponents.join(" ");
 }
 

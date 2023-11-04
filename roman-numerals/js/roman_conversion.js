@@ -1,18 +1,3 @@
-
-const rules = {
-    lowercase: false,
-
-    zero: true,
-    clock: false,
-
-    standard: false,
-    apostrophus: true,
-    apostrophusReduced: true,
-    vinculum: false,
-
-    specialCharters: true,
-}
-
 // 3,999 is max for standard. Still convert but say it is not valid
 
 function sortMapKeys(map, reversed = false) {
@@ -38,7 +23,7 @@ function makeGlyphSet(values) {
 const standardGlyphs = makeGlyphSet("IVXLCDM")
 const specialGlyphs = makeGlyphSet("ⅠⅤⅩⅬⅭⅮⅯ")
 
-const zero = "nūlla"
+const zero = "Nūlla"
 const clockGlyphs = ["Ⅰ", "Ⅱ", "Ⅲ", "Ⅳ", "Ⅴ", "Ⅵ", "Ⅶ", "Ⅷ", "Ⅸ", "Ⅹ", "Ⅺ", "Ⅻ"]
 
 const apostrophusReducedGlyphs = {
@@ -50,13 +35,18 @@ const apostrophusReducedGlyphs = {
     10000: ["ⅭⅭⅭIↃↃↃ", "(((I)))", "ↈ"],
 }
 
-export function numToRoman(num, rules1) {
-    
-    if (rules.zero && num === 0) return [zero];
-    if (rules.clock && num <= 12) return [clockGlyphs[num-1]];
-
+export function numToRoman(num, rules) {
     const totalPlaces = Math.floor(Math.log10(num))
     const result = Array.from({length: totalPlaces+1}, () => "");
+
+    if (rules.zero && num === 0) {
+        result.push(zero);
+    }
+    
+    if (rules.clock && num <= 12) {
+        result.push(clockGlyphs[num-1]);
+        num = 0;
+    }
 
     const numbersMap = new Map([...(rules.specialCharters ? specialGlyphs : standardGlyphs)]);
 
