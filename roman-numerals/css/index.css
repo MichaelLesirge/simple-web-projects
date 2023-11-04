@@ -56,6 +56,8 @@ body {
     font-size: 7rem;
 
     text-align: center;
+
+    /* font-family: Arial, Helvetica, sans-serif; */
 }
 
 .explanation {
@@ -65,6 +67,10 @@ body {
     flex-direction: row;
 }
 
+*::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+}
 .explanation .card {
     min-width: 10%;
     width: max-content;
@@ -82,15 +88,12 @@ body {
     height: 85%;
     max-width: 100%;
 
+    font-size: 500%;
+
     overflow-y: hidden;
     overflow-x: auto;
-    overflow-wrap: normal;
 
-    font-size: 600%;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    text-align: center;
 }
 
 .explanation .card-number {
@@ -104,8 +107,51 @@ body {
     border-radius: 5px;
 }
 
-.settings {
-    grid-area: setting;
+.under-text {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    
+    margin-top: 0.5rem;
+}
 
-    outline: auto;
+.under-text.settings {
+    gap: 1rem;
+}
+
+.check-mark {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    
+    gap: 0.3rem;
+
+    user-select: none;
+
+    padding: 0 0.4rem;
+    outline: 1px solid black;
+    border-radius: 0.1rem;
+}
+
+.check-mark:hover {
+    background-color: blu;
+}
+
+.check-mark:hover input {
+    border-color: blue;
+}
+
+.check-mark:has(:checked) {
+    background-color: rgba(134, 134, 253, 0.1);
+}
+
+.check-mark input {
+    scale: 1.2;
+    border-color: #07f;
+}
+
+.check-mark label {
+    width: max-content;
+    white-space: nowrap;
 }

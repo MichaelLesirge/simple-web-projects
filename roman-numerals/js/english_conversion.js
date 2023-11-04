@@ -15,8 +15,7 @@ const largeUnitWords = [
 ];
 
 export function numToWord(n, title=false) {
-    if (n === 0) return "zero";
-    let wordComponents = numToWordComponents(Math.abs(n));
+    let wordComponents = n ? numToWordComponents(Math.abs(n)) : ["zero"];
     if (n < 0) wordComponents.unshift("negative");
     if (title) wordComponents = wordComponents.map((w) => w[0].toUpperCase() + w.substring(1))
     return wordComponents.join(" ");

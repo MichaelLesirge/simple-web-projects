@@ -37,14 +37,14 @@ const apostrophusReducedGlyphs = {
 
 export function numToRoman(num, rules) {
     const totalPlaces = Math.floor(Math.log10(num))
-    const result = Array.from({length: totalPlaces+1}, () => "");
+    let result = Array.from({length: totalPlaces+1}, () => "");
 
     if (rules.zero && num === 0) {
-        result.push(zero);
+        result = [zero];
     }
     
     if (rules.clock && num <= 12) {
-        result.push(clockGlyphs[num-1]);
+        result = [clockGlyphs[num-1]];
         num = 0;
     }
 

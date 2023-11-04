@@ -3,7 +3,7 @@ import { numToWord } from "./english_conversion.js";
 
 setAllowedChars("decimal-input", /\d/)
 
-const rules = {
+const defaultRules = {
     lowercase: false,
 
     zero: true,
@@ -29,9 +29,15 @@ const startingWords = wordDisplay.innerText;
 
 const explanationBox = document.getElementById("explanation-box")
 
+const lowercaseCheck = document.getElementById("lowercase")
+const specialCheck = document.getElementById("special-charters")
+const clockCheck = document.getElementById("clock-charters")
+
 function setInfoDisplay(numeralsPlaces, value) {
     explanationBox.innerHTML = "";
+
     numeralsPlaces.forEach((numeral, index) => {
+        console.log(numeralsPlaces)
         if (numeral) {
             explanationBox.innerHTML += `
             <div class="card">
@@ -39,21 +45,29 @@ function setInfoDisplay(numeralsPlaces, value) {
                     ${numeral}
                 </div>
                 <div class="card-number">
-                    ${(parseInt(value[index]) || 1) + "0".repeat(numeralsPlaces.length - index - 1)}
+                    ${(value[index] == 0 && value != 0 ? 1 : (numeralsPlaces.length == 1 ? value : value[index])) + "0".repeat(numeralsPlaces.length - index - 1)}
                 </div>
             </div>`
         }
     })
 }
 
-decimalInput.addEventListener("input", (event) => {
+function update() {
+    console.log(decimalInput.value)
     if (decimalInput.value) {
         const value = Number.parseInt(decimalInput.value)
 
+        const rules = {
+            ...defaultRules,
+            lowercase: lowercaseCheck.checked,
+            specialCharters: specialCheck.checked,
+            clock: clockCheck.checked,
+        }
+    
         if (rules.standard && value > 3999) {
             numeralCorrect.innerText = "Invalid Numeral, standard roman numerals don't go higher than 3999";
         }
-        if (value == 0) {
+        else if (value == 0) {
             numeralCorrect.innerText = "Invalid Numeral, zero did not exist in roman numerals";
         }
         else {
@@ -70,7 +84,12 @@ decimalInput.addEventListener("input", (event) => {
         setInfoDisplay([]);
         numeralInput.value = "";
     }
-})
+}
+
+decimalInput.addEventListener("input", update)
+lowercaseCheck.addEventListener("change", update)
+specialCheck.addEventListener("change", update)
+clockCheck.addEventListener("change", update)
 
 function setAllowedChars(elementClass, pattern) {
     document.querySelectorAll("input." + elementClass).forEach((input) => {
