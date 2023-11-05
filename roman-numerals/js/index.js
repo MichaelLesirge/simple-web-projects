@@ -65,10 +65,10 @@ function update() {
         }
     
         if (rules.standard && value > 3999) {
-            numeralCorrect.innerText = "Invalid Numeral, standard roman numerals don't go higher than 3999";
+            numeralCorrect.innerText = "Invalid Numeral, must be 3999 or lower";
         }
-        else if (value == 0) {
-            numeralCorrect.innerText = "Invalid Numeral, zero did not exist in roman numerals";
+        else if (value < 1) {
+            numeralCorrect.innerText = "Invalid Numeral, must be 1 or higher";
         }
         else {
             numeralCorrect.innerText = "Valid Numeral";
