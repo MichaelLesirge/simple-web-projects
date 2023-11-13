@@ -302,9 +302,16 @@ const playerTurn = (square, board) => {
 	if (!square.isEmpty() && currentColor === square.get().color) {
 		board.setSelected(square);
 	} else if (board.selected != null) {
+		const hasWon = square.get()?.type === "king";
 		if (board.selected.get().getPossibleMoves().includes(square)) {
 			board.move(board.selected, square);
-			switchCurrentPlayer();
+			if (hasWon) {
+				alert(`${currentColor.toUpperCase()} Has Won The Game!`)
+				setTimeout(placeStartingPieces, 1000);
+			}
+			else {
+				switchCurrentPlayer();
+			}
 		}
 		board.setSelected(null);
 	}
@@ -312,14 +319,20 @@ const playerTurn = (square, board) => {
 
 const board = new Board(boardWidth, boardHeight, document.querySelector("table.board"), playerTurn);
 
-// Place the black pieces
+function placeStartingPieces() {
 
-const piecesLayout = [Rook, Knight, Bishop, Queen, King, Bishop, Knight, Rook];
-const pieces = new Map();
+	currentColor = PlayerColors.WHITE;
 
-piecesLayout.forEach((type, i) => pieces.set([0, i], new type(PlayerColors.WHITE)));
-piecesLayout.forEach((type, i) => pieces.set([1, i], new Pawn(PlayerColors.WHITE)));
-piecesLayout.forEach((type, i) => pieces.set([7, i], new type(PlayerColors.BLACK)));
-piecesLayout.forEach((type, i) => pieces.set([6, i], new Pawn(PlayerColors.BLACK)));
+	const piecesLayout = [Rook, Knight, Bishop, Queen, King, Bishop, Knight, Rook];
+	const pieces = new Map();
+	
+	piecesLayout.forEach((type, i) => pieces.set([0, i], new type(PlayerColors.WHITE)));
+	piecesLayout.forEach((type, i) => pieces.set([1, i], new Pawn(PlayerColors.WHITE)));
+	piecesLayout.forEach((type, i) => pieces.set([7, i], new type(PlayerColors.BLACK)));
+	piecesLayout.forEach((type, i) => pieces.set([6, i], new Pawn(PlayerColors.BLACK)));
+	
+	board.reset()
+	pieces.forEach((piece, location) => board.add(...location, piece))
+}
 
-pieces.forEach((piece, location) => board.add(...location, piece))
+placeStartingPieces()
