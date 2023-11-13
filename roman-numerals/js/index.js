@@ -1,4 +1,4 @@
-import { numToRoman, romanToNum } from "./roman_conversion.js";
+import { numToRoman, romanToNum, toRules } from "./roman_conversion.js";
 import { numToWord } from "./english_conversion.js";
 
 setAllowedChars("decimal-input", /\d/)
@@ -37,7 +37,6 @@ function setInfoDisplay(numeralsPlaces, value) {
     explanationBox.innerHTML = "";
 
     numeralsPlaces.forEach((numeral, index) => {
-        console.log(numeralsPlaces)
         if (numeral) {
             explanationBox.innerHTML += `
             <div class="card">
@@ -91,12 +90,23 @@ lowercaseCheck.addEventListener("change", update)
 specialCheck.addEventListener("change", update)
 clockCheck.addEventListener("change", update)
 
-function updateNumeral() {
-     if (numeralInput.value) {
-        const [number, valid] = romanToNum(numeralInput.value);
+function updateNumeral(event) {
+    const rules = {
+        ...defaultRules,
+        lowercase: lowercaseCheck.checked,
+        specialCharters: specialCheck.checked,
+        clock: clockCheck.checked,
+    }
+
+    const inputValue = numeralInput.value;
+    numeralInput.value = toRules(inputValue, rules);
+
+    if (inputValue) {
+        const [number, valid] = romanToNum(inputValue);
 
         if (!valid) {
             numeralCorrect.innerText = "Invalid numeral, bad characters"
+            setInfoDisplay([]);
         }
         else {
             numeralCorrect.innerText = "Valid Numeral";
@@ -104,18 +114,14 @@ function updateNumeral() {
                 decimalInput.value = number;
                 wordDisplay.innerText = numToWord(number, true);
                 
-                // TODO always convert what person writes to follow rules so the following will work:
-                // const rules = {
-                //     ...defaultRules,
-                //     lowercase: lowercaseCheck.checked,
-                //     specialCharters: specialCheck.checked,
-                //     clock: clockCheck.checked,
-                // }
-
-                // const [numeral, numeralsPlace] = numToRoman(number, rules);
-                // if (numeral == numeralInput.value.toUpperCase()) {
-                //     update()
-                // }
+                const [numeral, numeralsPlace] = numToRoman(number, rules);
+                if (numeral == numeralInput.value) {
+                    setInfoDisplay(numeralsPlace, number.toString())
+                }
+                else {
+                    numeralCorrect.innerText = `Invalid numeral, format should be ${numeral}`;
+                    setInfoDisplay([]);
+                }
             }
         }
 

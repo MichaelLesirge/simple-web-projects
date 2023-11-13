@@ -14,14 +14,19 @@ function makeGlyphSet(values) {
         const last = (10 ** (Math.ceil(i / 2) - 1))
         
         if (output.has(last)) output.set(num-last, output.get(last)+values[i])
+
         output.set(num, values[i])
     }
     
     return output;
 }
 
-const standardGlyphs = makeGlyphSet("IVXLCDM")
-const specialGlyphs = makeGlyphSet("ⅠⅤⅩⅬⅭⅮⅯ")
+const standardGlyphs = Array.from("IVXLCDM")
+const specialGlyphs = Array.from("ⅠⅤⅩⅬⅭⅮⅯ")
+
+const numbersMap = makeGlyphSet(standardGlyphs);
+const specialGlyphsMap = new Map(standardGlyphs.map((char, i) => [char, specialGlyphs[i]]));
+const standardGlyphsMap = new Map(specialGlyphs.map((char, i) => [char, standardGlyphs[i]]));
 
 const zero = "Nūlla"
 const clockGlyphs = ["Ⅰ", "Ⅱ", "Ⅲ", "Ⅳ", "Ⅴ", "Ⅵ", "Ⅶ", "Ⅷ", "Ⅸ", "Ⅹ", "Ⅺ", "Ⅻ"]
@@ -33,6 +38,20 @@ const apostrophusReducedGlyphs = {
     1000: ["ⅭⅭIↃↃ", "((I))", "ↂ"],
     50000: ["IↃↃↃ", "I)))", "ↇ"],
     10000: ["ⅭⅭⅭIↃↃↃ", "(((I)))", "ↈ"],
+}
+
+export function toRules(glyphs, rules) {
+    if (rules.lowercase) glyphs = glyphs.toLowerCase();
+    else glyphs = glyphs.toUpperCase();
+
+    glyphs = glyphs.split("").map((glyph) => (rules.specialCharters ? specialGlyphsMap : standardGlyphsMap).get(glyph) ?? glyph).join("");
+    return glyphs;
+}
+
+export function toStandard(glyphs) {
+    glyphs = glyphs.toUpperCase();;
+    glyphs = glyphs.split("").map((glyph) => standardGlyphsMap.get(glyph) ?? glyph).join("");
+    return glyphs;
 }
 
 export function numToRoman(num, rules) {
@@ -48,8 +67,6 @@ export function numToRoman(num, rules) {
         num = 0;
     }
 
-    const numbersMap = new Map([...(rules.specialCharters ? specialGlyphs : standardGlyphs)]);
-
     const keys = sortMapKeys(numbersMap, true);
     let currentIndex = 0;
 
@@ -59,21 +76,20 @@ export function numToRoman(num, rules) {
         if (num - current >= 0) {
             const place = Math.floor(Math.log10(num))
             num -= current;
-            result[place] += numbersMap.get(current)
+            result[place] += toRules(numbersMap.get(current), rules)
         }
         else {
             currentIndex++;
         }
     }
-
-    if (rules.lowercase) {
-        Object.keys(result).forEach((key) => result[key] = result[key].toLowerCase())
-    }
-
+    
+    console.log(result)
     return [result.reverse().join(""), result];
 }
 
 export function romanToNum(glyphs) {
+    glyphs = toStandard(glyphs);
+
     if (glyphs.toLowerCase() === zero.toLowerCase()) {
         return [0, false]
     }
@@ -83,14 +99,14 @@ export function romanToNum(glyphs) {
         return [clockValue, false];
     }
     
-    const numbersMap = new Map([...specialGlyphs, ...standardGlyphs].map(([key, value]) => [value, key]));
+    const keys = new Map([...numbersMap].map(([key, value]) => [value, key]))
 
     let num = 0;
     let highest = 0;
     let valid = true;
 
     for (const char of Array.from(glyphs).reverse()) {
-        let value = numbersMap.get(char.toUpperCase());
+        let value = keys.get(char.toUpperCase());
 
         if (value === undefined) {
             valid = false;
@@ -102,5 +118,6 @@ export function romanToNum(glyphs) {
         else num -= value;
     }
 
+    console.log(glyphs, num)
     return [num, valid];
 }
