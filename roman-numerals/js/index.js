@@ -53,8 +53,7 @@ function setInfoDisplay(numeralsPlaces, value) {
 }
 
 function update() {
-    console.log(decimalInput.value)
-    if (decimalInput.value) {
+     if (decimalInput.value) {
         const value = Number.parseInt(decimalInput.value)
 
         const rules = {
@@ -65,10 +64,10 @@ function update() {
         }
     
         if (rules.standard && value > 3999) {
-            numeralCorrect.innerText = "Invalid Numeral, must be 3999 or lower";
+            numeralCorrect.innerText = "Invalid numeral, must be 3999 or lower";
         }
         else if (value < 1) {
-            numeralCorrect.innerText = "Invalid Numeral, must be 1 or higher";
+            numeralCorrect.innerText = "Invalid numeral, must be 1 or higher";
         }
         else {
             numeralCorrect.innerText = "Valid Numeral";
@@ -83,6 +82,7 @@ function update() {
         wordDisplay.innerText = startingWords;
         setInfoDisplay([]);
         numeralInput.value = "";
+        numeralCorrect.innerText = "Valid Numeral";
     }
 }
 
@@ -90,6 +90,47 @@ decimalInput.addEventListener("input", update)
 lowercaseCheck.addEventListener("change", update)
 specialCheck.addEventListener("change", update)
 clockCheck.addEventListener("change", update)
+
+function updateNumeral() {
+     if (numeralInput.value) {
+        const [number, valid] = romanToNum(numeralInput.value);
+
+        if (!valid) {
+            numeralCorrect.innerText = "Invalid numeral, bad characters"
+        }
+        else {
+            numeralCorrect.innerText = "Valid Numeral";
+            if (number) {
+                decimalInput.value = number;
+                wordDisplay.innerText = numToWord(number, true);
+                
+                // TODO always convert what person writes to follow rules so the following will work:
+                // const rules = {
+                //     ...defaultRules,
+                //     lowercase: lowercaseCheck.checked,
+                //     specialCharters: specialCheck.checked,
+                //     clock: clockCheck.checked,
+                // }
+
+                // const [numeral, numeralsPlace] = numToRoman(number, rules);
+                // if (numeral == numeralInput.value.toUpperCase()) {
+                //     update()
+                // }
+            }
+        }
+
+    }
+    else {
+        wordDisplay.innerText = startingWords;
+        setInfoDisplay([]);
+        decimalInput.value = "";
+        numeralCorrect.innerText = "Valid Numeral";
+    }
+}
+
+numeralInput.addEventListener("input", updateNumeral)
+numeralInput.addEventListener("blur", update)
+numeralInput.addEventListener("keypress", (event) => {if (event.key === "Enter") update()})
 
 function setAllowedChars(elementClass, pattern) {
     document.querySelectorAll("input." + elementClass).forEach((input) => {

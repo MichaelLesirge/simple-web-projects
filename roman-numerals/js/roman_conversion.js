@@ -74,5 +74,33 @@ export function numToRoman(num, rules) {
 }
 
 export function romanToNum(glyphs) {
-    return {};
+    if (glyphs.toLowerCase() === zero.toLowerCase()) {
+        return [0, false]
+    }
+
+    const clockValue = clockGlyphs.indexOf(glyphs) + 1
+    if (clockValue !== 0) {
+        return [clockValue, false];
+    }
+    
+    const numbersMap = new Map([...specialGlyphs, ...standardGlyphs].map(([key, value]) => [value, key]));
+
+    let num = 0;
+    let highest = 0;
+    let valid = true;
+
+    for (const char of Array.from(glyphs).reverse()) {
+        let value = numbersMap.get(char.toUpperCase());
+
+        if (value === undefined) {
+            valid = false;
+            value = 0;
+        }
+
+        highest = Math.max(value, highest);
+        if (value >= highest) num += value;
+        else num -= value;
+    }
+
+    return [num, valid];
 }
