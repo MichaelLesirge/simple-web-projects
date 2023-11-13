@@ -11,7 +11,7 @@
 	padding: 0;
 }
 
-/* page struture */
+/* page structure */
 
 body,
 html {
@@ -91,6 +91,7 @@ body {
 
 .content .text .text-box {
     resize: vertical;
+    padding: 0.1rem;
 }
 
 /* Controls */

@@ -32,8 +32,8 @@ function formatBinary(binary_str_array) {
 	return bytes.join(" ")
 }
 
-function convertString(text, func, split_seporator = "", join_seporator = undefined) {
-	return text.split(split_seporator).map(func).join(join_seporator ?? split_seporator)
+function convertString(text, func, split_separator = "", join_separator = undefined) {
+	return text.split(split_separator).map(func).join(join_separator ?? split_separator)
 }
 
 const converters = {
