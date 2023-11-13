@@ -60,16 +60,18 @@ const converters = {
 	},
 	"Glitched": {
 		"Slightly Cursed": (text) => curseText(text, 5),
-		"Meduim Cursed": (text) => curseText(text, 25),
+		"Medium": (text) => curseText(text, 25),
 		"Very Cursed": (text) => curseText(text, 50),
 	},
-	"Direction": {
-		"Reverse": (text) => Array.from(text).reverse().join(""),
+	"Reverse": {
+		"Everything": (text) => Array.from(text).reverse().join(""),
+		"Lettering": (text) => convertString(text, (word) => Array.from(word).reverse().join(""), " "),
+		"Words": (text) => text.split(" ").reverse().join(" "),
 	},
 	"Meme": {
 		"Leet Speak": (text) => {
-			const leet_converter = {"e": "3", "t": "7", "i": "1", "o": "0", "a": "4", "s": "5", "g": "9", "l": "1", "z": "2", "b": "8"}
-			return matchCase(convertString(text.toLowerCase().replaceAll("leet", "1337"), (char) => char in leet_converter && Math.random() < 0.75 ? leet_converter[char] : char), text)
+			const leetConverter = {"e": "3", "t": "7", "i": "1", "o": "0", "a": "4", "s": "5", "g": "9", "l": "1", "z": "2", "b": "8"}
+			return matchCase(convertString(text.toLowerCase().replaceAll("leet", "1337"), (char) => char in leetConverter && Math.random() < 0.75 ? leetConverter[char] : char), text)
 		},
 		"Cow": (text) => matchCase(convertString(text, (word) => convertString(word, (char, i) => i ? "o" : "m"), " "), text),
 		"Among Us": (text) => convertString(text, (char) => [" ", "\n"].includes(char) ? char : Math.random() < 0.01 ? "ඞ්" : "ඞ"),
