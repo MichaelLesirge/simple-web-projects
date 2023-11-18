@@ -1,5 +1,4 @@
-// make circle follow cursor slowly
-// make circle grow on mouse down and shrink fast when mouse is lifted
+const dragDuration = 200;
 
 const blob = document.getElementById("blob");
 let duration = 0;
@@ -12,8 +11,11 @@ document.addEventListener("mousemove", (event) => {
         top: `${clientY}px`,
     }, {duration: duration, fill: "forwards"})
 
-    duration = 100;
+    duration = dragDuration;
 })
+
+document.addEventListener("mousedown", () => blob.style.background = "red")
+document.addEventListener("mouseup", () => blob.style.background = "")
 
 function charRange(startChar, stopChar) {
     return Array.from({length: stopChar.charCodeAt() - startChar.charCodeAt() + 1}, (_, i) => String.fromCharCode(i + startChar.charCodeAt())).join("");

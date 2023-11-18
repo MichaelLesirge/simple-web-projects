@@ -69,7 +69,8 @@ body {
 }
 
 .hacker-text {
-    font-family: 'Space Mono', monospace
+    font-family: 'Space Mono', monospace;
+    user-select: none;
 }
 
 @keyframes rotate {
