@@ -31,3 +31,4 @@
 - Get sorting algorithms and maze finding algorithms on this
 - Brain Damage: Bruh sound making (put random meme sounds in order and then add loops, speedups (*/+n), baseboost, volume boost,)
     - Get sounds from https://www.myinstants.com/en/search/?name=MEME
+- PID demo with sliders for setpoint, PID, and ground tilt. Also be able to drag car and graph location
