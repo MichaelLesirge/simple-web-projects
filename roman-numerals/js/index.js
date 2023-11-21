@@ -2,6 +2,7 @@ import { numToRoman, romanToNum, toRules } from "./roman_conversion.js";
 import { numToWord } from "./english_conversion.js";
 
 setAllowedChars("decimal-input", /\d/)
+setAllowedChars("decimal-input", /\d/)
 
 const defaultRules = {
     lowercase: false,

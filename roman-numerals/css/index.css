@@ -93,7 +93,9 @@ body {
     overflow-y: hidden;
     overflow-x: auto;
 
-    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .explanation .card-number {
