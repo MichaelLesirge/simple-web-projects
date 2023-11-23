@@ -11,7 +11,7 @@ function degreesToRadians(degrees){
 }
 
 function radiansToDegrees(radians){
-    return radians * (Math.PI/180);
+    return radians / (Math.PI/180);
 }
 
 class Floor {
@@ -49,7 +49,6 @@ class Floor {
         const opposite = this.startY - this.endY;
 
         const thetaRadians = Math.atan(opposite / adjacent);
-
         return radiansToDegrees(thetaRadians);
     }
     
@@ -130,7 +129,6 @@ sliderAngle.addEventListener("input", () => world.setFloorOffset(Number(sliderAn
 setInterval(() => {
     world.draw();
     const floorDegrees = world.getFloorDegrees();
-    // console.log(floorDegrees)
     
     car.update(floorDegrees);
     car.draw()
