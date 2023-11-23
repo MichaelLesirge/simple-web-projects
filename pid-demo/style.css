@@ -1,0 +1,67 @@
+* {
+    box-sizing: border-box;
+
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    width: 100%;
+    height: 100%;
+}
+
+body {  
+    width: 100%;
+    height: 100%;
+}
+
+main {
+    display: grid;
+    
+    background-color: darkgray;
+
+    height: 100%;
+
+    grid-template-columns: 1.618fr 1fr;
+    grid-template-rows: 1.618fr 1fr;
+}
+
+
+#header {
+    position: absolute;
+    width: 100%;
+    padding: 0.2rem;
+    
+    color: white;
+    background-color: darkblue;
+}
+
+#display {
+    display: flex;
+}
+
+#display #display-canvas {
+    width: 100%;
+    height: 100%;
+
+    border: 1px solid black; 
+}
+
+#display {
+
+}
+
+input[type=range][orient=v] {
+    appearance: slider-vertical;
+    width: 8px;
+    height: 100%;
+    padding: 0 5px;
+}
+
+/* #settings {
+
+}
+
+#power-graph {
+
+} */
