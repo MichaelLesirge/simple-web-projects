@@ -18,20 +18,48 @@
     </header>
     <main>
         <section id="display">
-            <input id="floor-angle" type="range" max="-1" min="1" value="0" orient="v"/>
+            <input title="change ground angle" id="floor-angle" type="range" orient="v"/>
             <canvas id="display-canvas">
                 This Program Requires HTML5 Canvas
             </canvas>
+            <input title="setpoint" class="slider" id="car-setpoint" type="range">
         </section>
         <section id="settings">
-            <div id="pid-settings"></div>
-            <div id="car-settings"></div>
+            <div>
+                <h2>Pid Settings</h2>
+                <ul>
+                    <li>P</li>
+                    <li>I</li>
+                    <li>D</li>
+                    <li>FF</li>
+                    <li>IZone</li>
+                    <li>IMaxAccumulation</li>
+                    <li>Output Range</li>
+                </ul>
+            </div>
+            <div>
+                <h2>Car Settings</h2>
+                <ul>
+                    <li>Mass</li>
+                    <li>Motor Force Limits</li>
+                </ul>
+            </div>
+            <div>
+                <h2>World Settings</h2>
+                <ul>
+                    <li>Gravity</li>
+                    <li>Friction</li>
+                </ul>
+            </div>
         </section>
         <section id="graph">
     
         </section>
-        <section id="power-graph">
-    
+        <section id="extra-graph">
+            <select name="" id="">
+                <option value="motor-power">Motor Power</option>
+                <option value="error">Error</option>
+            </select>
         </section>
     </main>
 

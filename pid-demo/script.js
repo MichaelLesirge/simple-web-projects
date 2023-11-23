@@ -16,7 +16,8 @@ function fullResolution(canvas) {
     canvas.height = canvas.clientHeight / doRatio * dpr;
 }
 
-const sliderAngle = document.getElementById("floor-angle")
+const sliderAngle = document.getElementById("floor-angle");
+const carSetpoint = document.getElementById("car-setpoint");
 
 const backgroundColor = "white";
 const gravity = -9.8
@@ -118,13 +119,13 @@ class PidController {
 
 class Car {
     constructor(canvas, imageSource, ground) {
+
+        // save values
         this.canvas = canvas;
-
-        this.backgroundWidth = this.canvas.width;
-        this.backgroundHeight = this.canvas.height;
-
         this.ctx = canvas.getContext("2d");
+        this.ground = ground;
 
+        // load image
         this.image = new Image();
         this.hasImageLoaded = false;
         this.image.onload = () => {
@@ -132,38 +133,53 @@ class Car {
         }
         this.image.src = imageSource;
 
-        this.width = this.image.width * 0.25
-        this.height = this.image.height * 0.20
-
-        this.x = this.backgroundWidth / 2 - this.width / 2;
-        this.y = 0;
-        this.rotation = 0;
-
+        // Configuration
         this.mass = 10;
         this.weight = this.mass * gravity;
+        
+        this.maxMotorPower = 1;
 
-        this.ground = ground;
+        this.width = this.image.width * 0.25
+        this.height = this.image.height * 0.20
+        
+        // create variables
+        this.startX = this.canvas.width / 2 - this.width / 2;;
+        this.reset();
+    }
+    
+    reset() {
+        this.velocity = 0;
+        
+        this.x = this.startX;
+        this.rotation = 0;
+        this.y = 0;
     }
 
     update() {
-        const rotation = this.ground.getFloorRad();
+        this.rotation = this.ground.getFloorRad();
 
         // find ground
-        const b2 = Math.tan(rotation) * this.x + this.height;
+        const b2 = Math.tan(this.rotation) * this.x + this.height;
         const ground = this.ground.startY - b2;
 
         this.y = ground;
 
+        this.x
+    }
 
+    getCenterX() {
+        return this.x + car.width/2;
+    }
+
+    setCenterX(x) {
+        this.x = x - car.width/2;
     }
 
     draw() {        
-        const rotation = this.ground.getFloorRad();
-
         this.ctx.save();
 
         this.ctx.translate(this.x, this.y);
-        this.ctx.rotate(-rotation);
+        this.ctx.rotate(-this.rotation);
         if (this.hasImageLoaded) {
             this.ctx.drawImage(this.image, 0, 0, this.width, this.height);
             this.ctx.fillStyle = backgroundColor;
@@ -182,18 +198,20 @@ const car = new Car(displayCanvas, "car_outline.png", world)
 const carController = new PidController();
 
 sliderAngle.max = world.height;
-sliderAngle.value = 0;
 sliderAngle.min = -world.height;
-// sliderAngle.max = 90;
-// sliderAngle.value = 0;
-// sliderAngle.min = 0;
+sliderAngle.value = 0;
+
+carSetpoint.min = 0;
+carSetpoint.max = world.width;
+carSetpoint.value = car.getCenterX();
 
 setInterval(() => {
     world.setFloorOffset(Number(sliderAngle.value))
+    car.setCenterX(Number(carSetpoint.value));
 
     world.draw();
     
-    const floorDegrees = world.getFloorRad();
+    const floorDegrees = world.getFloorDegrees();
 
     car.update();
     car.draw()
