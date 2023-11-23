@@ -188,11 +188,11 @@ sliderAngle.min = -world.height;
 // sliderAngle.value = 0;
 // sliderAngle.min = 0;
 
-sliderAngle.addEventListener("input", () => world.setFloorOffset(Number(sliderAngle.value)));
-// sliderAngle.addEventListener("input", () => car.x = Number(sliderAngle.value));
-
 setInterval(() => {
+    world.setFloorOffset(Number(sliderAngle.value))
+
     world.draw();
+    
     const floorDegrees = world.getFloorRad();
 
     car.update();
