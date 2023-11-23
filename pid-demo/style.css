@@ -47,9 +47,9 @@ main {
     border: 1px solid black; 
 }
 
-#display {
+/* #display {
 
-}
+} */
 
 input[type=range][orient=v] {
     appearance: slider-vertical;

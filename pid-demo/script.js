@@ -1,17 +1,28 @@
 
 const displayCanvas = document.getElementById("display-canvas");
+
+fullResolution(displayCanvas);
+
+function fullResolution(canvas) {
+    const doRatio = canvas.clientWidth / canvas.clientHeight;
+
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = canvas.clientWidth * dpr;
+    canvas.height = canvas.clientHeight / doRatio * dpr;
+}
+
 const sliderAngle = document.getElementById("floor-angle")
 
 const backgroundColor = "white";
 const gravity = -9.8
 const FPS = 60;
 
-function degreesToRadians(degrees){
-    return degrees * (Math.PI/180);
+function degreesToRadians(degrees) {
+    return degrees * (Math.PI / 180);
 }
 
-function radiansToDegrees(radians){
-    return radians / (Math.PI/180);
+function radiansToDegrees(radians) {
+    return radians / (Math.PI / 180);
 }
 
 class Floor {
@@ -23,7 +34,7 @@ class Floor {
 
         this.setFloorOffset(0);
     }
-    
+
     fillBackground() {
         this.ctx.fillStyle = backgroundColor;
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
@@ -31,7 +42,7 @@ class Floor {
 
     setFloorOffset(floorOffset) {
         this.floorOffset = floorOffset;
-        
+
         [this.startX, this.startY] = [0, (this.height - this.floorOffset) / 2];
         [this.endX, this.endY] = [this.width, (this.height + this.floorOffset) / 2];
 
@@ -50,7 +61,7 @@ class Floor {
 
         return Math.atan(opposite / adjacent);
     }
-    
+
     setFloorDegrees(floorDegrees) {
         const floorRad = degreesToRadians(floorDegrees);
         this.setFloorRad(floorRad);
@@ -77,8 +88,16 @@ class Floor {
     }
 }
 
+class PidController {
+    constructor(P, I, D) {
+        this.P = P;
+        this.I = I;
+        this.D = D;
+    }
+}
+
 class Car {
-    constructor(canvas, imageSource) {
+    constructor(canvas, imageSource, ground) {
         this.canvas = canvas;
 
         this.backgroundWidth = this.canvas.width;
@@ -91,36 +110,45 @@ class Car {
         this.hasImageLoaded = false;
         this.image.onload = () => this.hasImageLoaded = true;
 
-        this.width = this.image.width / 7
-        this.height = this.image.height / 10
+        this.width = this.image.width * 0.25
+        this.height = this.image.height * 0.15
 
         this.x = this.backgroundWidth / 2 - this.width / 2;
         this.y = 0;
         this.rotation = 0;
-        
+
         this.mass = 10;
         this.weight = this.mass * gravity;
+
+        this.ground = ground;
     }
 
-    update(groundAngle) {
-        this.rotation = groundAngle;
+    update() {
+        const rotation = this.ground.getFloorRad();
+
+        // find ground
+        const b2 = Math.tan(rotation) * this.x + this.height;
+        const ground = this.ground.startY - b2;
+
+        this.y = ground;
+
+
     }
 
     draw() {
+        const rotation = this.ground.getFloorRad();
+
         this.ctx.save();
 
-        const centerWidth = this.width / 2;
-        const centerHeight = this.height / 2;
-
-        this.ctx.translate(this.x + centerWidth, this.y + centerHeight);      
-        this.ctx.rotate(-this.rotation);
+        this.ctx.translate(this.x, this.y);
+        this.ctx.rotate(-rotation);
         if (this.hasImageLoaded) {
             this.ctx.fillStyle = backgroundColor;
-            this.ctx.drawImage(this.image, -centerWidth, -centerHeight, this.width, this.height);
+            this.ctx.drawImage(this.image, 0, 0, this.width, this.height);
         }
         else {
             this.ctx.fillStyle = "black";
-            this.ctx.fillRect(-centerWidth, -centerHeight, this.width, this.height);
+            this.ctx.fillRect(0, 0, this.width, this.height);
         }
         this.ctx.restore()
     }
@@ -128,7 +156,7 @@ class Car {
 
 const world = new Floor(displayCanvas);
 
-const car = new Car(displayCanvas, "car_outline.png")
+const car = new Car(displayCanvas, "car_outline.png", world)
 
 sliderAngle.max = world.height;
 sliderAngle.value = 0;
@@ -138,12 +166,13 @@ sliderAngle.min = -world.height;
 // sliderAngle.min = 0;
 
 sliderAngle.addEventListener("input", () => world.setFloorOffset(Number(sliderAngle.value)));
+// sliderAngle.addEventListener("input", () => car.x = Number(sliderAngle.value));
 
 setInterval(() => {
     world.draw();
     const floorDegrees = world.getFloorRad();
-    
-    car.update(floorDegrees);
+
+    car.update();
     car.draw()
 
 }, Math.floor(1000 / FPS))
