@@ -1,4 +1,9 @@
 
+// push down body
+const header = document.getElementById("header");
+const main = document.querySelector("main");
+main.style.paddingTop = header.clientHeight + 1 + "px";
+
 const displayCanvas = document.getElementById("display-canvas");
 
 fullResolution(displayCanvas);
@@ -89,11 +94,26 @@ class Floor {
 }
 
 class PidController {
-    constructor(P, I, D) {
-        this.P = P;
-        this.I = I;
-        this.D = D;
+    constructor(gains = {P: 1, I: 1, D: 1}, ITermLimits = {min: -Infinity, max: Infinity}, outputLimits = {min: -Infinity, minThreshold: undefined, max: Infinity, maxThreshold: undefined}) {
+        const {P, I, D} = gains;
+        this.setGains(P, I, D)
+
+        const {min: ITermMin, max: ITermMax} = ITermLimits;
+
+        const {min: outputMin, max: outMax} = outputLimits;
+        
+
     }
+
+    setGains(P = 1, I = 1, D = 1) {
+        [this.P, this.I, this.D] = [P, I, D]
+    }
+
+    setITermLimits(min = -Infinity, max = Infinity) {
+        [this.ITermMin, this.ITermMax] = [min, max]
+    }
+
+    setOutput
 }
 
 class Car {
@@ -106,12 +126,14 @@ class Car {
         this.ctx = canvas.getContext("2d");
 
         this.image = new Image();
-        this.image.src = imageSource;
         this.hasImageLoaded = false;
-        this.image.onload = () => this.hasImageLoaded = true;
+        this.image.onload = () => {
+            this.hasImageLoaded = true;
+        }
+        this.image.src = imageSource;
 
         this.width = this.image.width * 0.25
-        this.height = this.image.height * 0.15
+        this.height = this.image.height * 0.20
 
         this.x = this.backgroundWidth / 2 - this.width / 2;
         this.y = 0;
@@ -135,7 +157,7 @@ class Car {
 
     }
 
-    draw() {
+    draw() {        
         const rotation = this.ground.getFloorRad();
 
         this.ctx.save();
@@ -143,8 +165,8 @@ class Car {
         this.ctx.translate(this.x, this.y);
         this.ctx.rotate(-rotation);
         if (this.hasImageLoaded) {
-            this.ctx.fillStyle = backgroundColor;
             this.ctx.drawImage(this.image, 0, 0, this.width, this.height);
+            this.ctx.fillStyle = backgroundColor;
         }
         else {
             this.ctx.fillStyle = "black";
@@ -157,6 +179,7 @@ class Car {
 const world = new Floor(displayCanvas);
 
 const car = new Car(displayCanvas, "car_outline.png", world)
+const carController = new PidController();
 
 sliderAngle.max = world.height;
 sliderAngle.value = 0;
