@@ -21,7 +21,7 @@ const carSetpoint = document.getElementById("car-setpoint");
 
 const backgroundColor = "white";
 const gravity = -9.8
-const FPS = 60;
+const FPS = 300;
 
 function degreesToRadians(degrees) {
     return degrees * (Math.PI / 180);
@@ -63,7 +63,7 @@ class Floor {
 
     getFloorRad() {
         const adjacent = this.width;
-        const opposite = this.startY - this.endY;
+        const opposite = this.endY - this.startY;
 
         return Math.atan(opposite / adjacent);
     }
@@ -78,14 +78,19 @@ class Floor {
         return radiansToDegrees(floorRad);
     }
 
-    drawFloor() {
+    drawLine(startX, startY, endX, endY, color = "black", width = 1) {
         this.ctx.lineWidth = 1;
         this.ctx.beginPath();
 
-        this.ctx.moveTo(this.startX, this.startY);
-        this.ctx.lineTo(this.endX, this.endY);
+        this.ctx.moveTo(startX, startY);
+        this.ctx.lineTo(endX, endY);
 
+        this.ctx.strokeStyle = color;
         this.ctx.stroke();
+    }
+
+    drawFloor() {
+        this.drawLine(this.startX, this.startY, this.endX, this.endY)
     }
 
     draw() {
@@ -95,15 +100,13 @@ class Floor {
 }
 
 class PidController {
-    constructor(gains = {P: 1, I: 1, D: 1}, ITermLimits = {min: -Infinity, max: Infinity}, outputLimits = {min: -Infinity, minThreshold: undefined, max: Infinity, maxThreshold: undefined}) {
+    constructor(gains = {P: 1, I: 1, D: 1}, ITermLimits = {min: -Infinity, max: Infinity}, outputLimits = {min: -Infinity, max: Infinity}) {
         const {P, I, D} = gains;
         this.setGains(P, I, D)
 
         const {min: ITermMin, max: ITermMax} = ITermLimits;
 
         const {min: outputMin, max: outMax} = outputLimits;
-        
-
     }
 
     setGains(P = 1, I = 1, D = 1) {
@@ -113,8 +116,6 @@ class PidController {
     setITermLimits(min = -Infinity, max = Infinity) {
         [this.ITermMin, this.ITermMax] = [min, max]
     }
-
-    setOutput
 }
 
 class Car {
@@ -140,13 +141,13 @@ class Car {
         this.maxMotorPower = 1;
 
         this.width = this.image.width * 0.25
-        this.height = this.image.height * 0.20
+        this.height = this.image.height * 0.15
         
         // create variables
         this.startX = this.canvas.width / 2 - this.width / 2;;
         this.reset();
     }
-    
+
     reset() {
         this.velocity = 0;
         
@@ -159,12 +160,10 @@ class Car {
         this.rotation = this.ground.getFloorRad();
 
         // find ground
-        const b2 = Math.tan(this.rotation) * this.x + this.height;
-        const ground = this.ground.startY - b2;
+        const b2 = Math.tan(this.rotation) * this.x - this.height;
+        const ground = this.ground.startY + b2;
 
         this.y = ground;
-
-        this.x
     }
 
     getCenterX() {
@@ -179,7 +178,7 @@ class Car {
         this.ctx.save();
 
         this.ctx.translate(this.x, this.y);
-        this.ctx.rotate(-this.rotation);
+        this.ctx.rotate(this.rotation);
         if (this.hasImageLoaded) {
             this.ctx.drawImage(this.image, 0, 0, this.width, this.height);
             this.ctx.fillStyle = backgroundColor;
@@ -201,15 +200,23 @@ sliderAngle.max = world.height;
 sliderAngle.min = -world.height;
 sliderAngle.value = 0;
 
-carSetpoint.min = 0;
+const thumbWidth = getComputedStyle(carSetpoint).getPropertyValue("--thumb-width");
+carSetpoint.min = thumbWidth/2;
 carSetpoint.max = world.width;
-carSetpoint.value = car.getCenterX();
+carSetpoint.value = car.getCenterX() - thumbWidth/2;
+
+let changing = false;
+carSetpoint.addEventListener("input", () => changing = true)
+carSetpoint.addEventListener("blur", () => changing = false)
 
 setInterval(() => {
+    const setPoint = Number(carSetpoint.value);
+
     world.setFloorOffset(Number(sliderAngle.value))
-    car.setCenterX(Number(carSetpoint.value));
+    car.setCenterX(setPoint);
 
     world.draw();
+    if (changing) world.drawLine(setPoint, 0, setPoint, world.height)
     
     const floorDegrees = world.getFloorDegrees();
 

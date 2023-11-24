@@ -19,9 +19,9 @@ body {
 	height: 100%;
 }
 
-/* section {
-    outline: auto;
-} */
+section {
+    overflow: hidden;
+}
 
 main {
 	display: grid;
@@ -45,18 +45,22 @@ main {
 	background-color: darkblue;
 }
 
+input[type="range"] {
+    z-index: 999;
+}
+
 .slider {
     --thumb-width: 15px;
 
 	-webkit-appearance: none;
 	appearance: none;
 	width: 100%;
-	height: 25px;
+	height: var(--thumb-width);
 	background: #d3d3d3;
 	outline: none;
 	opacity: 0.7;
-	-webkit-transition: 0.2s;
-	transition: opacity 0.2s;
+	/* -webkit-transition: 0.2s; */
+	/* transition: opacity 0.2s; */
 }
 
 .slider:hover {
@@ -92,7 +96,6 @@ main {
 }
 
 #car-setpoint {
-	flex-shrink: 2;
 	height: 1px;
 	grid-area: h-slider;
 }
@@ -102,7 +105,7 @@ main {
 
 	width: 100%;
 	height: 100%;
-	flex-grow: 1;
+	/* flex-grow: 3; */
 
 	/* border: 1px solid black; */
 }
