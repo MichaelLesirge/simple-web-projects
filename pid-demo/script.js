@@ -32,23 +32,56 @@ function radiansToDegrees(radians) {
     return radians / (Math.PI / 180);
 }
 
-class Floor {
-    constructor(canvas, x, y, width, height) {
+class Slider {
+    constructor(canvas, position, size, vertical, values = { min: 0, value: 50, max: 100 }) {
         this.canvas = canvas;
-        this.cWidth = width ?? this.canvas.width;
-        this.cHeight = height ?? this.canvas.height;
-
         this.ctx = canvas.getContext("2d");
-        this.ctx.translate(x ?? 0, y ?? 0)
+
+        [this.x, this.y] = position;
+
+        [this.cWidth, this.cHeight] = size;
+
+        this.isVertical = vertical;
+
+        this.values = values;
+
+        this.thumbSize = 10;
+    }
+
+    draw() {
+        this.ctx.save();
+        this.ctx.translate(this.x, this.y);
+
+
+
+        this.ctx.restore()
+    }
+}
+
+
+class Floor {
+    constructor(canvas, position, size) {
+        this.canvas = canvas;
+        this.ctx = canvas.getContext("2d");
+
+        const [x, y] = position ?? [0, 0];
+        this.cX = x;
+        this.cY = y;
+        
+        const [width, height] = size ?? [this.canvas.width, this.canvas.height];
+        this.cWidth = width;
+        this.cHeight = height;
+
 
         this.setFloorOffset(0);
     }
 
     fillBackground() {
         this.ctx.fillStyle = backgroundColor;
-        this.ctx.fillRect(0, 0, this.cWidth, this.cHeight);
-        this.drawLine(0, 0, this.cWidth, this.cHeight);
-        // this.drawLine(0, this.cHeight, this.width, 0);
+        this.ctx.fillRect(this.cX, this.cY, this.cWidth + this.cX, this.cHeight + this.cY);
+
+        // this.drawLine(0, 0, this.cWidth, this.cHeight);
+        // this.drawLine(0, this.cHeight, this.cWidth, 0);
     }
 
     setFloorOffset(floorOffset) {
@@ -56,9 +89,6 @@ class Floor {
 
         [this.startX, this.startY] = [0, (this.cHeight - this.floorOffset) / 2];
         [this.endX, this.endY] = [this.cWidth, (this.cHeight + this.floorOffset) / 2];
-
-        // [this.startX, this.startY] = [0, this.height];
-        // [this.endX, this.endY] = [this.width, this.height-this.floorOffset];
     }
 
     setFloorRad(floorRad) {
@@ -84,14 +114,20 @@ class Floor {
     }
 
     drawLine(startX, startY, endX, endY, color = "black", width = 1) {
-        this.ctx.lineWidth = 1;
+
+        // this.ctx.save();
+        // this.ctx.translate(this.cX, this.cY);
+
+        this.ctx.lineWidth = width;
         this.ctx.beginPath();
 
-        this.ctx.moveTo(startX, startY);
-        this.ctx.lineTo(endX, endY);
+        this.ctx.moveTo(startX + this.cX, startY + this.cY);
+        this.ctx.lineTo(endX + this.cX, endY + this.cY);
 
         this.ctx.strokeStyle = color;
         this.ctx.stroke();
+
+        // this.ctx.restore()
     }
 
     drawFloor() {
@@ -213,7 +249,7 @@ class Car {
     draw() {        
         this.ctx.save();
 
-        this.ctx.translate(this.x, this.y);
+        this.ctx.translate(this.x + this.ground.cX, this.y + this.ground.cY);
         this.ctx.rotate(this.rotation);
         if (this.hasImageLoaded) {
             this.ctx.drawImage(this.image, 0, 0, this.width, this.height);
@@ -227,18 +263,14 @@ class Car {
     }
 }
 
-const world = new Floor(displayCanvas, 0, 0, displayCanvas.width, displayCanvas.height * 1.618);
+const sliderWidth = 10;
+const world = new Floor(displayCanvas, [sliderWidth, 0], [displayCanvas.width - sliderWidth, displayCanvas.height / 1.618]);
 
 const car = new Car(displayCanvas, "car_outline.png", world)
 const carController = new PidController();
 
-// sliderAngle.max = world.height;
-// sliderAngle.min = -world.height;
-// sliderAngle.value = 0;
-
-// carSetpoint.min = 0;
-// carSetpoint.max = world.width;
-// carSetpoint.value = car.getCenterX();
+// const groundSlider = new Slider(displayCanvas, [world.y, world.x - sliderWidth], [sliderWidth, world.cHeight], true, { min: 0, value: 50, max: 100 });
+// const setPointSlider = new Slider(displayCanvas, [100, 100], [sliderWidth, world.cHeight], false, { min: 0, value: 50, max: 100 });
 
 setInterval(() => {
     const setPoint = 0;
@@ -246,7 +278,8 @@ setInterval(() => {
     world.setFloorOffset(0)
 
     world.draw();
-    world.drawLine(setPoint, 0, setPoint, world.cHeight)
+    // groundSlider.draw();
+    // setPointSlider.draw();
     
     car.update();
     car.draw()
