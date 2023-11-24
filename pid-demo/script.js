@@ -2,7 +2,7 @@
 // push down body
 const header = document.getElementById("header");
 const main = document.querySelector("main");
-main.style.paddingTop = header.clientHeight + 1 + "px";
+main.style.paddingTop = header.clientHeight + "px";
 
 const displayCanvas = document.getElementById("display-canvas");
 
@@ -33,37 +33,41 @@ function radiansToDegrees(radians) {
 }
 
 class Floor {
-    constructor(canvas) {
+    constructor(canvas, x, y, width, height) {
         this.canvas = canvas;
-        this.width = this.canvas.width;
-        this.height = this.canvas.height;
+        this.cWidth = width ?? this.canvas.width;
+        this.cHeight = height ?? this.canvas.height;
+
         this.ctx = canvas.getContext("2d");
+        this.ctx.translate(x ?? 0, y ?? 0)
 
         this.setFloorOffset(0);
     }
 
     fillBackground() {
         this.ctx.fillStyle = backgroundColor;
-        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        this.ctx.fillRect(0, 0, this.cWidth, this.cHeight);
+        this.drawLine(0, 0, this.cWidth, this.cHeight);
+        // this.drawLine(0, this.cHeight, this.width, 0);
     }
 
     setFloorOffset(floorOffset) {
         this.floorOffset = floorOffset;
 
-        [this.startX, this.startY] = [0, (this.height - this.floorOffset) / 2];
-        [this.endX, this.endY] = [this.width, (this.height + this.floorOffset) / 2];
+        [this.startX, this.startY] = [0, (this.cHeight - this.floorOffset) / 2];
+        [this.endX, this.endY] = [this.cWidth, (this.cHeight + this.floorOffset) / 2];
 
         // [this.startX, this.startY] = [0, this.height];
         // [this.endX, this.endY] = [this.width, this.height-this.floorOffset];
     }
 
     setFloorRad(floorRad) {
-        const radiansB = Math.tan(floorRad) * this.width
+        const radiansB = Math.tan(floorRad) * this.cWidth
         this.setFloorOffset(radiansB);
     }
 
     getFloorRad() {
-        const adjacent = this.width;
+        const adjacent = this.cWidth;
         const opposite = this.endY - this.startY;
 
         return Math.atan(opposite / adjacent);
@@ -223,7 +227,7 @@ class Car {
     }
 }
 
-const world = new Floor(displayCanvas);
+const world = new Floor(displayCanvas, 0, 0, displayCanvas.width, displayCanvas.height * 1.618);
 
 const car = new Car(displayCanvas, "car_outline.png", world)
 const carController = new PidController();
@@ -242,10 +246,8 @@ setInterval(() => {
     world.setFloorOffset(0)
 
     world.draw();
-    world.drawLine(setPoint, 0, setPoint, world.height)
+    world.drawLine(setPoint, 0, setPoint, world.cHeight)
     
-    const floorDegrees = world.getFloorDegrees();
-
     car.update();
     car.draw()
 

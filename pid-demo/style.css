@@ -19,10 +19,6 @@ body {
 	height: 100%;
 }
 
-section {
-    overflow: hidden;
-}
-
 main {
 	display: grid;
 
@@ -50,12 +46,13 @@ main {
 }
 
 #display {
+	display: flex;
 	grid-area: display;
 }
 
 #display canvas {
 	width: 100%;
-	height: 100%;
+	flex-grow: 1;
 }
 
 #settings {
