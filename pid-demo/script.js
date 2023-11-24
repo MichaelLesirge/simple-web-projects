@@ -16,9 +16,6 @@ function fullResolution(canvas) {
     canvas.height = canvas.clientHeight / doRatio * dpr;
 }
 
-const sliderAngle = document.getElementById("floor-angle");
-const carSetpoint = document.getElementById("car-setpoint");
-
 const backgroundColor = "white";
 const FPS = 300;
 
@@ -231,28 +228,21 @@ const world = new Floor(displayCanvas);
 const car = new Car(displayCanvas, "car_outline.png", world)
 const carController = new PidController();
 
-sliderAngle.max = world.height;
-sliderAngle.min = -world.height;
-sliderAngle.value = 0;
+// sliderAngle.max = world.height;
+// sliderAngle.min = -world.height;
+// sliderAngle.value = 0;
 
-const thumbWidth = Number(getComputedStyle(carSetpoint).getPropertyValue("--thumb-width").replace("px", ""));
-carSetpoint.min = thumbWidth/2;
-carSetpoint.max = world.width - thumbWidth/2;
-carSetpoint.value = car.getCenterX();
-
-let changing = false;
-carSetpoint.addEventListener("input", () => changing = true)
-carSetpoint.addEventListener("click", () => changing = !changing)
-carSetpoint.addEventListener("blur", () => changing = false)
+// carSetpoint.min = 0;
+// carSetpoint.max = world.width;
+// carSetpoint.value = car.getCenterX();
 
 setInterval(() => {
-    const setPoint = Number(carSetpoint.value);
+    const setPoint = 0;
 
-    world.setFloorOffset(Number(sliderAngle.value))
-    // car.setCenterX(setPoint);
+    world.setFloorOffset(0)
 
     world.draw();
-    if (changing) world.drawLine(setPoint, 0, setPoint, world.height)
+    world.drawLine(setPoint, 0, setPoint, world.height)
     
     const floorDegrees = world.getFloorDegrees();
 
