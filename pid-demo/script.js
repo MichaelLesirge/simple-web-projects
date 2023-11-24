@@ -33,7 +33,7 @@ function radiansToDegrees(radians) {
 }
 
 class Slider {
-    constructor(canvas, position, size, vertical, values = { min: 0, value: 50, max: 100 }) {
+    constructor(canvas, position, size, vertical = false, values = { min: 0, value: 50, max: 100 }) {
         this.canvas = canvas;
         this.ctx = canvas.getContext("2d");
 
@@ -195,8 +195,12 @@ class Car {
         
         this.maxMotorPower = 1;
 
-        this.width = this.image.width * 0.25
-        this.height = this.image.height * 0.15
+		const scale = Math.min(this.ground.cWidth, this.ground.cHeight)
+		const size = 2500;
+
+        this.width = (scale / size) * (this.image.width);
+        this.height = (scale / size) * (this.image.height);
+		console.log(scale, this.width, this.height)
         
         // create variables
         this.startX = this.canvas.width / 2 - this.width / 2;;
@@ -264,7 +268,7 @@ class Car {
 }
 
 const sliderWidth = 10;
-const world = new Floor(displayCanvas, [sliderWidth, 0], [displayCanvas.width - sliderWidth, displayCanvas.height / 1.618]);
+const world = new Floor(displayCanvas, [0, 0], [displayCanvas.width, displayCanvas.height / 1.618]);
 
 const car = new Car(displayCanvas, "car_outline.png", world)
 const carController = new PidController();
