@@ -20,8 +20,12 @@ const sliderAngle = document.getElementById("floor-angle");
 const carSetpoint = document.getElementById("car-setpoint");
 
 const backgroundColor = "white";
-const gravity = -9.8
 const FPS = 300;
+
+const physics = {
+    gravity: -9.8,
+    friction: 0.02,
+};
 
 function degreesToRadians(degrees) {
     return degrees * (Math.PI / 180);
@@ -118,6 +122,21 @@ class PidController {
     }
 }
 
+function moveTowards(value, target, distance) {
+    if (value > target) {
+        if (value - target < distance) {
+            return target;
+        }
+        return value - distance;
+    }
+    else {
+        if (target - value < distance) {
+            return target;
+        }
+        return value + distance;
+    }
+}
+
 class Car {
     constructor(canvas, imageSource, ground) {
 
@@ -135,8 +154,7 @@ class Car {
         this.image.src = imageSource;
 
         // Configuration
-        this.mass = 10;
-        this.weight = this.mass * gravity;
+        this.mass = 5;
         
         this.maxMotorPower = 1;
 
@@ -149,11 +167,11 @@ class Car {
     }
 
     reset() {
-        this.velocity = 0;
+        this.xVelocity = 0;
         
         this.x = this.startX;
-        this.rotation = 0;
         this.y = 0;
+        this.rotation = 0;
     }
 
     update() {
@@ -164,6 +182,23 @@ class Car {
         const ground = this.ground.startY + b2;
 
         this.y = ground;
+
+        // find velocity
+
+        const weight = this.mass * physics.gravity;
+
+        const bRad = degreesToRadians(90) - this.rotation;
+
+        const adj = Math.cos(bRad) * weight;
+        const op = Math.sin(bRad) * weight;
+
+        const resistance = op * physics.friction;
+        const forward = moveTowards(adj, 0, Math.abs(resistance));
+        // console.log([adj, 0, Math.abs(resistance)], forward)
+        
+        this.xVelocity = -forward;
+
+        this.x += this.xVelocity
     }
 
     getCenterX() {
@@ -214,7 +249,7 @@ setInterval(() => {
     const setPoint = Number(carSetpoint.value);
 
     world.setFloorOffset(Number(sliderAngle.value))
-    car.setCenterX(setPoint);
+    // car.setCenterX(setPoint);
 
     world.draw();
     if (changing) world.drawLine(setPoint, 0, setPoint, world.height)
