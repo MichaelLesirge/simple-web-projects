@@ -200,13 +200,14 @@ sliderAngle.max = world.height;
 sliderAngle.min = -world.height;
 sliderAngle.value = 0;
 
-const thumbWidth = getComputedStyle(carSetpoint).getPropertyValue("--thumb-width");
+const thumbWidth = Number(getComputedStyle(carSetpoint).getPropertyValue("--thumb-width").replace("px", ""));
 carSetpoint.min = thumbWidth/2;
-carSetpoint.max = world.width;
-carSetpoint.value = car.getCenterX() - thumbWidth/2;
+carSetpoint.max = world.width - thumbWidth/2;
+carSetpoint.value = car.getCenterX();
 
 let changing = false;
 carSetpoint.addEventListener("input", () => changing = true)
+carSetpoint.addEventListener("click", () => changing = !changing)
 carSetpoint.addEventListener("blur", () => changing = false)
 
 setInterval(() => {
