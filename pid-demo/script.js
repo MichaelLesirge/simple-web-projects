@@ -210,10 +210,6 @@ class Floor extends CanvasDrawer {
         this.setFloorOffset(0);
     }
 
-    fillBackground() {
-		this.drawRect(this.cX, this.cY, this.cWidth + this.cX, this.cHeight + this.cY, {color: "transparent", fill: "white"})
-    }
-
     setFloorOffset(floorOffset) {
         this.floorOffset = floorOffset;
 
@@ -242,14 +238,15 @@ class Floor extends CanvasDrawer {
         const floorRad = this.getFloorRad();
         return radiansToDegrees(floorRad);
     }
-
-    drawFloor() {
-        this.drawLine(this.startX, this.startY, this.endX, this.endY, {color: "black"})
-    }
-
+	
     draw() {
-        this.fillBackground();
-        this.drawFloor(this.floorOffset)
+		this.ctx.save();
+		this.ctx.translate(this.cX, this.cY);
+
+		this.drawRect(0, 0, this.cWidth, this.cHeight, {color: "transparent", fill: "white"})
+		this.drawLine(this.startX, this.startY, this.endX, this.endY, {color: "black"})
+
+		this.ctx.restore();
     }
 }
 
@@ -287,12 +284,10 @@ function moveTowards(value, target, distance) {
     }
 }
 
-class Car {
+class Car extends CanvasDrawer {
     constructor(canvas, imageSource, ground) {
+		super(canvas)
 
-        // save values
-        this.canvas = canvas;
-        this.ctx = canvas.getContext("2d");
         this.ground = ground;
 
         // load image
@@ -317,6 +312,8 @@ class Car {
         // create variables
         this.startX = this.canvas.width / 2 - this.width / 2;;
         this.reset();
+
+		this.boxLines = true;
     }
 
     reset() {
@@ -335,6 +332,21 @@ class Car {
         const ground = this.ground.startY + b2;
 
         this.y = ground;
+
+		if (this.boxLines) {
+			this.ctx.save();
+
+			this.ctx.translate(this.x + this.ground.cX, this.y + this.ground.cY);
+
+			this.drawLine(0, 0, this.width, 0, {color: "black"})
+			this.drawLine(0, 0, 0, this.height, {color: "black"})
+			this.drawLine(this.width, 0, this.width, this.height, {color: "black"})
+			this.drawLine(this.width, this.height, 0, this.height, {color: "black"})
+
+			this.drawLine(this.width / 2, this.height, this.width / 2, 100, {color: "red"})
+
+			this.ctx.restore();
+		}
 
         // find velocity
 
@@ -355,25 +367,35 @@ class Car {
     }
 
     getCenterX() {
-        return this.x + car.width/2;
+        return this.x + car.width/2 + this.ground.cX;
     }
 
     setCenterX(x) {
-        this.x = x - car.width/2;
+        this.x = x - car.width/2 - this.ground.cX;
     }
 
     draw() {        
         this.ctx.save();
 
-        this.ctx.translate(this.x + this.ground.cX, this.y + this.ground.cY);
+        this.ctx.translate(this.x + this.ground.cX, this.y + this.ground.cY - this.height);
         this.ctx.rotate(this.rotation);
+        this.ctx.translate(0, this.height);
+
+		if (this.boxLines) {
+			this.drawLine(0, 0, this.width, 0, {color: "green"})
+			this.drawLine(0, 0, 0, this.height, {color: "green"})
+			this.drawLine(this.width, 0, this.width, this.height, {color: "green"})
+			this.drawLine(this.width, this.height, 0, this.height, {color: "green"})
+
+			this.drawLine(this.width / 2, this.height, this.width / 2, 100, {color: "red"})
+		}
+
         if (this.hasImageLoaded) {
             this.ctx.drawImage(this.image, 0, 0, this.width, this.height);
             this.ctx.fillStyle = backgroundColor;
         }
         else {
-            this.ctx.fillStyle = "black";
-            this.ctx.fillRect(0, 0, this.width, this.height);
+            this.drawRect(0, 0, this.width, this.height, {color: "black"})
         }
         this.ctx.restore()
     }
@@ -394,8 +416,9 @@ setInterval(() => {
 
 	const worldTilt = groundSlider.getCanvasCenteredPosition() * 2;
     world.setFloorOffset(worldTilt);
-
+	
     world.draw();
+	// world.drawLine(setPoint, world.cY, setPoint, world.cY+world.cHeight, {color: "black"})
     
     car.update();
     car.draw()
