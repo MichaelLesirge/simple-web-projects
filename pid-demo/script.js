@@ -1,3 +1,4 @@
+// TODO make base canvas object class with draw that auto has save/restore and init that auto gets [x, y, width, height], as well as drawing lines, rects, and circles
 
 // push down body
 const header = document.getElementById("header");
@@ -5,15 +6,14 @@ const main = document.querySelector("main");
 main.style.paddingTop = header.clientHeight + "px";
 
 const displayCanvas = document.getElementById("display-canvas");
+displayCanvas.addEventListener('selectstart', function(e) { e.preventDefault(); return false; }, false);
 
 fullResolution(displayCanvas);
 
 function fullResolution(canvas) {
-    const doRatio = canvas.clientWidth / canvas.clientHeight;
-
     const dpr = window.devicePixelRatio || 1;
     canvas.width = canvas.clientWidth * dpr;
-    canvas.height = canvas.clientHeight / doRatio * dpr;
+    canvas.height = canvas.clientHeight * dpr;
 }
 
 const backgroundColor = "white";
@@ -32,30 +32,156 @@ function radiansToDegrees(radians) {
     return radians / (Math.PI / 180);
 }
 
-class Slider {
-    constructor(canvas, position, size, vertical = false, values = { min: 0, value: 50, max: 100 }) {
+function clamp(value, min, max) {
+	return Math.min(Math.max(value, min), max)
+}
+
+class PositionSlider {
+    constructor(canvas, position, size, vertical = false, margin = 0) {
         this.canvas = canvas;
         this.ctx = canvas.getContext("2d");
 
-        [this.x, this.y] = position;
+		const [x, y] = position;
+        this.cX = x + margin;
+		this.cY = y + margin;
 
-        [this.cWidth, this.cHeight] = size;
+		
+		const [width, height] = size;
+        this.cWidth = width - margin * 2;
+		this.cHeight = height - margin * 2;
 
+		this.isDragged = false;
+		this.canvas.addEventListener('mousedown', this.detectClicked)
+		this.canvas.addEventListener('mousemove', this.move)
+		document.body.addEventListener('mouseup', this.mouseUp)
+		
+		this.margin = margin;
+		
         this.isVertical = vertical;
 
-        this.values = values;
+		this.backgroundColor = "#b6cad9";
+		this.lineColor = "black";
 
-        this.thumbSize = 10;
+        this.thumbRadius = (this.isVertical ? this.cWidth : this.cHeight) * 0.4;
+		this.thumbColor = "red";
+
+		this.value = ((this.isVertical ? this.cHeight : this.cWidth)) / 2 + this.thumbRadius + ((this.isVertical ? this.cY : this.cX));
     }
+
+	detectClicked = (event) => {
+		const rect = event.target.getBoundingClientRect();
+
+		const dpr = window.devicePixelRatio || 1;
+	
+		const [x, y] = [event.x * dpr - rect.x, event.y * dpr - rect.y - 10];
+
+		// console.log(x >= this.cX, x <= this.cX + this.cWidth, y >= this.cY, y <= this.cY + this.cHeight)
+
+		// this.drawCircle(x, y, 4, {color: "black", fill: "red"})
+
+		if (x >= this.cX && x <= this.cX + this.cWidth && y >= this.cY && y <= this.cY + this.cHeight) {
+
+			this.isDragged = true;
+			// console.log(this.isVertical ? "vertical" : "horizontal", "click")
+		}
+	}
+
+	mouseUp = (event) => {
+		this.isDragged = false;
+	}
+
+	move = (event) => {
+		if (this.isDragged) {
+			const rect = event.target.getBoundingClientRect();
+			const dpr = window.devicePixelRatio || 1;
+			const [x, y] = [event.x * dpr - rect.x, event.y * dpr - rect.y];
+
+			this.setValue(this.isVertical ? y - this.thumbRadius * 2 : x);
+		}
+	}
 
     draw() {
         this.ctx.save();
-        this.ctx.translate(this.x, this.y);
+        this.ctx.translate(this.cX, this.cY);
 
+		this.ctx.fillStyle = this.backgroundColor;
+        this.drawRect(0, 0, this.cWidth, this.cHeight, {color: "transparent", fill: this.backgroundColor});
 
+		if (this.isVertical) {
+			this.drawLine(
+				this.cWidth / 2, this.thumbRadius / 2,
+				this.cWidth / 2, this.cHeight - this.thumbRadius / 2,
+				{color: this.lineColor});
+			// this.drawCircle(this.cWidth / 2, this.value, this.thumbRadius, {fill: "blue"});
+		}
+		else {
+			this.drawLine(
+				this.thumbRadius / 2, this.cHeight / 2,
+				this.cWidth - this.thumbRadius / 2, this.cHeight / 2,
+				{color: this.lineColor});
+			// this.drawCircle(this.value, this.cHeight / 2, this.thumbRadius, {fill: "blue"});
+		}
 
-        this.ctx.restore()
+        this.ctx.restore();
     }
+
+	drawThumb() {
+		if (this.isVertical) {
+			this.drawCircle(this.cX + this.cWidth / 2, this.value, this.thumbRadius, {fill: "blue"});
+			this.drawLine(this.cX + (this.cWidth - this.thumbRadius) / 2, this.value, this.cX + (this.cWidth + this.thumbRadius) / 2, this.value, {color: "white"})
+		}
+		else {
+			this.drawCircle(this.value, this.cY + this.cHeight / 2, this.thumbRadius, {fill: "blue"});
+			this.drawLine(this.value, this.cY + (this.cHeight - this.thumbRadius) / 2, this.value, this.cY + (this.cHeight + this.thumbRadius) / 2, {color: "white"})
+		}
+	}
+
+	getValue() {
+		return this.value;
+	}
+
+	setValue(value) {
+		if (this.isVertical) this.value = clamp(value, this.cY + this.thumbRadius, this.cY + this.cHeight - this.thumbRadius);
+		else this.value = clamp(value, this.cX + this.thumbRadius, this.cX + this.cWidth - this.thumbRadius);
+	}
+
+	drawLine(startX, startY, endX, endY, {color = "black", width = 1}) {
+        this.ctx.lineWidth = width;
+        this.ctx.beginPath();
+
+        this.ctx.moveTo(startX, startY);
+        this.ctx.lineTo(endX, endY);
+
+        this.ctx.strokeStyle = color;
+        this.ctx.stroke();
+    }
+
+	drawRect(startX, startY, endX, endY, {color = "black", width = 1, fill = false}) {
+		this.ctx.rect(startX, startY, endX, endY);
+
+		if (fill) {
+			this.ctx.fillStyle = fill;
+			this.ctx.fill();
+		}
+
+		this.ctx.strokeStyle = color;
+		this.ctx.lineWidth = width;
+		this.ctx.stroke();
+	}
+
+	drawCircle(x, y, radius, {color = "black", width = 1, fill = false}) {
+		this.ctx.beginPath();
+		this.ctx.arc(x, y, radius, 0, 2 * Math.PI, false);
+
+		this.ctx.fillStyle = fill;
+		if (fill) {
+			this.ctx.fill();
+		}
+
+		this.ctx.lineWidth = width;
+		this.ctx.strokeStyle = color;
+		this.ctx.stroke();
+	}
 }
 
 
@@ -71,7 +197,6 @@ class Floor {
         const [width, height] = size ?? [this.canvas.width, this.canvas.height];
         this.cWidth = width;
         this.cHeight = height;
-
 
         this.setFloorOffset(0);
     }
@@ -200,7 +325,6 @@ class Car {
 
         this.width = (scale / size) * (this.image.width);
         this.height = (scale / size) * (this.image.height);
-		console.log(scale, this.width, this.height)
         
         // create variables
         this.startX = this.canvas.width / 2 - this.width / 2;;
@@ -267,14 +391,14 @@ class Car {
     }
 }
 
-const sliderWidth = 10;
-const world = new Floor(displayCanvas, [0, 0], [displayCanvas.width, displayCanvas.height / 1.618]);
+const sliderWidth = 11;
+const world = new Floor(displayCanvas, [sliderWidth, 0], [displayCanvas.width - sliderWidth, displayCanvas.height / 1.618]);
 
 const car = new Car(displayCanvas, "car_outline.png", world)
 const carController = new PidController();
 
-// const groundSlider = new Slider(displayCanvas, [world.y, world.x - sliderWidth], [sliderWidth, world.cHeight], true, { min: 0, value: 50, max: 100 });
-// const setPointSlider = new Slider(displayCanvas, [100, 100], [sliderWidth, world.cHeight], false, { min: 0, value: 50, max: 100 });
+const groundSlider = new PositionSlider(displayCanvas, [0, world.cY], [sliderWidth, world.cHeight - sliderWidth], true);
+const setPointSlider = new PositionSlider(displayCanvas, [world.cX, world.cY + world.cHeight - sliderWidth], [world.cWidth, sliderWidth], false);
 
 setInterval(() => {
     const setPoint = 0;
@@ -282,8 +406,12 @@ setInterval(() => {
     world.setFloorOffset(0)
 
     world.draw();
-    // groundSlider.draw();
-    // setPointSlider.draw();
+
+    groundSlider.draw();
+    setPointSlider.draw();
+
+	groundSlider.drawThumb();
+	setPointSlider.drawThumb();
     
     car.update();
     car.draw()

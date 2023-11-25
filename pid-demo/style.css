@@ -39,8 +39,6 @@ main {
 	width: 100%;
 	padding: 0.2rem;
 
-	user-select: none;
-
 	color: white;
 	background-color: darkblue;
 }
