@@ -24,6 +24,7 @@ const physics = {
     friction: 0.02,
 };
 
+const UNIT = 20;
 
 function degreesToRadians(degrees) {
     return degrees * (Math.PI / 180);
@@ -268,7 +269,8 @@ class PidController {
 		this.hiddenOkRange = 3;
 
 		this.result = 0;
-		setInterval(() => this.result = this.calculate(this.measuredValueSource(), this.setPointSource()), this.deltaTime)
+
+		setInterval(() => this.result = this.calculate(this.measuredValueSource() / UNIT, this.setPointSource() / UNIT), this.deltaTime)
     }
 
 	calculate(measuredValue, setpoint) {
@@ -289,7 +291,7 @@ class PidController {
 		this.integral = integral;
 		// this.lastTime = now;
 		
-		if (Math.abs(error) < this.hiddenOkRange) return clamp(result, -0.1, 0.1);
+		// if (Math.abs(error) < this.hiddenOkRange) return clamp(result, -0.1, 0.1);
 		return result;
 	}
 
@@ -328,7 +330,7 @@ class Car extends CanvasDrawer {
         this.image.src = imageSource;
 
         // Configuration
-        this.mass = 5;
+        this.mass = 0.2;
         
 		const scale = Math.min(this.ground.cWidth, this.ground.cHeight)
 		const size = 2500;
@@ -340,10 +342,10 @@ class Car extends CanvasDrawer {
         this.startX = this.canvas.width / 2 - this.width / 2;;
         this.reset();
 
-		this.boxLines = false;
+		this.boxLines = true;
 
 		this.motorPower = 0;
-		this.maxMotorPower = 5;
+		this.maxMotorPower = UNIT * 0.5;
     }
 
     reset() {
@@ -362,7 +364,7 @@ class Car extends CanvasDrawer {
         this.rotation = this.ground.getFloorRad();
 
         // find ground
-        const b2 = Math.tan(this.rotation) * (this.x + Math.floor(this.width / 2)) - this.height;
+        const b2 = Math.tan(this.rotation) * (this.x + this.width/2) - this.height;
         const ground = this.ground.startY + b2;
 
         this.y = ground;
@@ -411,9 +413,11 @@ class Car extends CanvasDrawer {
     draw() {        
         this.ctx.save();
 
-        this.ctx.translate(this.x + this.ground.cX + Math.floor(this.width / 2), this.y + this.ground.cY - this.height);
+        // const b2 = Math.tan(this.rotation) * (this.x + Math.floor(this.width / 2)) - this.height;
+        // const ground = this.ground.startY + b2;
+        this.ctx.translate(this.ground.cX + this.x + this.width/2, this.y + this.height);
         this.ctx.rotate(this.rotation);
-        this.ctx.translate(-Math.floor(this.width / 2), this.height);
+        this.ctx.translate(-this.width/2, -this.height);
 
 		if (this.boxLines) {
 			this.drawLine(0, 0, this.width, 0, {color: "green"})
@@ -446,14 +450,14 @@ const setPointSlider = new PositionSlider(displayCanvas, [world.cX, world.cY + w
 const pidSettings = {
 	P: 1,
 	I: 0,
-	D: 0,
+	D: 10,
 }
 const deltaTime = 10;
 const carPidController = new PidController(() => car.getCenterX(), () => setPointSlider.getAbsolutePosition(), deltaTime, pidSettings);
 
 setInterval(() => {
-	// const motorPower = carPidController.calculate(car.getCenterX(), setPoint);
-	car.setMotorPower(carPidController.getResult());
+	// car.setMotorPower(carPidController.getResult());
+	car.setCenterX(setPointSlider.getAbsolutePosition())
 
 	const worldTilt = groundSlider.getCanvasCenteredPosition() * 2;
     world.setFloorOffset(worldTilt);
