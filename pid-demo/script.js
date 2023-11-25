@@ -138,8 +138,16 @@ class PositionSlider {
 		}
 	}
 
-	getValue() {
+	getAbsolutePosition() {
 		return this.value;
+	}
+
+	getCanvasPosition() {
+		return this.value - ((this.isVertical ? this.cY : this.cX)) - (this.isVertical ? this.thumbRadius : 0);
+	}
+
+	getCanvasCenteredPosition() {
+		return (this.isVertical ? this.cHeight : this.cWidth) / 2 - this.getCanvasPosition()
 	}
 
 	setValue(value) {
@@ -403,19 +411,21 @@ const groundSlider = new PositionSlider(displayCanvas, [0, world.cY], [sliderWid
 const setPointSlider = new PositionSlider(displayCanvas, [world.cX, world.cY + world.cHeight - sliderWidth], [world.cWidth, sliderWidth], false);
 
 setInterval(() => {
-    const setPoint = 0;
+    const setPoint = setPointSlider.getAbsolutePosition();
+	car.setCenterX(setPoint)
 
-    world.setFloorOffset(0)
+	const worldTilt = groundSlider.getCanvasCenteredPosition() * 2;
+    world.setFloorOffset(worldTilt);
 
     world.draw();
+    
+    car.update();
+    car.draw()
 
     groundSlider.draw();
     setPointSlider.draw();
 
 	groundSlider.drawThumb();
 	setPointSlider.drawThumb();
-    
-    car.update();
-    car.draw()
 
 }, Math.floor(1000 / FPS))
