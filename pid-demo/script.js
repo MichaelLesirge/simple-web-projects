@@ -36,19 +36,65 @@ function clamp(value, min, max) {
 	return Math.min(Math.max(value, min), max)
 }
 
-class PositionSlider {
-    constructor(canvas, position, size, vertical = false, margin = 0) {
-        this.canvas = canvas;
+class CanvasDrawer {
+	constructor(canvas, position, size) {
+		this.canvas = canvas;
         this.ctx = canvas.getContext("2d");
 
-		const [x, y] = position;
-        this.cX = x + margin;
-		this.cY = y + margin;
+        const [x, y] = position ?? [0, 0];
+        this.cX = x;
+        this.cY = y;
+        
+        const [width, height] = size ?? [this.canvas.width, this.canvas.height];
+        this.cWidth = width;
+        this.cHeight = height;
+
+	}
+
+	drawLine(startX, startY, endX, endY, {color = "black", width = 1}) {
+        this.ctx.lineWidth = width;
+        this.ctx.beginPath();
+
+        this.ctx.moveTo(startX, startY);
+        this.ctx.lineTo(endX, endY);
+
+        this.ctx.strokeStyle = color;
+        this.ctx.stroke();
+    }
+
+	drawRect(startX, startY, endX, endY, {color = "black", width = 1, fill = false}) {
+		this.ctx.rect(startX, startY, endX, endY);
 
 		
-		const [width, height] = size;
-        this.cWidth = width - margin * 2;
-		this.cHeight = height - margin * 2;
+		this.ctx.strokeStyle = color;
+		this.ctx.lineWidth = width;
+		
+		if (fill) {
+			this.ctx.fillStyle = fill;
+			this.ctx.fill();
+		}
+
+		this.ctx.stroke();
+	}
+
+	drawCircle(x, y, radius, {color = "black", width = 1, fill = false}) {
+		this.ctx.beginPath();
+		this.ctx.arc(x, y, radius, 0, 2 * Math.PI, false);
+
+		this.ctx.fillStyle = fill;
+		if (fill) {
+			this.ctx.fill();
+		}
+
+		this.ctx.lineWidth = width;
+		this.ctx.strokeStyle = color;
+		this.ctx.stroke();
+	}
+}
+
+class PositionSlider extends CanvasDrawer {
+    constructor(canvas, position, size, vertical = false, margin = 0) {
+		super(canvas, position, size)
 
 		this.isSelected = false;
 		this.canvas.addEventListener('mousedown', this.detectClicked)
@@ -154,69 +200,18 @@ class PositionSlider {
 		if (this.isVertical) this.value = clamp(value, this.cY + this.thumbRadius, this.cY + this.cHeight - this.thumbRadius);
 		else this.value = clamp(value, this.cX + this.thumbRadius, this.cX + this.cWidth - this.thumbRadius);
 	}
-
-	drawLine(startX, startY, endX, endY, {color = "black", width = 1}) {
-        this.ctx.lineWidth = width;
-        this.ctx.beginPath();
-
-        this.ctx.moveTo(startX, startY);
-        this.ctx.lineTo(endX, endY);
-
-        this.ctx.strokeStyle = color;
-        this.ctx.stroke();
-    }
-
-	drawRect(startX, startY, endX, endY, {color = "black", width = 1, fill = false}) {
-		this.ctx.rect(startX, startY, endX, endY);
-
-		if (fill) {
-			this.ctx.fillStyle = fill;
-			this.ctx.fill();
-		}
-
-		this.ctx.strokeStyle = color;
-		this.ctx.lineWidth = width;
-		this.ctx.stroke();
-	}
-
-	drawCircle(x, y, radius, {color = "black", width = 1, fill = false}) {
-		this.ctx.beginPath();
-		this.ctx.arc(x, y, radius, 0, 2 * Math.PI, false);
-
-		this.ctx.fillStyle = fill;
-		if (fill) {
-			this.ctx.fill();
-		}
-
-		this.ctx.lineWidth = width;
-		this.ctx.strokeStyle = color;
-		this.ctx.stroke();
-	}
 }
 
 
-class Floor {
+class Floor extends CanvasDrawer {
     constructor(canvas, position, size) {
-        this.canvas = canvas;
-        this.ctx = canvas.getContext("2d");
-
-        const [x, y] = position ?? [0, 0];
-        this.cX = x;
-        this.cY = y;
-        
-        const [width, height] = size ?? [this.canvas.width, this.canvas.height];
-        this.cWidth = width;
-        this.cHeight = height;
+		super(canvas, position, size)
 
         this.setFloorOffset(0);
     }
 
     fillBackground() {
-        this.ctx.fillStyle = backgroundColor;
-        this.ctx.fillRect(this.cX, this.cY, this.cWidth + this.cX, this.cHeight + this.cY);
-
-        // this.drawLine(0, 0, this.cWidth, this.cHeight);
-        // this.drawLine(0, this.cHeight, this.cWidth, 0);
+		this.drawRect(this.cX, this.cY, this.cWidth + this.cX, this.cHeight + this.cY, {color: "transparent", fill: "white"})
     }
 
     setFloorOffset(floorOffset) {
@@ -248,25 +243,8 @@ class Floor {
         return radiansToDegrees(floorRad);
     }
 
-    drawLine(startX, startY, endX, endY, color = "black", width = 1) {
-
-        // this.ctx.save();
-        // this.ctx.translate(this.cX, this.cY);
-
-        this.ctx.lineWidth = width;
-        this.ctx.beginPath();
-
-        this.ctx.moveTo(startX + this.cX, startY + this.cY);
-        this.ctx.lineTo(endX + this.cX, endY + this.cY);
-
-        this.ctx.strokeStyle = color;
-        this.ctx.stroke();
-
-        // this.ctx.restore()
-    }
-
     drawFloor() {
-        this.drawLine(this.startX, this.startY, this.endX, this.endY)
+        this.drawLine(this.startX, this.startY, this.endX, this.endY, {color: "black"})
     }
 
     draw() {
