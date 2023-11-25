@@ -50,20 +50,22 @@ class PositionSlider {
         this.cWidth = width - margin * 2;
 		this.cHeight = height - margin * 2;
 
-		this.isDragged = false;
+		this.isSelected = false;
 		this.canvas.addEventListener('mousedown', this.detectClicked)
 		this.canvas.addEventListener('mousemove', this.move)
 		document.body.addEventListener('mouseup', this.mouseUp)
+		document.body.addEventListener('mouseleave', this.mouseUp)
 		
 		this.margin = margin;
 		
         this.isVertical = vertical;
 
-		this.backgroundColor = "#b6cad9";
+		this.defaultBackgroundColor = "#b6cad9";
+		this.selectedBackgroundColor = "lightblue"
 		this.lineColor = "black";
 
         this.thumbRadius = (this.isVertical ? this.cWidth : this.cHeight) * 0.4;
-		this.thumbColor = "red";
+		this.thumbColor = "green";
 
 		this.value = ((this.isVertical ? this.cHeight : this.cWidth)) / 2 + this.thumbRadius + ((this.isVertical ? this.cY : this.cX));
     }
@@ -81,17 +83,18 @@ class PositionSlider {
 
 		if (x >= this.cX && x <= this.cX + this.cWidth && y >= this.cY && y <= this.cY + this.cHeight) {
 
-			this.isDragged = true;
+			this.isSelected = true;
+			this.setValue(this.isVertical ? y - this.thumbRadius * 2 : x);
 			// console.log(this.isVertical ? "vertical" : "horizontal", "click")
 		}
 	}
 
 	mouseUp = (event) => {
-		this.isDragged = false;
+		this.isSelected = false;
 	}
 
 	move = (event) => {
-		if (this.isDragged) {
+		if (this.isSelected) {
 			const rect = event.target.getBoundingClientRect();
 			const dpr = window.devicePixelRatio || 1;
 			const [x, y] = [event.x * dpr - rect.x, event.y * dpr - rect.y];
@@ -104,8 +107,7 @@ class PositionSlider {
         this.ctx.save();
         this.ctx.translate(this.cX, this.cY);
 
-		this.ctx.fillStyle = this.backgroundColor;
-        this.drawRect(0, 0, this.cWidth, this.cHeight, {color: "transparent", fill: this.backgroundColor});
+        this.drawRect(0, 0, this.cWidth, this.cHeight, {color: "transparent", fill: this.isSelected ? this.selectedBackgroundColor : this.defaultBackgroundColor});
 
 		if (this.isVertical) {
 			this.drawLine(
@@ -127,11 +129,11 @@ class PositionSlider {
 
 	drawThumb() {
 		if (this.isVertical) {
-			this.drawCircle(this.cX + this.cWidth / 2, this.value, this.thumbRadius, {fill: "blue"});
+			this.drawCircle(this.cX + this.cWidth / 2, this.value, this.thumbRadius, {fill: this.thumbColor});
 			this.drawLine(this.cX + (this.cWidth - this.thumbRadius) / 2, this.value, this.cX + (this.cWidth + this.thumbRadius) / 2, this.value, {color: "white"})
 		}
 		else {
-			this.drawCircle(this.value, this.cY + this.cHeight / 2, this.thumbRadius, {fill: "blue"});
+			this.drawCircle(this.value, this.cY + this.cHeight / 2, this.thumbRadius, {fill: this.thumbColor});
 			this.drawLine(this.value, this.cY + (this.cHeight - this.thumbRadius) / 2, this.value, this.cY + (this.cHeight + this.thumbRadius) / 2, {color: "white"})
 		}
 	}
