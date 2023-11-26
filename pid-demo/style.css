@@ -37,10 +37,14 @@ main {
 #header {
 	position: absolute;
 	width: 100%;
-	padding: 0.2rem;
+	padding: 0.1rem;
 
 	color: white;
-	background-color: darkblue;
+
+	background: rgb(84,147,158);
+	background: linear-gradient(90deg, rgba(84,147,158,1) 0%, rgba(252,176,69,1) 100%);
+	border-bottom: 3px solid black;
+
 }
 
 #display {
@@ -55,6 +59,31 @@ main {
 
 #settings {
 	grid-area: settings;
+	margin-left: 1rem;	
+}
+
+#settings-menu {
+	display: flex;
+
+	flex-direction: column;
+	flex-wrap: wrap;
+		
+	gap: 1rem;
+}
+
+#settings .controls {
+	font-family: 'Courier New', Courier, monospace;
+	border: 1px solid black;
+	width: fit-content;
+	padding: 0.5rem;
+}
+
+#settings .controls .item {
+	text-align: end;
+}
+
+#settings .controls .item input {
+	width: 4rem;
 }
 
 #extra-graph {
