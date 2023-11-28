@@ -67,6 +67,7 @@ function makeSettings(header, values, {getInputElements = false} = {}) {
 		input.id = name;
 
 		if (rules.min >= 0) setAllowedChars(input, /[\d.]/);
+		else setAllowedChars(input, /[\d.-]/);
 		input.addEventListener("input", (event) => updateObject[name] = Number(event.target.value));
 
 		for (const [ruleType, ruleValue] of Object.entries(rules)) {
@@ -97,9 +98,10 @@ const pidSettings = makeSettings("PID Gains", {
 	D: {value: 0, min: 0, step: 0.1},
 })
 
-const [groundDegreesInput, setPointInput] = makeSettings("General", {
+const [groundDegreesInput, setPointInput, carPointInput] = makeSettings("General", {
 	slopeDegrees: {name: "Floor Angle Degrees"},
-	setPoint: {name: "Car Set Point"},
+	setPoint: {name: "Car Set Point", step: 5},
+	carPoint: {name: "Car Position", step: 5},
 }, {getInputElements: true});
 
 
@@ -207,7 +209,7 @@ class PositionSlider extends CanvasDrawer {
         this.thumbRadius = (this.isVertical ? this.cWidth : this.cHeight) * 0.4;
 		this.thumbColor = "green";
 
-		this.value = ((this.isVertical ? this.cHeight : this.cWidth)) / 2 + this.thumbRadius + ((this.isVertical ? this.cY : this.cX));
+		this.setCanvasCenteredPosition(0);
 
 		this.oninput = () => {};
     }
@@ -267,8 +269,8 @@ class PositionSlider extends CanvasDrawer {
 
 	drawThumb() {
 		if (this.isVertical) {
-			this.drawCircle(this.cX + this.cWidth / 2, this.value, this.thumbRadius, {fill: this.thumbColor});
-			this.drawLine(this.cX + (this.cWidth - this.thumbRadius) / 2, this.value, this.cX + (this.cWidth + this.thumbRadius) / 2, this.value, {color: "white"})
+			this.drawCircle(this.cX + this.cWidth / 2, this.value + this.thumbRadius, this.thumbRadius, {fill: this.thumbColor});
+			this.drawLine(this.cX + (this.cWidth - this.thumbRadius) / 2, this.value + this.thumbRadius, this.cX + (this.cWidth + this.thumbRadius) / 2, this.value + this.thumbRadius, {color: "white"})
 		}
 		else {
 			this.drawCircle(this.value, this.cY + this.cHeight / 2, this.thumbRadius, {fill: this.thumbColor});
@@ -281,23 +283,23 @@ class PositionSlider extends CanvasDrawer {
 	}
 
 	getCanvasPosition() {
-		return this.value - ((this.isVertical ? this.cY : this.cX)) - this.thumbRadius;
+		return this.value - ((this.isVertical ? this.cY : this.cX));
 	}
 
 	setCanvasPosition(value) {
-		this.value = value + ((this.isVertical ? this.cY : this.cX)) + this.thumbRadius;
+		this.value = value + ((this.isVertical ? this.cY : this.cX));
 	}
 
 	getCanvasCenteredPosition() {
 		return (this.isVertical ? this.cHeight : this.cWidth) / 2 - this.getCanvasPosition()
 	}
-
+	
 	setCanvasCenteredPosition(value) {
 		this.setCanvasPosition(value + (this.isVertical ? this.cHeight : this.cWidth) / 2);
 	}
 
 	setValue(value) {
-		if (this.isVertical) this.value = clamp(value, this.cY + this.thumbRadius, this.cY + this.cHeight - this.thumbRadius);
+		if (this.isVertical) this.value = clamp(value - this.thumbRadius, this.cY + this.thumbRadius, this.cY + this.cHeight - this.thumbRadius);
 		else this.value = clamp(value, this.cX + this.thumbRadius, this.cX + this.cWidth - this.thumbRadius);
 		this.oninput();
 	}
@@ -374,7 +376,7 @@ class PidController {
 		this.setPoint = 0;
 		this.measuredValue = 0;
 
-		setInterval(() => this.update())
+		setInterval(() => this.update(), this.deltaTime)
     }
 
 	setSetPoint(value) {
@@ -396,7 +398,7 @@ class PidController {
 		const derivative = (error - this.previousError) / (1/this.deltaTime);
 
 		// console.log(proportional, integral, derivative);
-		console.log((pidSettings.P * proportional) / this.deltaTime, (pidSettings.I * integral) / this.deltaTime, (pidSettings.D * derivative) / this.deltaTime);
+		// console.log((pidSettings.P * proportional) / this.deltaTime, (pidSettings.I * integral) / this.deltaTime, (pidSettings.D * derivative) / this.deltaTime);
 		
 		this.result = (pidSettings.P * proportional + pidSettings.I * integral + pidSettings.D * derivative) / this.deltaTime;
 
@@ -438,26 +440,26 @@ class Car extends CanvasDrawer {
             this.hasImageLoaded = true;
         }
         this.image.src = imageSource;
-        
+		
 		const scale = Math.min(this.ground.cWidth, this.ground.cHeight)
 		const size = 2500;
+		
+		this.width = (scale / size) * 400;
+		this.height = (scale / size) * 200;
 
-        this.width = (scale / size) * (this.image.width);
-        this.height = (scale / size) * (this.image.height);
-        
-        // create variables
-        this.startX = this.canvas.width / 2 - this.width / 2;;
-        this.reset();
-
-		this.boxLines = false;
-
+		this.onupdate = () => {};
+		
+		this.boxLines = true;
+		
 		this.motorPower = 0;
+		
+		this.reset();
     }
 
     reset() {
         this.xVelocity = 0;
         
-        this.x = this.startX;
+        this.setCenterXPosition(0);
         this.y = 0;
         this.rotation = 0;
     }
@@ -494,7 +496,7 @@ class Car extends CanvasDrawer {
 
         const weight = carSettings.mass * -physicsSettings.gravity;
 
-        const bRad = degreesToRadians(90) - this.rotation;
+        const bRad = Math.PI / 2 - this.rotation;
 
         const adj = Math.cos(bRad) * weight;
         const op = Math.sin(bRad) * weight;
@@ -504,23 +506,32 @@ class Car extends CanvasDrawer {
 
         this.xVelocity += (hillForce + this.motorPower) / FPS;
 		
-		
 		const airResistance = ((physicsSettings.airDensity * carSettings.dragCoefficient) / 2) * Math.pow(this.xVelocity, 2);
 		this.xVelocity = moveTowards(this.xVelocity, 0, airResistance / FPS)
 		this.xVelocity = moveTowards(this.xVelocity, 0, frictionResistance / FPS)
 		
         this.x += this.xVelocity
 
+		this.onupdate()
+
 		// console.log([hillForce, this.motorPower, airResistance, frictionResistance], [this.x, this.xVelocity])
     }
 
     getCenterX() {
-        return this.x + car.width/2 + this.ground.cX;
+        return this.x + this.width/2;
     }
 
     setCenterX(x) {
-        this.x = x - car.width/2 - this.ground.cX;
+        this.x = x - this.width/2;
     }
+
+	getCenterXPosition() {
+		return this.getCenterX() - this.ground.cWidth / 2;
+	}
+
+	setCenterXPosition(x) {
+		this.setCenterX(x + this.ground.cWidth / 2)
+	}
 	
     draw() {        
         this.ctx.save();
@@ -538,13 +549,12 @@ class Car extends CanvasDrawer {
 			this.drawLine(this.width / 2, this.height, this.width / 2, 100, {color: "red"})
 		}
 
-        if (this.hasImageLoaded) {
-            this.ctx.drawImage(this.image, 0, 0, this.width, this.height);
-            this.ctx.fillStyle = backgroundColor;
-        }
-        else {
-            this.drawRect(0, 0, this.width, this.height, {color: "black"})
-        }
+		
+        if (this.hasImageLoaded) this.ctx.drawImage(this.image, 0, 0, this.width, this.height);
+		else this.drawRect(0, 0, this.width, this.height, {fill: "black"})
+
+		this.drawLine(this.width/2, this.height/2, this.width/2 + this.motorPower * 10, this.height/2, {color: "red", width: 4})
+
         this.ctx.restore()
     }
 }
@@ -561,48 +571,62 @@ const carPidController = new PidController(deltaTime);
 carPidController.setSetPoint(setPointSlider.getAbsolutePosition());
 carPidController.updateMeasuredValue(car.getCenterX());
 
-// groundDegreesInput.value = world.getFloorDegrees();
-groundDegreesInput.value = groundAngleSlider.getCanvasCenteredPosition();
+// set up ground angle inputs
 groundAngleSlider.oninput = () => {
 	const worldTilt = groundAngleSlider.getCanvasCenteredPosition() * 2;
     world.setFloorOffset(worldTilt);
 	groundDegreesInput.value = world.getFloorDegrees();
 }
 groundDegreesInput.oninput = () => {
-	const worldTiltDegrees = groundDegreesInput.value;
+	const worldTiltDegrees = Number(groundDegreesInput.value);
 	world.setFloorDegrees(worldTiltDegrees);
 	groundAngleSlider.setCanvasCenteredPosition(world.getFloorOffset() / 2);
 };
 groundDegreesInput.max = 89;
 groundDegreesInput.min = -89;
+groundDegreesInput.value = Math.round(groundAngleSlider.getCanvasCenteredPosition());
 
-setPointInput.value = setPointSlider.getCanvasCenteredPosition();
+// set up car position input
+carPointInput.oninput = () => car.setCenterXPosition(Number(carPointInput.value));
+car.onupdate = () => carPointInput.value = car.getCenterXPosition();
+carPointInput.value = car.getCenterXPosition();
 
+// set up set point inputs
 setPointSlider.oninput = () => {
-	const setPointPosition = setPointSlider.getCanvasCenteredPosition();
-	setPointInput.value = setPointPosition;
-
+	carPidController.setSetPoint(setPointSlider.getAbsolutePosition());
+	setPointInput.value = setPointSlider.getCanvasCenteredPosition();
+}
+setPointInput.oninput = () => {
+	const setPointValue = Number(setPointInput.value)
+	setPointSlider.setCanvasCenteredPosition(setPointValue);
 	carPidController.setSetPoint(setPointSlider.getAbsolutePosition());
 };
-setPointInput.oninput = () => {
-	const setPointPosition = setPointInput.value;
-	setPointSlider.setCanvasCenteredPosition(setPointPosition);
-	carPidController.setSetPoint(setPointPosition);
-}
+setPointInput.value = setPointSlider.getCanvasCenteredPosition();
 
+const crossLines = true;
+
+// main loop
 setInterval(() => {
 	carPidController.updateMeasuredValue(car.getCenterX())
 	car.setMotorPower(carPidController.getResult());
 
     world.draw();
+
+	if (crossLines) {
+		world.drawLine(world.cX + world.cWidth / 2, world.cY, world.cX + world.cWidth / 2, world.cY + world.cHeight, {color: "red", width: 1});
+		world.drawLine(world.cX, world.cY + world.cHeight / 2, world.cX + world.cWidth, world.cY + world.cHeight / 2, {color: "red", width: 1});
+	}
+
+
 	if (setPointSlider.isHovered || setPointSlider.isSelected || document.activeElement === setPointInput) {
 		const setPoint = setPointSlider.getAbsolutePosition();
 		world.drawLine(setPoint, world.cY, setPoint, world.cY+world.cHeight, {color: "green"})
 	}
+	
     
     car.update();
     car.draw()
-
+	
     groundAngleSlider.draw();
     setPointSlider.draw();
 
