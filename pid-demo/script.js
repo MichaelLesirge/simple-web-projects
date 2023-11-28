@@ -18,22 +18,33 @@ function fullResolution(canvas) {
 // #settings #settings-menu
 const settingsMenu = document.getElementById("settings-menu");
 
-function makeSettings(header, values) {
+function setAllowedChars(input, pattern) {
+    input.addEventListener("keypress", (event) => {
+        if (!pattern.test(event.key)) {
+            event.preventDefault();
+            return false;
+        }
+    });
+}
+
+function makeSettings(header, values, {getInputElements = false} = {}) {
 	// .category
-	const category = document.createElement("div");
+	const category = document.createElement("fieldset");
 	category.classList.add("category");
 
 	// .category .header
-	const headerElement = document.createElement("h3");
+	const headerElement = document.createElement("legend");
+	headerElement.classList.add("header");
 	headerElement.innerText = header;
 
 	category.appendChild(headerElement);
 	
 	// .category .controls
 	const categoryControls = document.createElement("div");
-	categoryControls.classList.add("controls")
+	categoryControls.classList.add("controls");
 	
-	const updateObject = {}
+	const updateObject = {};
+	const inputs = [];
 	
 	for (const [name, rules] of Object.entries(values)) {
 		// .category .controls .item
@@ -55,11 +66,14 @@ function makeSettings(header, values) {
 		input.name = name;
 		input.id = name;
 
+		if (rules.min >= 0) setAllowedChars(input, /[\d.]/);
 		input.addEventListener("input", (event) => updateObject[name] = Number(event.target.value));
 
 		for (const [ruleType, ruleValue] of Object.entries(rules)) {
 			input.setAttribute(ruleType, ruleValue);
 		}
+
+		inputs.push(input);
 
 		item.appendChild(label);
 		item.appendChild(input);
@@ -70,22 +84,28 @@ function makeSettings(header, values) {
 
 	settingsMenu.appendChild(category)
 
-	return updateObject;
+	return getInputElements ? inputs : updateObject;
 
 }
 
 const backgroundColor = "white";
 const FPS = 60;
 
-const pidSettings = makeSettings("PID", {
+const pidSettings = makeSettings("PID Gains", {
 	P: {value: 1, min: 0, step: 0.1},
 	I: {value: 0, min: 0, step: 0.1},
 	D: {value: 0, min: 0, step: 0.1},
 })
 
+const [groundDegreesInput, setPointInput] = makeSettings("General", {
+	slopeDegrees: {name: "Floor Angle Degrees"},
+	setPoint: {name: "Car Set Point"},
+}, {getInputElements: true});
+
+
 const physicsSettings = makeSettings("World", {
     gravity: {name: "Gravity", value: 9.8, min: 0, step: 0.1},
-    friction: {name: "Friction", value: 0.2, min: 0, step: 0.1},
+    friction: {name: "Friction Coefficient", value: 0.02, min: 0, step: 0.1},
 	airDensity: {name: "Air Density", value: 1.225, min: 0, step: 0.1},
 });
 
@@ -93,8 +113,7 @@ const carSettings = makeSettings("Car", {
 	maxMotorPower: {name: "Max Motor Power", value: 10, min: 0, max: 20},
 	mass: {name: "Mass", value: 3, min: 0},
 	dragCoefficient: {name: "Drag Coefficient", value: 0.01, min: 0},
-	// area: {name: "Drag Area", value: 5, min: 0},
-})
+});
 
 const deltaTime = 25;
 
@@ -189,16 +208,18 @@ class PositionSlider extends CanvasDrawer {
 		this.thumbColor = "green";
 
 		this.value = ((this.isVertical ? this.cHeight : this.cWidth)) / 2 + this.thumbRadius + ((this.isVertical ? this.cY : this.cX));
+
+		this.oninput = () => {};
     }
 
-	getCanvasLocation(x, y) {
+	toCanvasLocation(x, y) {
 		const rect = this.canvas.getBoundingClientRect();
 		const dpr = window.devicePixelRatio || 1;
 		return [x * dpr - rect.x, y * dpr - rect.y - (this.isVertical ? 0 : 10)];
 	}
 
 	detectClicked = (event) => {
-		const [x, y] = this.getCanvasLocation(event.x, event.y);
+		const [x, y] = this.toCanvasLocation(event.x, event.y);
 		
 		if (x >= this.cX && x <= this.cX + this.cWidth && y >= this.cY && y <= this.cY + this.cHeight) {
 
@@ -212,7 +233,7 @@ class PositionSlider extends CanvasDrawer {
 	}
 
 	move = (event) => {
-		const [x, y] = this.getCanvasLocation(event.x, event.y);
+		const [x, y] = this.toCanvasLocation(event.x, event.y);
 
 		if (this.isSelected) this.setValue(this.isVertical ? y - this.thumbRadius * 2 : x);
 		
@@ -260,16 +281,25 @@ class PositionSlider extends CanvasDrawer {
 	}
 
 	getCanvasPosition() {
-		return this.value - ((this.isVertical ? this.cY : this.cX)) - (this.isVertical ? this.thumbRadius : 0);
+		return this.value - ((this.isVertical ? this.cY : this.cX)) - this.thumbRadius;
+	}
+
+	setCanvasPosition(value) {
+		this.value = value + ((this.isVertical ? this.cY : this.cX)) + this.thumbRadius;
 	}
 
 	getCanvasCenteredPosition() {
 		return (this.isVertical ? this.cHeight : this.cWidth) / 2 - this.getCanvasPosition()
 	}
 
+	setCanvasCenteredPosition(value) {
+		this.setCanvasPosition(value + (this.isVertical ? this.cHeight : this.cWidth) / 2);
+	}
+
 	setValue(value) {
 		if (this.isVertical) this.value = clamp(value, this.cY + this.thumbRadius, this.cY + this.cHeight - this.thumbRadius);
 		else this.value = clamp(value, this.cX + this.thumbRadius, this.cX + this.cWidth - this.thumbRadius);
+		this.oninput();
 	}
 }
 
@@ -289,6 +319,10 @@ class Floor extends CanvasDrawer {
         [this.startX, this.startY] = [0, (this.cHeight - this.floorOffset) / 2];
         [this.endX, this.endY] = [this.cWidth, (this.cHeight + this.floorOffset) / 2];
     }
+
+	getFloorOffset() {
+		return -this.floorOffset;
+	}
 
     setFloorRad(floorRad) {
         const radiansB = Math.tan(floorRad) * this.cWidth
@@ -324,9 +358,7 @@ class Floor extends CanvasDrawer {
 }
 
 class PidController {
-    constructor(measuredValueSource, setPointSource, deltaTimeMs) {
-		this.measuredValueSource = measuredValueSource;
-		this.setPointSource = setPointSource;
+    constructor(deltaTimeMs) {
 		this.deltaTime = deltaTimeMs;
 		this.deltaTimeSeconds = deltaTimeMs / 1000;
 
@@ -339,11 +371,22 @@ class PidController {
 
 		this.result = 0;
 
-		setInterval(() => this.result = this.calculate(this.measuredValueSource(), this.setPointSource()), this.deltaTime)
+		this.setPoint = 0;
+		this.measuredValue = 0;
+
+		setInterval(() => this.update())
     }
 
-	calculate(measuredValue, setpoint) {
-		const error = setpoint - measuredValue
+	setSetPoint(value) {
+		this.setPoint = value;
+	}
+
+	updateMeasuredValue(value) {
+		this.measuredValue = value;
+	}
+
+	update() {
+		const error = this.setPoint - this.measuredValue;
 
 		// const now = new Date().getTime();
 		// const deltaTime = (now - this.lastTime) || 1;
@@ -355,14 +398,10 @@ class PidController {
 		// console.log(proportional, integral, derivative);
 		console.log((pidSettings.P * proportional) / this.deltaTime, (pidSettings.I * integral) / this.deltaTime, (pidSettings.D * derivative) / this.deltaTime);
 		
-		const result = (pidSettings.P * proportional + pidSettings.I * integral + pidSettings.D * derivative) / this.deltaTime;
+		this.result = (pidSettings.P * proportional + pidSettings.I * integral + pidSettings.D * derivative) / this.deltaTime;
 
 		this.previousError = error;
 		this.integral = integral;
-		// this.lastTime = now;
-		
-		// if (Math.abs(error) < this.hiddenOkRange) return clamp(result, -0.1, 0.1);
-		return result;
 	}
 
 	getResult(){
@@ -371,6 +410,7 @@ class PidController {
 }
 
 function moveTowards(value, target, distance) {
+	distance = Math.abs(distance)
     if (value > target) {
         if (value - target < distance) {
             return target;
@@ -460,14 +500,18 @@ class Car extends CanvasDrawer {
         const op = Math.sin(bRad) * weight;
 
         const frictionResistance = op * physicsSettings.friction;
-        const hillForce = moveTowards(adj, 0, Math.abs(frictionResistance) / FPS);
-        
-        this.xVelocity += (-hillForce + this.motorPower) / FPS;
+        const hillForce = -adj
 
+        this.xVelocity += (hillForce + this.motorPower) / FPS;
+		
+		
 		const airResistance = ((physicsSettings.airDensity * carSettings.dragCoefficient) / 2) * Math.pow(this.xVelocity, 2);
 		this.xVelocity = moveTowards(this.xVelocity, 0, airResistance / FPS)
-
+		this.xVelocity = moveTowards(this.xVelocity, 0, frictionResistance / FPS)
+		
         this.x += this.xVelocity
+
+		// console.log([hillForce, this.motorPower, airResistance, frictionResistance], [this.x, this.xVelocity])
     }
 
     getCenterX() {
@@ -510,20 +554,48 @@ const world = new Floor(displayCanvas, [sliderWidth, 0], [displayCanvas.width - 
 
 const car = new Car(displayCanvas, "car_outline.png", world)
 
-const groundSlider = new PositionSlider(displayCanvas, [0, world.cY], [sliderWidth, world.cHeight - sliderWidth], true);
+const groundAngleSlider = new PositionSlider(displayCanvas, [0, world.cY], [sliderWidth, world.cHeight - sliderWidth], true);
 const setPointSlider = new PositionSlider(displayCanvas, [world.cX, world.cY + world.cHeight - sliderWidth], [world.cWidth, sliderWidth], false);
 
-const carPidController = new PidController(() => car.getCenterX(), () => setPointSlider.getAbsolutePosition(), deltaTime);
+const carPidController = new PidController(deltaTime);
+carPidController.setSetPoint(setPointSlider.getAbsolutePosition());
+carPidController.updateMeasuredValue(car.getCenterX());
+
+// groundDegreesInput.value = world.getFloorDegrees();
+groundDegreesInput.value = groundAngleSlider.getCanvasCenteredPosition();
+groundAngleSlider.oninput = () => {
+	const worldTilt = groundAngleSlider.getCanvasCenteredPosition() * 2;
+    world.setFloorOffset(worldTilt);
+	groundDegreesInput.value = world.getFloorDegrees();
+}
+groundDegreesInput.oninput = () => {
+	const worldTiltDegrees = groundDegreesInput.value;
+	world.setFloorDegrees(worldTiltDegrees);
+	groundAngleSlider.setCanvasCenteredPosition(world.getFloorOffset() / 2);
+};
+groundDegreesInput.max = 89;
+groundDegreesInput.min = -89;
+
+setPointInput.value = setPointSlider.getCanvasCenteredPosition();
+
+setPointSlider.oninput = () => {
+	const setPointPosition = setPointSlider.getCanvasCenteredPosition();
+	setPointInput.value = setPointPosition;
+
+	carPidController.setSetPoint(setPointSlider.getAbsolutePosition());
+};
+setPointInput.oninput = () => {
+	const setPointPosition = setPointInput.value;
+	setPointSlider.setCanvasCenteredPosition(setPointPosition);
+	carPidController.setSetPoint(setPointPosition);
+}
 
 setInterval(() => {
+	carPidController.updateMeasuredValue(car.getCenterX())
 	car.setMotorPower(carPidController.getResult());
-	// car.setCenterX(setPointSlider.getAbsolutePosition())
 
-	const worldTilt = groundSlider.getCanvasCenteredPosition() * 2;
-    world.setFloorOffset(worldTilt);
-	
     world.draw();
-	if (setPointSlider.isHovered || setPointSlider.isSelected) {
+	if (setPointSlider.isHovered || setPointSlider.isSelected || document.activeElement === setPointInput) {
 		const setPoint = setPointSlider.getAbsolutePosition();
 		world.drawLine(setPoint, world.cY, setPoint, world.cY+world.cHeight, {color: "green"})
 	}
@@ -531,10 +603,10 @@ setInterval(() => {
     car.update();
     car.draw()
 
-    groundSlider.draw();
+    groundAngleSlider.draw();
     setPointSlider.draw();
 
-	groundSlider.drawThumb();
+	groundAngleSlider.drawThumb();
 	setPointSlider.drawThumb();
 
 }, Math.floor(1000 / FPS))

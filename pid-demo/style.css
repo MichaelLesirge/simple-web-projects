@@ -65,24 +65,34 @@ main {
 #settings-menu {
 	display: flex;
 
-	flex-direction: column;
+	flex-direction: row;
 	flex-wrap: wrap;
 		
 	gap: 1rem;
 }
 
-#settings .controls {
+#settings .section-title {
+	text-decoration: underline;
+	margin: auto;
+	margin-block-start: 0.5em;
+    margin-block-end: 0.5em;
+}
+
+#settings-menu .header {
+	margin-left: 1em;
+}
+
+#settings-menu .controls {
 	font-family: 'Courier New', Courier, monospace;
-	border: 1px solid black;
-	width: fit-content;
+
 	padding: 0.5rem;
 }
 
-#settings .controls .item {
+#settings-menu .controls .item {
 	text-align: end;
 }
 
-#settings .controls .item input {
+#settings-menu .controls .item input {
 	width: 4rem;
 }
 
