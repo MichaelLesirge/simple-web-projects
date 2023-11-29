@@ -117,6 +117,12 @@ const carSettings = makeSettings("Car", {
 	dragCoefficient: {name: "Drag Coefficient", value: 0.01, min: 0},
 });
 
+const infoLineOpacities = makeSettings("Info Lines Opacity", {
+	crossLines: {name: "Center Cross", value: 0, min: 0, max: 1, step: 0.1},
+	carOutlineLines: {name: "Car Outline", value: 0, min: 0, max: 1, step: 0.1},
+	carMotorPower: {name: "Car Motor Power", value: 0, min: 0, max: 1, step: 0.1},
+});
+
 const deltaTime = 25;
 
 function degreesToRadians(degrees) {
@@ -555,23 +561,6 @@ class Car extends CanvasDrawer {
 
         this.y = ground;
 
-		if (this.boxLines) {
-			this.ctx.save();
-
-			this.ctx.translate(this.x + this.ground.cX, this.y + this.ground.cY);
-
-			this.drawLine(0, 0, this.width, 0, {color: "black"})
-			this.drawLine(0, 0, 0, this.height, {color: "black"})
-			this.drawLine(this.width, 0, this.width, this.height, {color: "black"})
-			this.drawLine(this.width, this.height, 0, this.height, {color: "black"})
-
-			this.drawLine(this.width / 2, this.height, this.width / 2, 100, {color: "red"})
-
-			this.ctx.restore();
-		}
-
-        // find velocity
-
         const weight = carSettings.mass * -physicsSettings.gravity;
 
         const bRad = Math.PI / 2 - this.rotation;
@@ -593,27 +582,48 @@ class Car extends CanvasDrawer {
 		// console.log([hillForce, this.motorPower, airResistance, frictionResistance], [this.x, this.xVelocity])
     }
 	
-    draw() {        
+    draw() {
+		const boxColor = `rgba(0, 0, 0, ${infoLineOpacities.carOutlineLines})`;
+		const arrowColor = `rgba(255, 0, 0, ${infoLineOpacities.carOutlineLines})`;
+
+		if (infoLineOpacities.carOutlineLines > 0) {
+			this.ctx.save();
+
+			this.ctx.translate(this.x + this.ground.cX, this.y + this.ground.cY);
+
+			this.drawLine(0, 0, this.width, 0, {color: boxColor})
+			this.drawLine(0, 0, 0, this.height, {color: boxColor})
+			this.drawLine(this.width, 0, this.width, this.height, {color: boxColor})
+			this.drawLine(this.width, this.height, 0, this.height, {color: boxColor})
+
+			this.drawLine(this.width / 2, this.height, this.width / 2, 100, {color: arrowColor})
+
+			this.ctx.restore();
+		}
+
         this.ctx.save();
 
         this.ctx.translate(this.ground.cX + this.x + this.width/2, this.y + this.height);
         this.ctx.rotate(this.rotation);
         this.ctx.translate(-this.width/2, -this.height);
 
-		if (this.boxLines) {
-			this.drawLine(0, 0, this.width, 0, {color: "green"})
-			this.drawLine(0, 0, 0, this.height, {color: "green"})
-			this.drawLine(this.width, 0, this.width, this.height, {color: "green"})
-			this.drawLine(this.width, this.height, 0, this.height, {color: "green"})
+		if (infoLineOpacities.carOutlineLines > 0) {
+			this.drawLine(0, 0, this.width, 0, {color: boxColor})
+			this.drawLine(0, 0, 0, this.height, {color: boxColor})
+			this.drawLine(this.width, 0, this.width, this.height, {color: boxColor})
+			this.drawLine(this.width, this.height, 0, this.height, {color: boxColor})
 
-			this.drawLine(this.width / 2, this.height, this.width / 2, 100, {color: "red"})
+			this.drawLine(this.width / 2, this.height, this.width / 2, 100, {color: arrowColor})
 		}
 
 		
         if (this.hasImageLoaded) this.ctx.drawImage(this.image, 0, 0, this.width, this.height);
 		else this.drawRect(0, 0, this.width, this.height, {fill: "black"})
 
-		this.drawLine(this.width/2, this.height/2, this.width/2 + this.motorPower * 10, this.height/2, {color: "red", width: 4})
+		if (infoLineOpacities.carMotorPower > 0) {
+			const motorColor = `rgba(255, 0, 0, ${infoLineOpacities.carMotorPower})`;
+			this.drawLine(this.width/2, this.height/2, this.width/2 + this.motorPower * 10, this.height/2, {color: motorColor, width: 4})
+		}
 
         this.ctx.restore()
     }
@@ -662,8 +672,6 @@ setPointInput.oninput = () => {
 };
 setPointInput.value = setPointSlider.getLocalCenteredPosition();
 
-const crossLines = true;
-
 // main loop
 setInterval(() => {
 	focusedElement = document.activeElement;
@@ -672,14 +680,15 @@ setInterval(() => {
 	car.setMotorPower(carPidController.getResult());
 
     world.draw();
-
+	
 	if (focusedElement !== carPointInput) {
 		carPointInput.value = car.getLocalWorldCenteredCenterX();
 	}
 
-	if (crossLines) {
-		world.drawLine(world.cX + world.cWidth / 2, world.cY, world.cX + world.cWidth / 2, world.cY + world.cHeight, {color: "red", width: 1});
-		world.drawLine(world.cX, world.cY + world.cHeight / 2, world.cX + world.cWidth, world.cY + world.cHeight / 2, {color: "red", width: 1});
+	if (infoLineOpacities.crossLines > 0) {
+		const color = `rgba(0, 255, 0, ${infoLineOpacities.crossLines})`
+		world.drawLine(world.cX + world.cWidth / 2, world.cY, world.cX + world.cWidth / 2, world.cY + world.cHeight, {color: color, width: 1});
+		world.drawLine(world.cX, world.cY + world.cHeight / 2, world.cX + world.cWidth, world.cY + world.cHeight / 2, {color: color, width: 1});
 	}
 
 	if (setPointSlider.isHovered || setPointSlider.isSelected || focusedElement === setPointInput) {
