@@ -73,6 +73,7 @@ function makeSettings(header, values, {getInputElements = false} = {}) {
 		for (const [ruleType, ruleValue] of Object.entries(rules)) {
 			input.setAttribute(ruleType, ruleValue);
 		}
+		input.step = "any";
 
 		inputs.push(input);
 
@@ -81,9 +82,9 @@ function makeSettings(header, values, {getInputElements = false} = {}) {
 		categoryControls.appendChild(item);
 	}
 
-	category.appendChild(categoryControls)
+	category.appendChild(categoryControls);
 
-	settingsMenu.appendChild(category)
+	settingsMenu.appendChild(category);
 
 	return getInputElements ? inputs : updateObject;
 
@@ -91,37 +92,41 @@ function makeSettings(header, values, {getInputElements = false} = {}) {
 
 const backgroundColor = "white";
 const FPS = 60;
+const FORCE_LINE_MULTIPLIER = 10;
 
 const pidSettings = makeSettings("PID Gains", {
-	P: {value: 1, min: 0, step: 0.1},
-	I: {value: 0, min: 0, step: 0.1},
-	D: {value: 0, min: 0, step: 0.1},
+	P: {value: 1, min: 0, title: "Proportional Term"},
+	I: {value: 0, min: 0, title: "Integral Term"},
+	D: {value: 0, min: 0, title: "Derivative Term"},
 })
 
 const [groundDegreesInput, setPointInput, carPointInput] = makeSettings("General", {
-	slopeDegrees: {name: "Floor Angle Degrees"},
-	setPoint: {name: "Car Set Point"},
-	carPoint: {name: "Car Position"},
+	slopeDegrees: {name: "Floor Angle Degrees", title: "Angle of the floor in degrees, between 90 and -90 with 0 being level"},
+	setPoint: {name: "Car Set Point", title: "Set point of car in pixels, 0 is center of canvas"},
+	carPoint: {name: "Car Position", title: "Position of car in pixels, 0 is center of canvas"},
 }, {getInputElements: true});
 
 
 const physicsSettings = makeSettings("World", {
-    gravity: {name: "Gravity", value: 9.8, min: 0, step: 0.1},
-    friction: {name: "Friction Coefficient", value: 0.02, min: 0, step: 0.1},
-	airDensity: {name: "Air Density", value: 1.225, min: 0, step: 0.1},
+    gravity: {name: "Gravity", value: 9.8, min: 0},
+    friction: {name: "Friction Coefficient", value: 0.02, min: 0},
+	airDensity: {name: "Air Density", value: 1.225, min: 0},
 });
 
 const carSettings = makeSettings("Car", {
-	maxMotorPower: {name: "Max Motor Power", value: 10, min: 0, max: 20},
+	maxMotorPower: {name: "Max Motor Power", value: 10, min: 0, max: 60},
 	mass: {name: "Mass", value: 3, min: 0},
 	dragCoefficient: {name: "Drag Coefficient", value: 0.01, min: 0},
 });
 
 const infoLineOpacities = makeSettings("Info Lines Opacity", {
-	crossLines: {name: "Center Cross", value: 0, min: 0, max: 1, step: 0.1},
-	carOutlineLines: {name: "Car Outline", value: 0, min: 0, max: 1, step: 0.1},
-	carMotorPower: {name: "Car Motor Power", value: 0, min: 0, max: 1, step: 0.1},
+	crossLines: {name: "Center Cross", value: 0, min: 0, max: 1},
+	carOutlineLines: {name: "Car Outline", value: 0, min: 0, max: 1},
+	carMotorPower: {name: "Car Motor Power", value: 0, min: 0, max: 1},
+	force: {name: "Forces", value: 0, min: 0, max: 1},
 });
+
+// const resetCarButton = document.getElementById("reset-button");
 
 const deltaTime = 25;
 
@@ -135,6 +140,10 @@ function radiansToDegrees(radians) {
 
 function clamp(value, min, max) {
 	return Math.min(Math.max(value, min), max)
+}
+
+function findDistance(x1, y1, x2, y2) {
+	return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
 }
 
 class CanvasDrawer {
@@ -190,6 +199,28 @@ class CanvasDrawer {
 		this.ctx.strokeStyle = color;
 		this.ctx.stroke();
 	}
+
+	drawArrow(startX, startY, endX, endY, { color = "black", width = 1, arrowHeadLength = 10, arrowAngleDegrees = 30, autoShrinkArrowHead = true} = {}) {
+		const lineDistance = findDistance(startX, startY, endX, endY);
+		if (lineDistance == 0) return
+
+		this.drawLine(startX, startY, endX, endY, { color: color, width: width });
+
+		const arrowAngleRad = degreesToRadians(arrowAngleDegrees);
+
+		const angle = Math.atan2(endY - startY, endX - startX);
+
+		if (lineDistance < arrowHeadLength) arrowHeadLength = lineDistance;
+
+		const x1 = endX - arrowHeadLength * Math.cos(angle - arrowAngleRad);
+		const y1 = endY - arrowHeadLength * Math.sin(angle - arrowAngleRad);
+		const x2 = endX - arrowHeadLength * Math.cos(angle + arrowAngleRad);
+		const y2 = endY - arrowHeadLength * Math.sin(angle + arrowAngleRad);
+
+		this.drawLine(endX, endY, x1, y1, { color: color, width: width });
+		this.drawLine(endX, endY, x2, y2, { color: color, width: width });
+	}
+
 }
 
 class PositionSlider extends CanvasDrawer {
@@ -426,7 +457,6 @@ class PidController {
 
 	update() {
 		const error = this.setPoint - this.measuredValue;
-		console.log(error, this.setPoint, this.measuredValue);
 
 		// const now = new Date().getTime();
 		// const deltaTime = (now - this.lastTime) || 1;
@@ -450,7 +480,7 @@ class PidController {
 }
 
 function moveTowards(value, target, distance) {
-	distance = Math.abs(distance)
+	distance = Math.abs(distance);
     if (value > target) {
         if (value - target < distance) {
             return target;
@@ -558,7 +588,7 @@ class Car extends CanvasDrawer {
         // find ground
         const b2 = Math.tan(this.rotation) * (this.x + this.width/2) - this.height;
         const ground = this.ground.startY + b2;
-
+		
         this.y = ground;
 
         const weight = carSettings.mass * -physicsSettings.gravity;
@@ -574,17 +604,40 @@ class Car extends CanvasDrawer {
         this.xVelocity += (hillForce + this.motorPower) / FPS;
 		
 		const airResistance = ((physicsSettings.airDensity * carSettings.dragCoefficient) / 2) * Math.pow(this.xVelocity, 2);
-		this.xVelocity = moveTowards(this.xVelocity, 0, airResistance / FPS)
+
 		this.xVelocity = moveTowards(this.xVelocity, 0, frictionResistance / FPS)
+		this.xVelocity = moveTowards(this.xVelocity, 0, airResistance / FPS)
 		
         this.x += this.xVelocity
 
 		// console.log([hillForce, this.motorPower, airResistance, frictionResistance], [this.x, this.xVelocity])
+		if (infoLineOpacities.force > 0) {
+			const color = `rgba(0, 0, 0, ${infoLineOpacities.force})`;
+			const red = `rgba(255, 0, 0, ${infoLineOpacities.force})`;
+
+			this.ctx.save();
+
+			const heightOffset = -this.height;
+
+			this.ctx.translate(this.x + this.ground.cX + this.width/2, this.y + this.ground.cY + this.height/2 + heightOffset);
+
+			const carDirection = this.xVelocity/Math.abs(this.xVelocity)
+
+			const lineOptions = {color: color, width: 2, arrowHeadLength: 5}
+
+			this.drawArrow(0, 0, hillForce * FORCE_LINE_MULTIPLIER, 0, lineOptions)
+			this.drawArrow(0, 5, Math.abs(frictionResistance) * -carDirection * FORCE_LINE_MULTIPLIER, 5, lineOptions)
+			this.drawArrow(0, 10, Math.abs(airResistance) * -carDirection * FORCE_LINE_MULTIPLIER, 10, lineOptions)
+
+			this.drawArrow(0, 15, this.xVelocity * FORCE_LINE_MULTIPLIER, 15, {color: red, width: 1, arrowHeadLength: 5})
+
+			this.ctx.restore();
+		}
     }
 	
     draw() {
 		const boxColor = `rgba(0, 0, 0, ${infoLineOpacities.carOutlineLines})`;
-		const arrowColor = `rgba(255, 0, 0, ${infoLineOpacities.carOutlineLines})`;
+		const arrowColor = `rgba(0, 255, 0, ${infoLineOpacities.carOutlineLines})`;
 
 		if (infoLineOpacities.carOutlineLines > 0) {
 			this.ctx.save();
@@ -596,7 +649,8 @@ class Car extends CanvasDrawer {
 			this.drawLine(this.width, 0, this.width, this.height, {color: boxColor})
 			this.drawLine(this.width, this.height, 0, this.height, {color: boxColor})
 
-			this.drawLine(this.width / 2, this.height, this.width / 2, 100, {color: arrowColor})
+			this.drawCircle(this.width / 2, this.height, 5, {color: arrowColor})
+			this.drawArrow(this.width / 2, this.height, this.width / 2, 100, {color: arrowColor})
 
 			this.ctx.restore();
 		}
@@ -613,7 +667,8 @@ class Car extends CanvasDrawer {
 			this.drawLine(this.width, 0, this.width, this.height, {color: boxColor})
 			this.drawLine(this.width, this.height, 0, this.height, {color: boxColor})
 
-			this.drawLine(this.width / 2, this.height, this.width / 2, 100, {color: arrowColor})
+			this.drawCircle(this.width / 2, this.height, 5, {color: arrowColor})
+			this.drawArrow(this.width / 2, this.height, this.width / 2, 100, {color: arrowColor})
 		}
 
 		
@@ -622,7 +677,7 @@ class Car extends CanvasDrawer {
 
 		if (infoLineOpacities.carMotorPower > 0) {
 			const motorColor = `rgba(255, 0, 0, ${infoLineOpacities.carMotorPower})`;
-			this.drawLine(this.width/2, this.height/2, this.width/2 + this.motorPower * 10, this.height/2, {color: motorColor, width: 4})
+			this.drawArrow(this.width/2, this.height/2, this.width/2 + this.motorPower * FORCE_LINE_MULTIPLIER, this.height/2, {color: motorColor, width: 4})
 		}
 
         this.ctx.restore()
@@ -672,6 +727,8 @@ setPointInput.oninput = () => {
 };
 setPointInput.value = setPointSlider.getLocalCenteredPosition();
 
+// resetCarButton.addEventListener("click", car.reset)
+
 // main loop
 setInterval(() => {
 	focusedElement = document.activeElement;
@@ -686,7 +743,7 @@ setInterval(() => {
 	}
 
 	if (infoLineOpacities.crossLines > 0) {
-		const color = `rgba(0, 255, 0, ${infoLineOpacities.crossLines})`
+		const color = `rgba(0, 0, 255, ${infoLineOpacities.crossLines})`
 		world.drawLine(world.cX + world.cWidth / 2, world.cY, world.cX + world.cWidth / 2, world.cY + world.cHeight, {color: color, width: 1});
 		world.drawLine(world.cX, world.cY + world.cHeight / 2, world.cX + world.cWidth, world.cY + world.cHeight / 2, {color: color, width: 1});
 	}

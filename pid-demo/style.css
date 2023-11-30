@@ -88,6 +88,11 @@ main {
 	padding: 0.5rem;
 }
 
+#settings-menu #settings-buttons {
+	display: flex;
+	flex-direction: column;
+}
+
 #settings-menu .controls .item {
 	text-align: end;
 }
