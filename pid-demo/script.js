@@ -5,29 +5,29 @@ const main = document.querySelector("main");
 main.style.paddingTop = header.clientHeight + "px";
 
 const displayCanvas = document.getElementById("display-canvas");
-displayCanvas.addEventListener('selectstart', function(e) { e.preventDefault(); return false; }, false);
+displayCanvas.addEventListener('selectstart', function (e) { e.preventDefault(); return false; }, false);
 
 fullResolution(displayCanvas);
 
 function fullResolution(canvas) {
-    const dpr = window.devicePixelRatio || 1;
-    canvas.width = canvas.clientWidth * dpr;
-    canvas.height = canvas.clientHeight * dpr;
+	const dpr = window.devicePixelRatio || 1;
+	canvas.width = canvas.clientWidth * dpr;
+	canvas.height = canvas.clientHeight * dpr;
 }
 
 // #settings #settings-menu
 const settingsMenu = document.getElementById("settings-menu");
 
 function setAllowedChars(input, pattern) {
-    input.addEventListener("keypress", (event) => {
-        if (!pattern.test(event.key)) {
-            event.preventDefault();
-            return false;
-        }
-    });
+	input.addEventListener("keypress", (event) => {
+		if (!pattern.test(event.key)) {
+			event.preventDefault();
+			return false;
+		}
+	});
 }
 
-function makeSettings(header, values, {getInputElements = false} = {}) {
+function makeSettings(header, values, { getInputElements = false } = {}) {
 	// .category
 	const category = document.createElement("fieldset");
 	category.classList.add("category");
@@ -38,28 +38,28 @@ function makeSettings(header, values, {getInputElements = false} = {}) {
 	headerElement.innerText = header;
 
 	category.appendChild(headerElement);
-	
+
 	// .category .controls
 	const categoryControls = document.createElement("div");
 	categoryControls.classList.add("controls");
-	
+
 	const updateObject = {};
 	const inputs = [];
-	
+
 	for (const [name, rules] of Object.entries(values)) {
 		// .category .controls .item
 		const item = document.createElement("div");
 		item.classList.add("item")
-		
+
 		updateObject[name] = rules.value;
 
 		const displayName = rules.name || name;
-		
+
 		// .category .controls .item label
 		const label = document.createElement("label");
 		label.innerText = displayName + ": ";
 		label.setAttribute("for", name);
-		
+
 		// .category .controls .item input
 		const input = document.createElement("input");
 		input.type = "number";
@@ -95,35 +95,35 @@ const FPS = 60;
 const FORCE_LINE_MULTIPLIER = 10;
 
 const pidSettings = makeSettings("PID Gains", {
-	P: {value: 1, min: 0, title: "Proportional Term"},
-	I: {value: 0, min: 0, title: "Integral Term"},
-	D: {value: 0, min: 0, title: "Derivative Term"},
+	P: { value: 1, min: 0, title: "Proportional Term" },
+	I: { value: 0, min: 0, title: "Integral Term" },
+	D: { value: 0, min: 0, title: "Derivative Term" },
 })
 
 const [groundDegreesInput, setPointInput, carPointInput] = makeSettings("General", {
-	slopeDegrees: {name: "Floor Angle Degrees", title: "Angle of the floor in degrees, between 90 and -90 with 0 being level"},
-	setPoint: {name: "Car Set Point", title: "Set point of car in pixels, 0 is center of canvas"},
-	carPoint: {name: "Car Position", title: "Position of car in pixels, 0 is center of canvas"},
-}, {getInputElements: true});
+	slopeDegrees: { name: "Floor Angle Degrees", title: "Angle of the floor in degrees, between 90 and -90 with 0 being level" },
+	setPoint: { name: "Car Set Point", title: "Set point of car in pixels, 0 is center of canvas" },
+	carPoint: { name: "Car Position", title: "Position of car in pixels, 0 is center of canvas" },
+}, { getInputElements: true });
 
 
 const physicsSettings = makeSettings("World", {
-    gravity: {name: "Gravity", value: 9.8, min: 0},
-    friction: {name: "Friction Coefficient", value: 0.02, min: 0},
-	airDensity: {name: "Air Density", value: 1.225, min: 0},
+	gravity: { name: "Gravity", value: 9.8, min: 0 },
+	friction: { name: "Friction Coefficient", value: 0.02, min: 0 },
+	airDensity: { name: "Air Density", value: 1.225, min: 0 },
 });
 
 const carSettings = makeSettings("Car", {
-	maxMotorPower: {name: "Max Motor Power", value: 10, min: 0, max: 60},
-	mass: {name: "Mass", value: 3, min: 0},
-	dragCoefficient: {name: "Drag Coefficient", value: 0.01, min: 0},
+	maxMotorPower: { name: "Max Motor Power", value: 10, min: 0, max: 60 },
+	mass: { name: "Mass", value: 3, min: 0 },
+	dragCoefficient: { name: "Drag Coefficient", value: 0.01, min: 0 },
 });
 
 const infoLineOpacities = makeSettings("Info Lines Opacity", {
-	crossLines: {name: "Center Cross", value: 0, min: 0, max: 1},
-	carOutlineLines: {name: "Car Outline", value: 0, min: 0, max: 1},
-	carMotorPower: {name: "Car Motor Power", value: 0, min: 0, max: 1},
-	force: {name: "Forces", value: 0, min: 0, max: 1},
+	crossLines: { name: "Center Cross", value: 0, min: 0, max: 1 },
+	carOutlineLines: { name: "Car Outline", value: 0, min: 0, max: 1 },
+	carMotorPower: { name: "Car Motor Power", value: 0, min: 0, max: 1 },
+	force: { name: "Forces", value: 0, min: 0, max: 1 },
 });
 
 // const resetCarButton = document.getElementById("reset-button");
@@ -131,11 +131,11 @@ const infoLineOpacities = makeSettings("Info Lines Opacity", {
 const deltaTime = 25;
 
 function degreesToRadians(degrees) {
-    return degrees * (Math.PI / 180);
+	return degrees * (Math.PI / 180);
 }
 
 function radiansToDegrees(radians) {
-    return radians / (Math.PI / 180);
+	return radians / (Math.PI / 180);
 }
 
 function clamp(value, min, max) {
@@ -149,35 +149,35 @@ function findDistance(x1, y1, x2, y2) {
 class CanvasDrawer {
 	constructor(canvas, position, size) {
 		this.canvas = canvas;
-        this.ctx = canvas.getContext("2d");
+		this.ctx = canvas.getContext("2d");
 
-        const [x, y] = position ?? [0, 0];
-        this.cX = x;
-        this.cY = y;
-        
-        const [width, height] = size ?? [this.canvas.width, this.canvas.height];
-        this.cWidth = width;
-        this.cHeight = height;
+		const [x, y] = position ?? [0, 0];
+		this.cX = x;
+		this.cY = y;
+
+		const [width, height] = size ?? [this.canvas.width, this.canvas.height];
+		this.cWidth = width;
+		this.cHeight = height;
 
 	}
 
-	drawLine(startX, startY, endX, endY, {color = "black", width = 1} = {}) {
-        this.ctx.lineWidth = width;
-        this.ctx.beginPath();
+	drawLine(startX, startY, endX, endY, { color = "black", width = 1 } = {}) {
+		this.ctx.lineWidth = width;
+		this.ctx.beginPath();
 
-        this.ctx.moveTo(startX, startY);
-        this.ctx.lineTo(endX, endY);
+		this.ctx.moveTo(startX, startY);
+		this.ctx.lineTo(endX, endY);
 
-        this.ctx.strokeStyle = color;
-        this.ctx.stroke();
-    }
+		this.ctx.strokeStyle = color;
+		this.ctx.stroke();
+	}
 
-	drawRect(startX, startY, endX, endY, {color = "black", width = 1, fill = false} = {}) {
+	drawRect(startX, startY, endX, endY, { color = "black", width = 1, fill = false } = {}) {
 		this.ctx.rect(startX, startY, endX, endY);
 
 		this.ctx.strokeStyle = color;
 		this.ctx.lineWidth = width;
-		
+
 		if (fill) {
 			this.ctx.fillStyle = fill;
 			this.ctx.fill();
@@ -186,7 +186,7 @@ class CanvasDrawer {
 		this.ctx.stroke();
 	}
 
-	drawCircle(x, y, radius, {color = "black", width = 1, fill = false} = {}) {
+	drawCircle(x, y, radius, { color = "black", width = 1, fill = false } = {}) {
 		this.ctx.beginPath();
 		this.ctx.arc(x, y, radius, 0, 2 * Math.PI, false);
 
@@ -200,7 +200,7 @@ class CanvasDrawer {
 		this.ctx.stroke();
 	}
 
-	drawArrow(startX, startY, endX, endY, { color = "black", width = 1, arrowHeadLength = 10, arrowAngleDegrees = 30, autoShrinkArrowHead = true} = {}) {
+	drawArrow(startX, startY, endX, endY, { color = "black", width = 1, arrowHeadLength = 10, arrowAngleDegrees = 30, autoShrinkArrowHead = true } = {}) {
 		const lineDistance = findDistance(startX, startY, endX, endY);
 		if (lineDistance == 0) return
 
@@ -224,17 +224,18 @@ class CanvasDrawer {
 }
 
 class PositionSlider extends CanvasDrawer {
-    constructor(canvas, position, size, vertical = false) {
+	constructor(canvas, position, size, vertical = false) {
 		super(canvas, position, size)
 
 		this.isSelected = false;
 		this.isHovered = false;
-		this.canvas.addEventListener('mousedown', this.detectClicked)
-		this.canvas.addEventListener('mousemove', this.move)
-		document.body.addEventListener('mouseup', this.mouseUp)
-		document.body.addEventListener('mouseleave', this.mouseUp)
-				
-        this.isVertical = vertical;
+		this.canvas.addEventListener('mousedown', this.detectClicked);
+		this.canvas.addEventListener('mousemove', this.move);
+		this.canvas.addEventListener('mousemove', this.move);
+		document.body.addEventListener('mouseup', this.mouseUp);
+		document.body.addEventListener('mouseleave', this.mouseUp);
+
+		this.isVertical = vertical;
 
 		this.defaultBgColor = "#99ccff";
 		this.hoverBgColor = "#80bfff"
@@ -242,13 +243,13 @@ class PositionSlider extends CanvasDrawer {
 
 		this.lineColor = "black";
 
-        this.thumbRadius = (this.isVertical ? this.cWidth : this.cHeight) * 0.4;
+		this.thumbRadius = (this.isVertical ? this.cWidth : this.cHeight) * 0.4;
 		this.thumbColor = "green";
 
 		this.setLocalCenteredPosition(0);
 
-		this.oninput = () => {};
-    }
+		this.oninput = () => { };
+	}
 
 	toCanvasLocation(x, y) {
 		const rect = this.canvas.getBoundingClientRect();
@@ -258,7 +259,7 @@ class PositionSlider extends CanvasDrawer {
 
 	detectClicked = (event) => {
 		const [x, y] = this.toCanvasLocation(event.x, event.y);
-		
+
 		if (x >= this.cX && x <= this.cX + this.cWidth && y >= this.cY && y <= this.cY + this.cHeight) {
 
 			this.isSelected = true;
@@ -274,55 +275,55 @@ class PositionSlider extends CanvasDrawer {
 		const [x, y] = this.toCanvasLocation(event.x, event.y);
 
 		if (this.isSelected) this.setValue(this.isVertical ? y - this.thumbRadius * 2 : x);
-		
+
 		this.isHovered = x >= this.cX && x <= this.cX + this.cWidth && y >= this.cY && y <= this.cY + this.cHeight;
 	}
 
-    draw() {
+	draw() {
 		this.ctx.save();
-        this.ctx.translate(this.cX, this.cY);
+		this.ctx.translate(this.cX, this.cY);
 
-        this.drawRect(0, 0, this.cWidth, this.cHeight, {color: "transparent", fill: this.isSelected ? this.selectedBgColor : (this.isHovered ? this.hoverBgColor : this.defaultBgColor)});
+		this.drawRect(0, 0, this.cWidth, this.cHeight, { color: "transparent", fill: this.isSelected ? this.selectedBgColor : (this.isHovered ? this.hoverBgColor : this.defaultBgColor) });
 
 		if (this.isVertical) {
 			this.drawLine(
 				this.cWidth / 2, this.thumbRadius / 2,
 				this.cWidth / 2, this.cHeight - this.thumbRadius / 2,
-				{color: this.lineColor});
+				{ color: this.lineColor });
 		}
 		else {
 			this.drawLine(
 				this.thumbRadius / 2, this.cHeight / 2,
 				this.cWidth - this.thumbRadius / 2, this.cHeight / 2,
-				{color: this.lineColor});
+				{ color: this.lineColor });
 		}
 
-        this.ctx.restore();
-    }
+		this.ctx.restore();
+	}
 
 	drawThumb() {
 		this.ctx.save();
-        this.ctx.translate(this.cX, this.cY);
+		this.ctx.translate(this.cX, this.cY);
 
 		if (this.isVertical) {
 			this.drawCircle(
 				this.cWidth / 2, this.value + this.thumbRadius,
-				this.thumbRadius, {fill: this.thumbColor});
+				this.thumbRadius, { fill: this.thumbColor });
 
 			this.drawLine(
 				(this.cWidth - this.thumbRadius) / 2, this.value + this.thumbRadius,
 				(this.cWidth + this.thumbRadius) / 2, this.value + this.thumbRadius,
-				{color: "white"})
+				{ color: "white" })
 		}
 		else {
 			this.drawCircle(
 				this.value, this.cHeight / 2,
-				this.thumbRadius, {fill: this.thumbColor});
+				this.thumbRadius, { fill: this.thumbColor });
 
 			this.drawLine(
 				this.value, (this.cHeight - this.thumbRadius) / 2,
 				this.value, (this.cHeight + this.thumbRadius) / 2,
-				{color: "white"})
+				{ color: "white" })
 		}
 
 		this.ctx.restore();
@@ -331,7 +332,7 @@ class PositionSlider extends CanvasDrawer {
 	getPosition() {
 		return this.value + (this.isVertical ? this.cY : this.cX);
 	}
-	
+
 	setPosition(value) {
 		this.value = value - (this.isVertical ? this.cY : this.cX)
 	}
@@ -347,7 +348,7 @@ class PositionSlider extends CanvasDrawer {
 	getLocalCenteredPosition() {
 		return this.getLocalPosition() - (this.isVertical ? this.cHeight : this.cWidth) / 2;
 	}
-	
+
 	setLocalCenteredPosition(value) {
 		this.setLocalPosition(value + (this.isVertical ? this.cHeight : this.cWidth) / 2);
 	}
@@ -355,7 +356,7 @@ class PositionSlider extends CanvasDrawer {
 	getCenteredPosition() {
 		return this.getPosition() - (this.isVertical ? this.cHeight : this.cWidth) / 2;
 	}
-	
+
 	setCenteredPosition(value) {
 		this.setPosition(value + (this.isVertical ? this.cHeight : this.cWidth) / 2);
 	}
@@ -368,67 +369,67 @@ class PositionSlider extends CanvasDrawer {
 		else {
 			value -= this.cX;
 			this.value = clamp(value, this.cX + this.thumbRadius, this.cX + this.cWidth - this.thumbRadius);
-		} 
+		}
 		this.oninput();
 	}
 }
 
 
 class Floor extends CanvasDrawer {
-    constructor(canvas, position, size, {floorWidth=1} = {}) {
+	constructor(canvas, position, size, { floorWidth = 1 } = {}) {
 		super(canvas, position, size)
 
 		this.floorWidth = floorWidth;
 
-        this.setFloorOffset(0);
-    }
+		this.setFloorOffset(0);
+	}
 
-    setFloorOffset(floorOffset) {
-        this.floorOffset = floorOffset;
+	setFloorOffset(floorOffset) {
+		this.floorOffset = floorOffset;
 
-        [this.startX, this.startY] = [0, (this.cHeight - this.floorOffset) / 2];
-        [this.endX, this.endY] = [this.cWidth, (this.cHeight + this.floorOffset) / 2];
-    }
+		[this.startX, this.startY] = [0, (this.cHeight - this.floorOffset) / 2];
+		[this.endX, this.endY] = [this.cWidth, (this.cHeight + this.floorOffset) / 2];
+	}
 
 	getFloorOffset() {
 		return -this.floorOffset;
 	}
 
-    setFloorRad(floorRad) {
-        const radiansB = Math.tan(floorRad) * this.cWidth
-        this.setFloorOffset(radiansB);
-    }
+	setFloorRad(floorRad) {
+		const radiansB = Math.tan(floorRad) * this.cWidth
+		this.setFloorOffset(radiansB);
+	}
 
-    getFloorRad() {
-        const adjacent = this.cWidth;
-        const opposite = this.endY - this.startY;
+	getFloorRad() {
+		const adjacent = this.cWidth;
+		const opposite = this.endY - this.startY;
 
-        return Math.atan(opposite / adjacent);
-    }
+		return Math.atan(opposite / adjacent);
+	}
 
-    setFloorDegrees(floorDegrees) {
-        const floorRad = degreesToRadians(floorDegrees);
-        this.setFloorRad(floorRad);
-    }
+	setFloorDegrees(floorDegrees) {
+		const floorRad = degreesToRadians(floorDegrees);
+		this.setFloorRad(floorRad);
+	}
 
-    getFloorDegrees() {
-        const floorRad = this.getFloorRad();
-        return radiansToDegrees(floorRad);
-    }
-	
-    draw() {
+	getFloorDegrees() {
+		const floorRad = this.getFloorRad();
+		return radiansToDegrees(floorRad);
+	}
+
+	draw() {
 		this.ctx.save();
 		this.ctx.translate(this.cX, this.cY);
 
-		this.drawRect(0, 0, this.cWidth, this.cHeight, {color: "transparent", fill: "white"})
-		this.drawLine(this.startX, this.startY + (this.floorWidth-1)/2, this.endX, this.endY + (this.floorWidth-1)/2, {color: "black", width: this.floorWidth})
+		this.drawRect(0, 0, this.cWidth, this.cHeight, { color: "transparent", fill: "white" })
+		this.drawLine(this.startX, this.startY + (this.floorWidth - 1) / 2, this.endX, this.endY + (this.floorWidth - 1) / 2, { color: "black", width: this.floorWidth })
 
 		this.ctx.restore();
-    }
+	}
 }
 
 class PidController {
-    constructor(deltaTimeMs) {
+	constructor(deltaTimeMs) {
 		this.deltaTime = deltaTimeMs;
 		this.deltaTimeSeconds = deltaTimeMs / 1000;
 
@@ -445,7 +446,7 @@ class PidController {
 		this.measuredValue = 0;
 
 		setInterval(() => this.update(), this.deltaTime)
-    }
+	}
 
 	setSetPoint(value) {
 		this.setPoint = value;
@@ -462,73 +463,73 @@ class PidController {
 		// const deltaTime = (now - this.lastTime) || 1;
 
 		const proportional = error;
-		const integral = this.integral + error * (1/this.deltaTime);
-		const derivative = (error - this.previousError) / (1/this.deltaTime);
+		const integral = this.integral + error * (1 / this.deltaTime);
+		const derivative = (error - this.previousError) / (1 / this.deltaTime);
 
 		// console.log(proportional, integral, derivative);
 		// console.log((pidSettings.P * proportional) / this.deltaTime, (pidSettings.I * integral) / this.deltaTime, (pidSettings.D * derivative) / this.deltaTime);
-		
+
 		this.result = (pidSettings.P * proportional + pidSettings.I * integral + pidSettings.D * derivative) / this.deltaTime;
 
 		this.previousError = error;
 		this.integral = integral;
 	}
 
-	getResult(){
+	getResult() {
 		return this.result;
 	}
 }
 
 function moveTowards(value, target, distance) {
 	distance = Math.abs(distance);
-    if (value > target) {
-        if (value - target < distance) {
-            return target;
-        }
-        return value - distance;
-    }
-    else {
-        if (target - value < distance) {
-            return target;
-        }
-        return value + distance;
-    }
+	if (value > target) {
+		if (value - target < distance) {
+			return target;
+		}
+		return value - distance;
+	}
+	else {
+		if (target - value < distance) {
+			return target;
+		}
+		return value + distance;
+	}
 }
 
 class Car extends CanvasDrawer {
-    constructor(canvas, imageSource, ground) {
+	constructor(canvas, imageSource, ground) {
 		super(canvas)
 
-        this.ground = ground;
+		this.ground = ground;
 
-        // load image
-        this.image = new Image();
-        this.hasImageLoaded = false;
-        this.image.onload = () => {
-            this.hasImageLoaded = true;
-        }
-        this.image.src = imageSource;
-		
+		// load image
+		this.image = new Image();
+		this.hasImageLoaded = false;
+		this.image.onload = () => {
+			this.hasImageLoaded = true;
+		}
+		this.image.src = imageSource;
+
 		const scale = Math.min(this.ground.cWidth, this.ground.cHeight)
 		const size = 2500;
-		
+
 		this.width = (scale / size) * 400;
 		this.height = (scale / size) * 200;
-		
-		this.boxLines = true;
-		
-		this.motorPower = 0;
-		
-		this.reset();
-    }
 
-    reset() {
-        this.xVelocity = 0;
-        
-        this.setLocalWorldCenteredCenterX(0);
-        this.y = 0;
-        this.rotation = 0;
-    }
+		this.boxLines = true;
+
+		this.motorPower = 0;
+
+		this.reset();
+	}
+
+	reset() {
+		this.xVelocity = 0;
+
+		this.setLocalWorldCenteredCenterX(0);
+		this.y = 0;
+		this.rotation = 0;
+	}
 
 	setMotorPower(power) {
 		this.motorPower = clamp(power, -carSettings.maxMotorPower, carSettings.maxMotorPower)
@@ -543,12 +544,12 @@ class Car extends CanvasDrawer {
 	}
 
 	getLocalCenterX() {
-        return this.getLocalX() + this.width/2;
-    }
+		return this.getLocalX() + this.width / 2;
+	}
 
-    setLocalCenterX(x) {
-        this.setLocalX(x - this.width/2);
-    }
+	setLocalCenterX(x) {
+		this.setLocalX(x - this.width / 2);
+	}
 
 	getX() {
 		return this.ground.cX + this.getLocalX();
@@ -582,33 +583,33 @@ class Car extends CanvasDrawer {
 		this.setCenterX(x + this.ground.cWidth / 2);
 	}
 
-    update() {
-        this.rotation = this.ground.getFloorRad();
+	update() {
+		this.rotation = this.ground.getFloorRad();
 
-        // find ground
-        const b2 = Math.tan(this.rotation) * (this.x + this.width/2) - this.height;
-        const ground = this.ground.startY + b2;
-		
-        this.y = ground;
+		// find ground
+		const b2 = Math.tan(this.rotation) * (this.x + this.width / 2) - this.height;
+		const ground = this.ground.startY + b2;
 
-        const weight = carSettings.mass * -physicsSettings.gravity;
+		this.y = ground;
 
-        const bRad = Math.PI / 2 - this.rotation;
+		const weight = carSettings.mass * -physicsSettings.gravity;
 
-        const adj = Math.cos(bRad) * weight;
-        const op = Math.sin(bRad) * weight;
+		const bRad = Math.PI / 2 - this.rotation;
 
-        const frictionResistance = op * physicsSettings.friction;
-        const hillForce = -adj
+		const adj = Math.cos(bRad) * weight;
+		const op = Math.sin(bRad) * weight;
 
-        this.xVelocity += (hillForce + this.motorPower) / FPS;
-		
+		const frictionResistance = op * physicsSettings.friction;
+		const hillForce = -adj
+
+		this.xVelocity += (hillForce + this.motorPower) / FPS;
+
 		const airResistance = ((physicsSettings.airDensity * carSettings.dragCoefficient) / 2) * Math.pow(this.xVelocity, 2);
 
 		this.xVelocity = moveTowards(this.xVelocity, 0, frictionResistance / FPS)
 		this.xVelocity = moveTowards(this.xVelocity, 0, airResistance / FPS)
-		
-        this.x += this.xVelocity
+
+		this.x += this.xVelocity
 
 		// console.log([hillForce, this.motorPower, airResistance, frictionResistance], [this.x, this.xVelocity])
 		if (infoLineOpacities.force > 0) {
@@ -619,23 +620,23 @@ class Car extends CanvasDrawer {
 
 			const heightOffset = -this.height;
 
-			this.ctx.translate(this.x + this.ground.cX + this.width/2, this.y + this.ground.cY + this.height/2 + heightOffset);
+			this.ctx.translate(this.x + this.ground.cX + this.width / 2, this.y + this.ground.cY + this.height / 2 + heightOffset);
 
-			const carDirection = this.xVelocity/Math.abs(this.xVelocity)
+			const carDirection = this.xVelocity / Math.abs(this.xVelocity)
 
-			const lineOptions = {color: color, width: 2, arrowHeadLength: 5}
+			const lineOptions = { color: color, width: 2, arrowHeadLength: 5 }
 
 			this.drawArrow(0, 0, hillForce * FORCE_LINE_MULTIPLIER, 0, lineOptions)
 			this.drawArrow(0, 5, Math.abs(frictionResistance) * -carDirection * FORCE_LINE_MULTIPLIER, 5, lineOptions)
 			this.drawArrow(0, 10, Math.abs(airResistance) * -carDirection * FORCE_LINE_MULTIPLIER, 10, lineOptions)
 
-			this.drawArrow(0, 15, this.xVelocity * FORCE_LINE_MULTIPLIER, 15, {color: red, width: 1, arrowHeadLength: 5})
+			this.drawArrow(0, 15, this.xVelocity * FORCE_LINE_MULTIPLIER, 15, { color: red, width: 1, arrowHeadLength: 5 })
 
 			this.ctx.restore();
 		}
-    }
-	
-    draw() {
+	}
+
+	draw() {
 		const boxColor = `rgba(0, 0, 0, ${infoLineOpacities.carOutlineLines})`;
 		const arrowColor = `rgba(0, 255, 0, ${infoLineOpacities.carOutlineLines})`;
 
@@ -644,44 +645,44 @@ class Car extends CanvasDrawer {
 
 			this.ctx.translate(this.x + this.ground.cX, this.y + this.ground.cY);
 
-			this.drawLine(0, 0, this.width, 0, {color: boxColor})
-			this.drawLine(0, 0, 0, this.height, {color: boxColor})
-			this.drawLine(this.width, 0, this.width, this.height, {color: boxColor})
-			this.drawLine(this.width, this.height, 0, this.height, {color: boxColor})
+			this.drawLine(0, 0, this.width, 0, { color: boxColor })
+			this.drawLine(0, 0, 0, this.height, { color: boxColor })
+			this.drawLine(this.width, 0, this.width, this.height, { color: boxColor })
+			this.drawLine(this.width, this.height, 0, this.height, { color: boxColor })
 
-			this.drawCircle(this.width / 2, this.height, 5, {color: arrowColor})
-			this.drawArrow(this.width / 2, this.height, this.width / 2, 100, {color: arrowColor})
+			this.drawCircle(this.width / 2, this.height, 5, { color: arrowColor })
+			this.drawArrow(this.width / 2, this.height, this.width / 2, 100, { color: arrowColor })
 
 			this.ctx.restore();
 		}
 
-        this.ctx.save();
+		this.ctx.save();
 
-        this.ctx.translate(this.ground.cX + this.x + this.width/2, this.y + this.height);
-        this.ctx.rotate(this.rotation);
-        this.ctx.translate(-this.width/2, -this.height);
+		this.ctx.translate(this.ground.cX + this.x + this.width / 2, this.y + this.height);
+		this.ctx.rotate(this.rotation);
+		this.ctx.translate(-this.width / 2, -this.height);
 
 		if (infoLineOpacities.carOutlineLines > 0) {
-			this.drawLine(0, 0, this.width, 0, {color: boxColor})
-			this.drawLine(0, 0, 0, this.height, {color: boxColor})
-			this.drawLine(this.width, 0, this.width, this.height, {color: boxColor})
-			this.drawLine(this.width, this.height, 0, this.height, {color: boxColor})
+			this.drawLine(0, 0, this.width, 0, { color: boxColor })
+			this.drawLine(0, 0, 0, this.height, { color: boxColor })
+			this.drawLine(this.width, 0, this.width, this.height, { color: boxColor })
+			this.drawLine(this.width, this.height, 0, this.height, { color: boxColor })
 
-			this.drawCircle(this.width / 2, this.height, 5, {color: arrowColor})
-			this.drawArrow(this.width / 2, this.height, this.width / 2, 100, {color: arrowColor})
+			this.drawCircle(this.width / 2, this.height, 5, { color: arrowColor })
+			this.drawArrow(this.width / 2, this.height, this.width / 2, 100, { color: arrowColor })
 		}
 
-		
-        if (this.hasImageLoaded) this.ctx.drawImage(this.image, 0, 0, this.width, this.height);
-		else this.drawRect(0, 0, this.width, this.height, {fill: "black"})
+
+		if (this.hasImageLoaded) this.ctx.drawImage(this.image, 0, 0, this.width, this.height);
+		else this.drawRect(0, 0, this.width, this.height, { fill: "black" })
 
 		if (infoLineOpacities.carMotorPower > 0) {
 			const motorColor = `rgba(255, 0, 0, ${infoLineOpacities.carMotorPower})`;
-			this.drawArrow(this.width/2, this.height/2, this.width/2 + this.motorPower * FORCE_LINE_MULTIPLIER, this.height/2, {color: motorColor, width: 4})
+			this.drawArrow(this.width / 2, this.height / 2, this.width / 2 + this.motorPower * FORCE_LINE_MULTIPLIER, this.height / 2, { color: motorColor, width: 4 })
 		}
 
-        this.ctx.restore()
-    }
+		this.ctx.restore()
+	}
 }
 
 const sliderWidth = 11;
@@ -699,7 +700,7 @@ carPidController.updateMeasuredValue(car.getLocalCenterX());
 // set up ground angle inputs
 groundAngleSlider.oninput = () => {
 	const worldTilt = groundAngleSlider.getCenteredPosition() * -2;
-    world.setFloorOffset(worldTilt);
+	world.setFloorOffset(worldTilt);
 	groundDegreesInput.value = world.getFloorDegrees();
 }
 groundDegreesInput.oninput = () => {
@@ -736,29 +737,29 @@ setInterval(() => {
 	carPidController.updateMeasuredValue(car.getCenterX())
 	car.setMotorPower(carPidController.getResult());
 
-    world.draw();
-	
+	world.draw();
+
 	if (focusedElement !== carPointInput) {
 		carPointInput.value = car.getLocalWorldCenteredCenterX();
 	}
 
 	if (infoLineOpacities.crossLines > 0) {
 		const color = `rgba(0, 0, 255, ${infoLineOpacities.crossLines})`
-		world.drawLine(world.cX + world.cWidth / 2, world.cY, world.cX + world.cWidth / 2, world.cY + world.cHeight, {color: color, width: 1});
-		world.drawLine(world.cX, world.cY + world.cHeight / 2, world.cX + world.cWidth, world.cY + world.cHeight / 2, {color: color, width: 1});
+		world.drawLine(world.cX + world.cWidth / 2, world.cY, world.cX + world.cWidth / 2, world.cY + world.cHeight, { color: color, width: 1 });
+		world.drawLine(world.cX, world.cY + world.cHeight / 2, world.cX + world.cWidth, world.cY + world.cHeight / 2, { color: color, width: 1 });
 	}
 
 	if (setPointSlider.isHovered || setPointSlider.isSelected || focusedElement === setPointInput) {
 		const setPoint = setPointSlider.getPosition();
-		world.drawLine(setPoint, world.cY, setPoint, world.cY+world.cHeight, {color: "green"})
+		world.drawLine(setPoint, world.cY, setPoint, world.cY + world.cHeight, { color: "green" })
 	}
-	
-    
-    car.update();
-    car.draw()
-	
-    groundAngleSlider.draw();
-    setPointSlider.draw();
+
+
+	car.update();
+	car.draw()
+
+	groundAngleSlider.draw();
+	setPointSlider.draw();
 
 	groundAngleSlider.drawThumb();
 	setPointSlider.drawThumb();
