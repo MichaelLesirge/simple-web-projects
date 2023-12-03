@@ -46,6 +46,7 @@ function makeSettings(header, values, { getInputElements = false } = {}) {
 	const updateObject = {};
 	const inputs = [];
 
+
 	for (const [name, rules] of Object.entries(values)) {
 		// .category .controls .item
 		const item = document.createElement("div");
@@ -73,7 +74,11 @@ function makeSettings(header, values, { getInputElements = false } = {}) {
 		for (const [ruleType, ruleValue] of Object.entries(rules)) {
 			input.setAttribute(ruleType, ruleValue);
 		}
-		input.step = "any";
+
+		input.step = 1;
+		document.addEventListener("click", (event) => input.step = event.target == input ? rules.step : "any")
+
+		settingsMenu.addEventListener("reset", () => { if (input.oninput) setTimeout(input.oninput) })
 
 		inputs.push(input);
 
@@ -95,9 +100,9 @@ const FPS = 60;
 const FORCE_LINE_MULTIPLIER = 10;
 
 const pidSettings = makeSettings("PID Gains", {
-	P: { value: 1, min: 0, title: "Proportional Term" },
-	I: { value: 0, min: 0, title: "Integral Term" },
-	D: { value: 0, min: 0, title: "Derivative Term" },
+	P: { value: 1, min: 0, title: "Proportional Term", step: 0.1 },
+	I: { value: 0, min: 0, title: "Integral Term", step: 0.1 },
+	D: { value: 0, min: 0, title: "Derivative Term", step: 0.1 },
 })
 
 const [groundDegreesInput, setPointInput, carPointInput] = makeSettings("General", {
@@ -108,25 +113,25 @@ const [groundDegreesInput, setPointInput, carPointInput] = makeSettings("General
 
 
 const physicsSettings = makeSettings("World", {
-	gravity: { name: "Gravity", value: 9.8, min: 0, title: "Gravity of world" },
-	friction: { name: "Friction Coefficient", value: 0.02, min: 0, title: "How easily the car slides" },
-	airDensity: { name: "Air Density", value: 1.225, min: 0, title: "How strong air resistance is" },
+	gravity: { name: "Gravity", value: 9.8, min: 0, title: "Gravity of world", step: 0.1 },
+	friction: { name: "Friction Coefficient", value: 0.02, min: 0, title: "How easily the car slides", step: 0.1 },
+	airDensity: { name: "Air Density", value: 1.225, min: 0, title: "How strong air resistance is", step: 0.1 },
 });
 
 const carSettings = makeSettings("Car", {
-	maxMotorPower: { name: "Max Motor Power", value: 10, min: 0, max: 60, title: "Max amount of force motors can spin wheels with" },
-	mass: { name: "Mass", value: 3, min: 0, title: "Mass of car, how much gravity effects car" },
-	dragCoefficient: { name: "Drag Coefficient", value: 0.01, min: 0, title: "How much drag effects car" },
+	maxMotorPower: { name: "Max Motor Power", value: 10, min: 0, max: 60, title: "Max amount of force motors can spin wheels with", step: 0.1 },
+	mass: { name: "Mass", value: 3, min: 0, title: "Mass of car, how much gravity effects car", step: 0.1 },
+	dragCoefficient: { name: "Drag Coefficient", value: 0.01, min: 0, title: "How much drag effects car", step: 0.1 },
 });
 
 const infoLineOpacities = makeSettings("Info Lines Opacity", {
-	carMotorPower: { name: "Car Motor Power", value: 0, min: 0, max: 1, title: "How visible arrow showing car's motor force is" },
-	force: { name: "Forces", value: 0, min: 0, max: 1, title: "How visible force arrows are, force arrows are gravity, friction, air resistance, and velocity" },
-	carOutlineLines: { name: "Car Outline", value: 0, min: 0, max: 1, title: "How visible car outline is" },
-	crossLines: { name: "Center Cross", value: 0, min: 0, max: 1, title: "How visible center cross is"},
+	carMotorPower: { name: "Car Motor Power", value: 0, min: 0, max: 1, title: "How visible arrow showing car's motor force is", step: 0.1 },
+	force: { name: "Forces", value: 0, min: 0, max: 1, title: "How visible force arrows are, force arrows are gravity, friction, air resistance, and velocity", step: 0.1 },
+	carOutlineLines: { name: "Car Outline", value: 0, min: 0, max: 1, title: "How visible car outline is", step: 0.1 },
+	crossLines: { name: "Center Cross", value: 0, min: 0, max: 1, title: "How visible center cross is", step: 0.1 },
 });
 
-// const resetCarButton = document.getElementById("reset-button");
+const resetCarButton = document.getElementById("reset-button");
 
 const deltaTime = 25;
 
@@ -221,7 +226,7 @@ class CanvasDrawer {
 		this.drawLine(endX, endY, x2, y2, { color: color, width: width });
 	}
 
-	drawText(text, x, y, height, {centerX = false, centerY = false, font = "monospace", color = "black"} = {}) {
+	drawText(text, x, y, height, { centerX = false, centerY = false, font = "monospace", color = "black" } = {}) {
 		height = (typeof height === "number") ? String(height) + "px" : height;
 
 		this.ctx.textAlign = centerX ? "center" : "left";
@@ -467,14 +472,7 @@ class PidController {
 		this.deltaTime = deltaTimeMs;
 		this.deltaTimeSeconds = deltaTimeMs / 1000;
 
-		this.previousError = 0;
-		this.integral = 0;
-
-		this.lastTime = new Date().getTime();
-
-		this.hiddenOkRange = 3;
-
-		this.result = 0;
+		this.reset();
 
 		this.setPoint = 0;
 		this.measuredValue = 0;
@@ -488,6 +486,12 @@ class PidController {
 
 	updateMeasuredValue(value) {
 		this.measuredValue = value;
+	}
+
+	reset() {
+		this.result = 0;
+		this.previousError = 0;
+		this.integral = 0;
 	}
 
 	update() {
@@ -743,11 +747,11 @@ groundDegreesInput.oninput = () => {
 };
 groundDegreesInput.max = 89;
 groundDegreesInput.min = -89;
-groundDegreesInput.value = Math.round(groundAngleSlider.getCenteredPosition());
+groundDegreesInput.setAttribute("value", Math.round(groundAngleSlider.getCenteredPosition()));
 
 // set up car position input
 carPointInput.oninput = () => car.setLocalWorldCenteredCenterX(Number(carPointInput.value));
-carPointInput.value = Math.round(car.getLocalWorldCenteredCenterX());
+carPointInput.setAttribute("value", Math.round(car.getLocalWorldCenteredCenterX()));
 
 // set up set point inputs
 setPointSlider.oninput = () => {
@@ -758,9 +762,13 @@ setPointInput.oninput = () => {
 	setPointSlider.setLocalCenteredPosition(Number(setPointInput.value));
 	carPidController.setSetPoint(setPointSlider.getPosition());
 };
-setPointInput.value = setPointSlider.getLocalCenteredPosition();
+setPointInput.setAttribute("value", setPointSlider.getLocalCenteredPosition());
 
-// resetCarButton.addEventListener("click", car.reset)
+console.log(resetCarButton);
+resetCarButton.onclick = () => {
+	car.reset();
+	carPidController.reset();
+}
 
 // main loop
 setInterval(() => {
@@ -775,18 +783,12 @@ setInterval(() => {
 		carPointInput.value = Math.round(car.getLocalWorldCenteredCenterX());
 	}
 
-	if (infoLineOpacities.crossLines > 0) {
-		const color = `rgba(0, 0, 255, ${infoLineOpacities.crossLines})`
-		world.drawLine(world.cX + world.cWidth / 2, world.cY, world.cX + world.cWidth / 2, world.cY + world.cHeight, { color: color, width: 1 });
-		world.drawLine(world.cX, world.cY + world.cHeight / 2, world.cX + world.cWidth, world.cY + world.cHeight / 2, { color: color, width: 1 });
-	}
-
 	if (setPointSlider.isHovered || setPointSlider.isSelected || focusedElement === setPointInput) {
 		const setPoint = setPointSlider.getPosition();
 		world.drawLine(setPoint, world.cY, setPoint, world.cY + world.cHeight, { color: "green" })
 	}
 	if (groundAngleSlider.isHovered || groundAngleSlider.isSelected || focusedElement == groundDegreesInput) {
-		world.displayGroundAngle({ color: "green"});
+		world.displayGroundAngle({ color: "green" });
 	}
 
 
