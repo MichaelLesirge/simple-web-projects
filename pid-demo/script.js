@@ -270,10 +270,10 @@ class PositionSlider extends CanvasDrawer {
 		this.oninput = () => { };
 	}
 
-	toCanvasLocation(x, y, downShiftV = 0, downShiftH = 10) {
+	toCanvasLocation(x, y) {
 		const rect = this.canvas.getBoundingClientRect();
 		const dpr = window.devicePixelRatio || 1;
-		return [x * dpr - rect.x, y * dpr - rect.y - (this.isVertical ? downShiftV : downShiftH)];
+		return [(x - rect.x) * dpr, (y - rect.y) * dpr];
 	}
 
 	detectClicked = (event) => {
@@ -382,12 +382,12 @@ class PositionSlider extends CanvasDrawer {
 
 	setValue(value) {
 		if (this.isVertical) {
-			value -= this.thumbRadius + this.cY;
-			this.value = clamp(value, this.cY + this.thumbRadius, this.cY + this.cHeight - this.thumbRadius * 2);
+			value -= this.cY - this.thumbRadius;
+			this.value = clamp(value, this.thumbRadius, this.cHeight - this.thumbRadius * 2);
 		}
 		else {
 			value -= this.cX;
-			this.value = clamp(value, this.cX + this.thumbRadius, this.cX + this.cWidth - this.thumbRadius);
+			this.value = clamp(value, this.thumbRadius, this.cWidth - this.thumbRadius);
 		}
 		this.oninput();
 	}
