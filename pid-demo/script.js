@@ -265,15 +265,16 @@ class PositionSlider extends CanvasDrawer {
 		this.thumbRadius = (this.isVertical ? this.cWidth : this.cHeight) * 0.4;
 		this.thumbColor = "green";
 
+		this.rect = this.canvas.getBoundingClientRect();
+		this.dpr = window.devicePixelRatio || 1;
+
 		this.setLocalCenteredPosition(0);
 
 		this.oninput = () => { };
 	}
 
 	toCanvasLocation(x, y) {
-		const rect = this.canvas.getBoundingClientRect();
-		const dpr = window.devicePixelRatio || 1;
-		return [(x - rect.x) * dpr, (y - rect.y) * dpr];
+		return [(x - this.rect.x) * this.dpr, (y - this.rect.y) * this.dpr];
 	}
 
 	detectClicked = (event) => {
@@ -734,11 +735,10 @@ carPidController.updateMeasuredValue(car.getLocalCenterX());
 groundAngleSlider.oninput = () => {
 	const worldTilt = groundAngleSlider.getCenteredPosition() * -2;
 	world.setFloorOffset(worldTilt);
-	groundDegreesInput.value = world.getFloorDegrees();
+	groundDegreesInput.value = Math.round(world.getFloorDegrees());
 }
 groundDegreesInput.oninput = () => {
-	const worldTiltDegrees = Number(groundDegreesInput.value);
-	world.setFloorDegrees(worldTiltDegrees);
+	world.setFloorDegrees(Number(groundDegreesInput.value));
 	groundAngleSlider.setCenteredPosition(world.getFloorOffset() / 2);
 };
 groundDegreesInput.max = 89;
@@ -747,16 +747,15 @@ groundDegreesInput.value = Math.round(groundAngleSlider.getCenteredPosition());
 
 // set up car position input
 carPointInput.oninput = () => car.setLocalWorldCenteredCenterX(Number(carPointInput.value));
-carPointInput.value = car.getLocalWorldCenteredCenterX();
+carPointInput.value = Math.round(car.getLocalWorldCenteredCenterX());
 
 // set up set point inputs
 setPointSlider.oninput = () => {
 	carPidController.setSetPoint(setPointSlider.getPosition());
-	setPointInput.value = setPointSlider.getLocalCenteredPosition();
+	setPointInput.value = Math.round(setPointSlider.getLocalCenteredPosition());
 }
 setPointInput.oninput = () => {
-	const setPointValue = Number(setPointInput.value)
-	setPointSlider.setLocalCenteredPosition(setPointValue);
+	setPointSlider.setLocalCenteredPosition(Number(setPointInput.value));
 	carPidController.setSetPoint(setPointSlider.getPosition());
 };
 setPointInput.value = setPointSlider.getLocalCenteredPosition();
@@ -773,7 +772,7 @@ setInterval(() => {
 	world.draw();
 
 	if (focusedElement !== carPointInput) {
-		carPointInput.value = car.getLocalWorldCenteredCenterX();
+		carPointInput.value = Math.round(car.getLocalWorldCenteredCenterX());
 	}
 
 	if (infoLineOpacities.crossLines > 0) {
