@@ -681,7 +681,7 @@ class Car extends CanvasDrawer {
 		if (infoLineOpacities.carOutlineLines > 0) {
 			this.ctx.save();
 
-			this.ctx.translate(this.x + this.ground.cX, this.y + this.ground.cY);
+			this.ctx.translate(this.ground.cX + this.x, this.ground.cY + this.y);
 
 			this.drawLine(0, 0, this.width, 0, { color: boxColor })
 			this.drawLine(0, 0, 0, this.height, { color: boxColor })
@@ -696,7 +696,7 @@ class Car extends CanvasDrawer {
 
 		this.ctx.save();
 
-		this.ctx.translate(this.ground.cX + this.x + this.width / 2, this.y + this.height);
+		this.ctx.translate(this.ground.cX + this.x + this.width / 2, this.ground.cY + this.y + this.height);
 		this.ctx.rotate(this.rotation);
 		this.ctx.translate(-this.width / 2, -this.height);
 
@@ -737,8 +737,7 @@ carPidController.updateMeasuredValue(car.getLocalCenterX());
 
 // set up ground angle inputs
 groundAngleSlider.oninput = () => {
-	const worldTilt = groundAngleSlider.getCenteredPosition() * -2;
-	world.setFloorOffset(worldTilt);
+	world.setFloorOffset(groundAngleSlider.getLocalCenteredPosition() * -2);
 	groundDegreesInput.value = Math.round(world.getFloorDegrees());
 }
 groundDegreesInput.oninput = () => {
@@ -747,7 +746,7 @@ groundDegreesInput.oninput = () => {
 };
 groundDegreesInput.max = 89;
 groundDegreesInput.min = -89;
-groundDegreesInput.setAttribute("value", Math.round(groundAngleSlider.getCenteredPosition()));
+groundDegreesInput.setAttribute("value", Math.round(groundAngleSlider.getLocalCenteredPosition()));
 
 // set up car position input
 carPointInput.oninput = () => car.setLocalWorldCenteredCenterX(Number(carPointInput.value));
@@ -764,7 +763,6 @@ setPointInput.oninput = () => {
 };
 setPointInput.setAttribute("value", setPointSlider.getLocalCenteredPosition());
 
-console.log(resetCarButton);
 resetCarButton.onclick = () => {
 	car.reset();
 	carPidController.reset();
