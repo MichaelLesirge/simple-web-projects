@@ -108,22 +108,22 @@ const [groundDegreesInput, setPointInput, carPointInput] = makeSettings("General
 
 
 const physicsSettings = makeSettings("World", {
-	gravity: { name: "Gravity", value: 9.8, min: 0 },
-	friction: { name: "Friction Coefficient", value: 0.02, min: 0 },
-	airDensity: { name: "Air Density", value: 1.225, min: 0 },
+	gravity: { name: "Gravity", value: 9.8, min: 0, title: "Gravity of world" },
+	friction: { name: "Friction Coefficient", value: 0.02, min: 0, title: "How easily the car slides" },
+	airDensity: { name: "Air Density", value: 1.225, min: 0, title: "How strong air resistance is" },
 });
 
 const carSettings = makeSettings("Car", {
-	maxMotorPower: { name: "Max Motor Power", value: 10, min: 0, max: 60 },
-	mass: { name: "Mass", value: 3, min: 0 },
-	dragCoefficient: { name: "Drag Coefficient", value: 0.01, min: 0 },
+	maxMotorPower: { name: "Max Motor Power", value: 10, min: 0, max: 60, title: "Max amount of force motors can spin wheels with" },
+	mass: { name: "Mass", value: 3, min: 0, title: "Mass of car, how much gravity effects car" },
+	dragCoefficient: { name: "Drag Coefficient", value: 0.01, min: 0, title: "How much drag effects car" },
 });
 
 const infoLineOpacities = makeSettings("Info Lines Opacity", {
-	crossLines: { name: "Center Cross", value: 0, min: 0, max: 1 },
-	carOutlineLines: { name: "Car Outline", value: 0, min: 0, max: 1 },
-	carMotorPower: { name: "Car Motor Power", value: 0, min: 0, max: 1 },
-	force: { name: "Forces", value: 0, min: 0, max: 1 },
+	carMotorPower: { name: "Car Motor Power", value: 0, min: 0, max: 1, title: "How visible arrow showing car's motor force is" },
+	force: { name: "Forces", value: 0, min: 0, max: 1, title: "How visible force arrows are, force arrows are gravity, friction, air resistance, and velocity" },
+	carOutlineLines: { name: "Car Outline", value: 0, min: 0, max: 1, title: "How visible car outline is" },
+	crossLines: { name: "Center Cross", value: 0, min: 0, max: 1, title: "How visible center cross is"},
 });
 
 // const resetCarButton = document.getElementById("reset-button");
@@ -739,7 +739,7 @@ groundAngleSlider.oninput = () => {
 groundDegreesInput.oninput = () => {
 	const worldTiltDegrees = Number(groundDegreesInput.value);
 	world.setFloorDegrees(worldTiltDegrees);
-	groundAngleSlider.setCenteredPosition(world.getFloorOffset() / -2);
+	groundAngleSlider.setCenteredPosition(world.getFloorOffset() / 2);
 };
 groundDegreesInput.max = 89;
 groundDegreesInput.min = -89;
