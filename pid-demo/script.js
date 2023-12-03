@@ -221,6 +221,20 @@ class CanvasDrawer {
 		this.drawLine(endX, endY, x2, y2, { color: color, width: width });
 	}
 
+	drawText(text, x, y, height, {centerX = false, centerY = false, font = "monospace", color = "black"} = {}) {
+		height = (typeof height === "number") ? String(height) + "px" : height;
+
+		this.ctx.textAlign = centerX ? "center" : "left";
+
+		this.ctx.fillStyle = color;
+		this.ctx.strokeStyle = color;
+
+		this.ctx.font = height + " " + font;
+
+		if (centerY) y -= height / 2;
+
+		this.ctx.strokeText(text, x, y);
+	}
 }
 
 class PositionSlider extends CanvasDrawer {
@@ -230,10 +244,15 @@ class PositionSlider extends CanvasDrawer {
 		this.isSelected = false;
 		this.isHovered = false;
 		this.canvas.addEventListener('mousedown', this.detectClicked);
+		this.canvas.addEventListener('touchstart', this.detectClicked);
+
 		this.canvas.addEventListener('mousemove', this.move);
-		this.canvas.addEventListener('mousemove', this.move);
-		document.body.addEventListener('mouseup', this.mouseUp);
-		document.body.addEventListener('mouseleave', this.mouseUp);
+		this.canvas.addEventListener('touchmove', this.move);
+
+		document.body.addEventListener('mouseup', this.cancelSelect);
+		document.body.addEventListener('touchend', this.cancelSelect)
+
+		document.body.addEventListener('mouseleave', this.cancelSelect);
 
 		this.isVertical = vertical;
 
@@ -251,10 +270,10 @@ class PositionSlider extends CanvasDrawer {
 		this.oninput = () => { };
 	}
 
-	toCanvasLocation(x, y) {
+	toCanvasLocation(x, y, downShiftV = 0, downShiftH = 10) {
 		const rect = this.canvas.getBoundingClientRect();
 		const dpr = window.devicePixelRatio || 1;
-		return [x * dpr - rect.x, y * dpr - rect.y - (this.isVertical ? 0 : 10)];
+		return [x * dpr - rect.x, y * dpr - rect.y - (this.isVertical ? downShiftV : downShiftH)];
 	}
 
 	detectClicked = (event) => {
@@ -267,7 +286,7 @@ class PositionSlider extends CanvasDrawer {
 		}
 	}
 
-	mouseUp = (event) => {
+	cancelSelect = (event) => {
 		this.isSelected = false;
 	}
 
@@ -389,6 +408,20 @@ class Floor extends CanvasDrawer {
 
 		[this.startX, this.startY] = [0, (this.cHeight - this.floorOffset) / 2];
 		[this.endX, this.endY] = [this.cWidth, (this.cHeight + this.floorOffset) / 2];
+	}
+
+	displayGroundAngle(drawSettings = {}) {
+		this.ctx.save();
+		this.ctx.translate(this.cX + this.cWidth / 2, this.cY + this.cHeight / 2);
+
+		const lineLength = 50
+
+		this.drawLine(0, 0, lineLength, 0, drawSettings)
+		this.drawLine(0, 0, 0, -lineLength, drawSettings)
+
+		this.drawText(Math.round(this.getFloorDegrees()) + "°", lineLength / 4, -lineLength / 6, 12);
+
+		this.ctx.restore();
 	}
 
 	getFloorOffset() {
@@ -752,6 +785,9 @@ setInterval(() => {
 	if (setPointSlider.isHovered || setPointSlider.isSelected || focusedElement === setPointInput) {
 		const setPoint = setPointSlider.getPosition();
 		world.drawLine(setPoint, world.cY, setPoint, world.cY + world.cHeight, { color: "green" })
+	}
+	if (groundAngleSlider.isHovered || groundAngleSlider.isSelected || focusedElement == groundDegreesInput) {
+		world.displayGroundAngle({ color: "green"});
 	}
 
 
