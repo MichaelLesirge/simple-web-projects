@@ -166,46 +166,46 @@ class CanvasDrawer {
 
 	}
 
-	drawLine(startX, startY, endX, endY, { color = "black", width = 1 } = {}) {
-		this.ctx.lineWidth = width;
-		this.ctx.beginPath();
+	drawLine(startX, startY, endX, endY, { color = undefined, thickness = 1, fill = undefined} = {}) {
 
+		this.ctx.strokeStyle = color;
+		this.ctx.fillStyle = fill;
+		this.ctx.lineWidth = thickness;
+		
+		this.ctx.beginPath();
 		this.ctx.moveTo(startX, startY);
 		this.ctx.lineTo(endX, endY);
-
-		this.ctx.strokeStyle = color;
+		
 		this.ctx.stroke();
 	}
 
-	drawRect(startX, startY, endX, endY, { color = "black", width = 1, fill = false } = {}) {
-		this.ctx.rect(startX, startY, endX, endY);
-
+	drawRect(x, y, width, height, { color = undefined, thickness = 1, fill = undefined } = {}) {	
+		
 		this.ctx.strokeStyle = color;
-		this.ctx.lineWidth = width;
+		this.ctx.fillStyle = fill;
+		this.ctx.lineWidth = thickness;
 
-		if (fill) {
-			this.ctx.fillStyle = fill;
-			this.ctx.fill();
-		}
+		if (fill) this.ctx.fillRect(x, y, width, height);
+		else this.ctx.rect(x, y, width, height);
 
-		this.ctx.stroke();
+		// if (color) this.ctx.stroke();
+		
 	}
 
-	drawCircle(x, y, radius, { color = "black", width = 1, fill = false } = {}) {
+	drawCircle(x, y, radius, { color = undefined, thickness = 1, fill = undefined } = {}) {
+		
 		this.ctx.beginPath();
 		this.ctx.arc(x, y, radius, 0, 2 * Math.PI, false);
 
-		this.ctx.fillStyle = fill;
-		if (fill) {
-			this.ctx.fill();
-		}
-
-		this.ctx.lineWidth = width;
 		this.ctx.strokeStyle = color;
+		this.ctx.fillStyle = fill;
+		this.ctx.lineWidth = thickness;
+
 		this.ctx.stroke();
+		if (fill) this.ctx.fill();
 	}
 
-	drawArrow(startX, startY, endX, endY, { color = "black", width = 1, arrowHeadLength = 10, arrowAngleDegrees = 30, autoShrinkArrowHead = true } = {}) {
+	drawArrow(startX, startY, endX, endY, { color = undefined, width = 1, arrowHeadLength = 10, arrowAngleDegrees = 30, autoShrinkArrowHead = true } = {}) {
 		const lineDistance = findDistance(startX, startY, endX, endY);
 		if (lineDistance == 0) return
 
@@ -226,20 +226,55 @@ class CanvasDrawer {
 		this.drawLine(endX, endY, x2, y2, { color: color, width: width });
 	}
 
-	drawText(text, x, y, height, { centerX = false, centerY = false, font = "monospace", color = "black" } = {}) {
+	drawText(text, x, y, height, { centerX = false, centerY = false, font = "monospace", color = "black", width = 1} = {}) {
+		this.ctx.fillStyle = color;
+		this.ctx.strokeStyle = color;
+		this.ctx.lineWidth = width;
+
 		height = (typeof height === "number") ? String(height) + "px" : height;
 
 		this.ctx.textAlign = centerX ? "center" : "left";
-
-		this.ctx.fillStyle = color;
-		this.ctx.strokeStyle = color;
-
 		this.ctx.font = height + " " + font;
 
 		if (centerY) y -= height / 2;
 
 		this.ctx.strokeText(text, x, y);
 	}
+}
+
+class HoverBox extends CanvasDrawer {
+	constructor(canvas, position, size) {
+		super(canvas, position, size);
+		this.isHovered = false;
+		
+		this.rect = this.canvas.getBoundingClientRect();
+		this.dpr = window.devicePixelRatio || 1;
+
+		this.canvas.addEventListener('mousemove', this.move);
+	}
+
+	toCanvasLocation(x, y) {
+		return [(x - this.rect.x) * this.dpr, (y - this.rect.y) * this.dpr];
+	}
+
+	move = (event) => {
+		const [x, y] = this.toCanvasLocation(event.x, event.y);
+
+		this.isHovered = x >= this.cX && x <= this.cX + this.cWidth && y >= this.cY && y <= this.cY + this.cHeight;
+	}
+
+	draw() {
+		const boxOneMarginPercent = 0.75;
+		const boxOneXMargin = (this.cWidth * (1-boxOneMarginPercent));
+		const boxOneYMargin = (this.cHeight * (1-boxOneMarginPercent));
+
+		this.drawRect(
+			this.cX + boxOneXMargin, this.cY + boxOneYMargin,
+			this.cWidth - boxOneXMargin*2, this.cHeight - boxOneYMargin*2,
+			{fill: this.isHovered ? "green" : "black"})
+	}
+
+
 }
 
 class PositionSlider extends CanvasDrawer {
@@ -249,13 +284,13 @@ class PositionSlider extends CanvasDrawer {
 		this.isSelected = false;
 		this.isHovered = false;
 		this.canvas.addEventListener('mousedown', this.detectClicked);
-		this.canvas.addEventListener('touchstart', this.detectClicked);
+		// this.canvas.addEventListener('touchstart', this.detectClicked);
 
 		this.canvas.addEventListener('mousemove', this.move);
-		this.canvas.addEventListener('touchmove', this.move);
+		// this.canvas.addEventListener('touchmove', this.move);
 
 		document.body.addEventListener('mouseup', this.cancelSelect);
-		document.body.addEventListener('touchend', this.cancelSelect)
+		// document.body.addEventListener('touchend', this.cancelSelect)
 
 		document.body.addEventListener('mouseleave', this.cancelSelect);
 
@@ -308,13 +343,15 @@ class PositionSlider extends CanvasDrawer {
 		this.ctx.save();
 		this.ctx.translate(this.cX, this.cY);
 
+		// draw slider background
 		this.drawRect(0, 0, this.cWidth, this.cHeight, { color: "transparent", fill: this.isSelected ? this.selectedBgColor : (this.isHovered ? this.hoverBgColor : this.defaultBgColor) });
 
+		// draw slider line
 		if (this.isVertical) {
 			this.drawLine(
 				this.cWidth / 2, this.thumbRadius / 2,
 				this.cWidth / 2, this.cHeight - this.thumbRadius / 2,
-				{ color: this.lineColor });
+				{ color: this.lineColor, fill: "black" });
 		}
 		else {
 			this.drawLine(
@@ -322,14 +359,8 @@ class PositionSlider extends CanvasDrawer {
 				this.cWidth - this.thumbRadius / 2, this.cHeight / 2,
 				{ color: this.lineColor });
 		}
-
-		this.ctx.restore();
-	}
-
-	drawThumb() {
-		this.ctx.save();
-		this.ctx.translate(this.cX, this.cY);
-
+		
+		// draw slider thumb
 		if (this.isVertical) {
 			this.drawCircle(
 				this.cWidth / 2, this.value + this.thumbRadius,
@@ -723,6 +754,27 @@ class Car extends CanvasDrawer {
 	}
 }
 
+class Graph extends CanvasDrawer {
+	constructor(canvas, xTicks, yTicks, position, size) {
+		super(canvas, position, size);
+
+		this.xTicks = xTicks;
+		this.yTicks = yTicks;
+
+		this.xSize = this.cWidth / this.xTicks;
+		this.ySize = this.cHeight / this.yTicks;
+	}
+
+	draw() {
+		this.ctx.save();
+		this.ctx.translate(this.cX, this.cY);
+
+		this.drawRect(0, 0, this.cWidth, this.cHeight, { color: "transparent", fill: "white" })
+
+		this.ctx.restore();
+	}
+}
+
 const sliderWidth = 11;
 const world = new Floor(displayCanvas, [sliderWidth, 0], [displayCanvas.width - sliderWidth, displayCanvas.height / 1.618]);
 
@@ -730,6 +782,9 @@ const car = new Car(displayCanvas, "car_outline.png", world)
 
 const groundAngleSlider = new PositionSlider(displayCanvas, [0, world.cY], [sliderWidth, world.cHeight - sliderWidth], true);
 const setPointSlider = new PositionSlider(displayCanvas, [world.cX, world.cY + world.cHeight - sliderWidth + 1], [world.cWidth, sliderWidth], false);
+const sliderDoubleHover = new HoverBox(displayCanvas, [groundAngleSlider.cX, setPointSlider.cY], [groundAngleSlider.cWidth, setPointSlider.cHeight]);
+
+const locationGraph = new Graph(displayCanvas, world.cWidth, 100, [0, setPointSlider.cY + setPointSlider.cHeight], [displayCanvas.width, displayCanvas.height - setPointSlider.cY + setPointSlider.cHeight]);
 
 const carPidController = new PidController(deltaTime);
 carPidController.setSetPoint(setPointSlider.getPosition());
@@ -781,22 +836,22 @@ setInterval(() => {
 		carPointInput.value = Math.round(car.getLocalWorldCenteredCenterX());
 	}
 
-	if (setPointSlider.isHovered || setPointSlider.isSelected || focusedElement === setPointInput) {
+	if (setPointSlider.isHovered || setPointSlider.isSelected || sliderDoubleHover.isHovered || focusedElement === setPointInput) {
 		const setPoint = setPointSlider.getPosition();
 		world.drawLine(setPoint, world.cY, setPoint, world.cY + world.cHeight, { color: "green" })
 	}
-	if (groundAngleSlider.isHovered || groundAngleSlider.isSelected || focusedElement == groundDegreesInput) {
+	if (groundAngleSlider.isHovered || groundAngleSlider.isSelected || sliderDoubleHover.isHovered || focusedElement == groundDegreesInput) {
 		world.displayGroundAngle({ color: "green" });
 	}
 
-
+	locationGraph.draw();
+	
 	car.update();
 	car.draw()
-
+	
 	groundAngleSlider.draw();
 	setPointSlider.draw();
 
-	groundAngleSlider.drawThumb();
-	setPointSlider.drawThumb();
+	sliderDoubleHover.draw();
 
 }, Math.floor(1000 / FPS))
