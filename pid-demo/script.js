@@ -100,9 +100,14 @@ const FPS = 60;
 const FORCE_LINE_MULTIPLIER = 15;
 
 const pidSettings = makeSettings("PID Gains", {
-	P: { value: 1, min: 0, title: "Proportional Term", step: 0.1 },
-	I: { value: 0, min: 0, title: "Integral Term", step: 0.1 },
-	D: { value: 0, min: 0, title: "Derivative Term", step: 0.1 },
+	P: { value: 1, min: 0, title: "The proportional gain value.", step: 0.1 },
+	I: { value: 0, min: 0, title: "The integral gain value", step: 0.1 },
+	D: { value: 0, min: 0, title: "The derivative gain value", step: 0.1 },
+})
+
+const settingsITerm = makeSettings("I Term Rules", {
+	maxAccum: { name: "Max Accumulation", min: 0, title: "This value is used to constrain the I accumulator to help manage integral wind-up.", step: 1 },
+	zone: { name: "Zone", min: 0, title: "This value specifies the range the |error| must be within for the integral constant to take effect.", step: 10 },
 })
 
 const [groundDegreesInput, setPointInput, carPointInput] = makeSettings("General", {
@@ -114,7 +119,7 @@ const [groundDegreesInput, setPointInput, carPointInput] = makeSettings("General
 
 const physicsSettings = makeSettings("World", {
 	gravity: { name: "Gravity", value: 9.8, min: 0, title: "Gravity of world", step: 0.1 },
-	friction: { name: "Friction Coefficient", value: 0.02, min: 0, title: "How easily the car slides", step: 0.1 },
+	friction: { name: "Friction", value: 0.02, min: 0, title: "Friction How easily the car slides", step: 0.1 },
 	airDensity: { name: "Air Density", value: 1.225, min: 0, title: "How strong air resistance is", step: 0.1 },
 });
 
@@ -125,7 +130,7 @@ const carSettings = makeSettings("Car", {
 });
 
 const infoLineOpacities = makeSettings("Info Lines Opacity", {
-	carMotorPower: { name: "Car Motor Power", value: 0, min: 0, max: 1, title: "How visible arrow showing car's motor force is", step: 0.1 },
+	carMotorPower: { name: "Motor Power", value: 0, min: 0, max: 1, title: "How visible arrow showing car's motor force is", step: 0.1 },
 	force: { name: "Forces", value: 0, min: 0, max: 1, title: "How visible force arrows are, force arrows are gravity, friction, air resistance, and velocity", step: 0.1 },
 	carOutlineLines: { name: "Car Outline", value: 0, min: 0, max: 1, title: "How visible car outline is", step: 0.1 },
 });
@@ -501,28 +506,26 @@ class PidController {
 	reset() {
 		this.previousError = 0;
 		this.integral = 0;
-		this.lastTime = new Date().getTime();
 	}
 
 	calculate(setPoint, measuredValue) {
 		const error = setPoint - measuredValue;
 
-		const now = new Date().getTime();
-		const deltaTime = (now - this.lastTime) || 1;
+		const deltaTime = FPS / 1000;
+		
+		let proportional = error;
+		let integral = this.integral + error * deltaTime;
+		let derivative = (error - this.previousError) / deltaTime;
+		
+		if (settingsITerm.maxAccum) integral = clamp(integral, -settingsITerm.maxAccum, settingsITerm.maxAccum);
+		if (settingsITerm.zone && Math.abs(error) > settingsITerm.zone) integral = 0;
 
-		const proportional = error;
-		const integral = this.integral + error * (1 / deltaTime);
-		const derivative = (error - this.previousError) / (1 / deltaTime);
-
-		// console.log(proportional, integral, derivative);
-		// console.log((pidSettings.P * proportional) / this.deltaTime, (pidSettings.I * integral) / this.deltaTime, (pidSettings.D * derivative) / this.deltaTime);
-
+		// console.log(proportional * deltaTime * pidSettings.P, integral * deltaTime * pidSettings.I, derivative * deltaTime * pidSettings.D)
 		
 		this.previousError = error;
 		this.integral = integral;
-		this.lastTime = now;
 
-		return (pidSettings.P * proportional + pidSettings.I * integral + pidSettings.D * derivative) / deltaTime;
+		return (pidSettings.P * proportional + pidSettings.I * integral + pidSettings.D * derivative) * deltaTime;
 	}
 }
 
@@ -742,8 +745,6 @@ class Graph extends CanvasDrawer {
 
 		[this.xTickGap, this.yTickGap] = [this.cWidth / this.xTicks, this.cHeight / this.yTicks];
 
-		console.log([this.xTicks, this.yTicks], [this.xTickGap, this.yTickGap])
-		
 		this.xAxisLines = 30;
 		this.axisLineGap = (this.cWidth) / this.xAxisLines;
 		this.yAxisLines = Math.ceil(this.cHeight / this.xAxisLines);
