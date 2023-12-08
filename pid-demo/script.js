@@ -106,7 +106,7 @@ const pidSettings = makeSettings("PID Gains", {
 })
 
 const settingsITerm = makeSettings("I Term Rules", {
-	maxAccum: { name: "Max Accumulation", min: 0, title: "This value is used to constrain the I accumulator to help manage integral wind-up.", step: 1 },
+	maxAccum: { name: "Max Accumulation", min: 0, title: "This value is used to constrain the I accumulator to help manage integral wind-up.", step: 10 },
 	zone: { name: "Zone", min: 0, title: "This value specifies the range the |error| must be within for the integral constant to take effect.", step: 10 },
 })
 
@@ -819,7 +819,7 @@ const sliderDoubleHover = new HoverBox(displayCanvas, [groundAngleSlider.cX, set
 const locationGraph = new Graph(
 	displayCanvas,
 	[world.cX, setPointSlider.cY + setPointSlider.cHeight], [world.cWidth, displayCanvas.height - setPointSlider.cY + setPointSlider.cHeight],
-	[undefined, 700]);
+	[undefined, 1000]);
 
 const carPidController = new PidController();
 
