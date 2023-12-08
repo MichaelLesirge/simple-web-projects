@@ -832,15 +832,16 @@ const groundAngleSlider = new PositionSlider(displayCanvas, [0, world.cY], [slid
 const setPointSlider = new PositionSlider(displayCanvas, [world.cX, world.cY + world.cHeight - sliderWidth + 1], [world.cWidth, sliderWidth], false);
 const infoHover = new HoverBox(displayCanvas, [groundAngleSlider.cX, setPointSlider.cY], [groundAngleSlider.cWidth, setPointSlider.cHeight]);
 
+const graphTicks = 1000;
 const locationGraph = new Graph(
 	displayCanvas,
 	[world.cX, setPointSlider.cY + setPointSlider.cHeight], [world.cWidth, displayCanvas.height - setPointSlider.cY + setPointSlider.cHeight],
-	[undefined, 1000]);
+	[undefined, graphTicks]);
 
 const otherGraph = new Graph(
 	graphCanvas,
 	[0, 0], [graphCanvas.width, graphCanvas.height],
-	[world.cWidth, 1000],
+	[undefined, graphTicks],
 );
 
 const carPidController = new PidController();
@@ -933,6 +934,8 @@ setInterval(() => {
 
 	locationGraph.draw();
 	otherGraph.draw()
+
+	otherGraph.drawLine(otherGraph.cWidth / 2, 0, otherGraph.cWidth / 2, otherGraph.cHeight, {color: "black", thickness: 3})
 	
 	car.update();
 	car.draw()
