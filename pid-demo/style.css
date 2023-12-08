@@ -102,5 +102,40 @@ main {
 }
 
 #extra-graph {
+	position: relative;
+
+	overflow: hidden;
+
 	grid-area: graph;
+}
+ 
+#secondary-graph {
+	height: 100%;
+	width: 100%;
+}
+
+#secondary-graph-options {
+	position: absolute;
+	user-select: none;
+	top: 0.5rem;
+	left: 0.5rem;
+}
+
+#secondary-graph-options input:after {
+	position: absolute;
+	content: attr(title);
+
+	background-color: attr(color);
+	padding: 0.1rem 0.5rem;
+	border-radius: 1rem;
+
+	bottom: -100%;
+	left: 0;
+
+	width: max-content;
+	opacity: 0;
+}
+
+#secondary-graph-options input:hover:after {
+	opacity: 1;
 }

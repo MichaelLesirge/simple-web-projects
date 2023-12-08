@@ -6,8 +6,11 @@ main.style.paddingTop = header.clientHeight + "px";
 
 const displayCanvas = document.getElementById("display-canvas");
 displayCanvas.addEventListener('selectstart', function (e) { e.preventDefault(); return false; }, false);
-
 fullResolution(displayCanvas);
+
+const graphCanvas = document.getElementById("secondary-graph");
+graphCanvas.addEventListener('selectstart', function (e) { e.preventDefault(); return false; }, false);
+fullResolution(graphCanvas)
 
 function fullResolution(canvas) {
 	const dpr = Math.ceil(window.devicePixelRatio || 1);
@@ -508,7 +511,7 @@ class PidController {
 		this.integral = 0;
 	}
 
-	calculate(setPoint, measuredValue) {
+	calculateWithResults(setPoint, measuredValue) {
 		const error = setPoint - measuredValue;
 
 		const deltaTime = FPS / 1000;
@@ -525,7 +528,16 @@ class PidController {
 		this.previousError = error;
 		this.integral = integral;
 
-		return (pidSettings.P * proportional + pidSettings.I * integral + pidSettings.D * derivative) * deltaTime;
+		const p = pidSettings.P * proportional;
+		const i = pidSettings.I * integral;
+		const d = pidSettings.D * derivative;
+
+		return [(p + i + d) * deltaTime, [error, p, i, d]];
+	}
+
+	calculate(setPoint, measuredValue) {
+		const [result, [error, p, i, d]] = this.calculateWithResults(setPoint, measuredValue);
+		return result;
 	}
 }
 
@@ -747,7 +759,7 @@ class Graph extends CanvasDrawer {
 
 		this.xAxisLines = 30;
 		this.axisLineGap = (this.cWidth) / this.xAxisLines;
-		this.yAxisLines = Math.ceil(this.cHeight / this.xAxisLines);
+		this.yAxisLines = Math.ceil(this.cHeight / this.axisLineGap);
 
 		this.data = {};
 		this.dataSettings = {};
@@ -788,9 +800,13 @@ class Graph extends CanvasDrawer {
 		for (const [name, data] of Object.entries(this.data)) {
 			const lineSettings = this.dataSettings[name];
 
+			if (lineSettings.condition && !lineSettings.condition()) continue;	
+
+			const xOffset = lineSettings.centerX ? this.cWidth / 2 : 0;
+
 			let lastPoint = undefined;
 			for (let i = 0; i < data.length; i++) {
-				const x = clamp(data[i], 0, this.cWidth);
+				const x = clamp(data[i] + xOffset, 0, this.cWidth);
 				const y = clamp(i * this.yTickGap, 0, this.cHeight);
 
 				if (lastPoint) {
@@ -814,12 +830,18 @@ const car = new Car(displayCanvas, "car_outline.png", world)
 
 const groundAngleSlider = new PositionSlider(displayCanvas, [0, world.cY], [sliderWidth, world.cHeight - sliderWidth], true);
 const setPointSlider = new PositionSlider(displayCanvas, [world.cX, world.cY + world.cHeight - sliderWidth + 1], [world.cWidth, sliderWidth], false);
-const sliderDoubleHover = new HoverBox(displayCanvas, [groundAngleSlider.cX, setPointSlider.cY], [groundAngleSlider.cWidth, setPointSlider.cHeight]);
+const infoHover = new HoverBox(displayCanvas, [groundAngleSlider.cX, setPointSlider.cY], [groundAngleSlider.cWidth, setPointSlider.cHeight]);
 
 const locationGraph = new Graph(
 	displayCanvas,
 	[world.cX, setPointSlider.cY + setPointSlider.cHeight], [world.cWidth, displayCanvas.height - setPointSlider.cY + setPointSlider.cHeight],
 	[undefined, 1000]);
+
+const otherGraph = new Graph(
+	graphCanvas,
+	[0, 0], [graphCanvas.width, graphCanvas.height],
+	[world.cWidth, 1000],
+);
 
 const carPidController = new PidController();
 
@@ -857,6 +879,25 @@ resetCarButton.onclick = () => {
 locationGraph.createDataPoint("car position", {color: "black", thickness: 5})
 locationGraph.createDataPoint("setpoint", {color: "green", thickness: 5})
 
+const checkBoxBox = document.getElementById("secondary-graph-options")
+function makeDataPoint(name, color) {
+	const checkBox = document.createElement("input");
+	checkBox.type = "checkbox";
+	checkBox.name = `${name.toLowerCase()}-graph-line`;
+	checkBox.title = `Show ${name}`;
+
+	checkBox.style.color = color;
+	
+	otherGraph.createDataPoint(name.toLowerCase(), {color: color, thickness: 5, centerX: true, condition: () => checkBox.checked});
+	checkBoxBox.appendChild(checkBox);
+}
+
+makeDataPoint("Output", "green");
+makeDataPoint("Error", "red");
+makeDataPoint("P", "#669966");
+makeDataPoint("I", "#9999ff");
+makeDataPoint("D", "#b58b36");
+
 // main loop
 setInterval(() => {
 	const focusedElement = document.activeElement;
@@ -864,10 +905,17 @@ setInterval(() => {
 	const carCenterX = car.getCenterX();
 	const setPoint = setPointSlider.getPosition();
 
-	locationGraph.updateData("car position", carCenterX)
-	locationGraph.updateData("setpoint", setPoint)
+	locationGraph.updateData("car position", carCenterX);
+	locationGraph.updateData("setpoint", setPoint);
 
-	const PIDOutput = carPidController.calculate(setPoint, carCenterX)
+	const [PIDOutput, [error, p, i, d]] = carPidController.calculateWithResults(setPoint, carCenterX);
+
+	otherGraph.updateData("error", error);	
+	otherGraph.updateData("output", p+i+d);	
+	otherGraph.updateData("p", p);	
+	otherGraph.updateData("i", i);	
+	otherGraph.updateData("d", d);	
+
 	car.setMotorPower(PIDOutput);
 
 	world.draw();
@@ -876,14 +924,15 @@ setInterval(() => {
 		carPointInput.value = Math.round(car.getLocalWorldCenteredCenterX());
 	}
 
-	if (setPointSlider.isHovered || setPointSlider.isSelected || sliderDoubleHover.isHovered || focusedElement === setPointInput) {
+	if (setPointSlider.isHovered || setPointSlider.isSelected || infoHover.isHovered || focusedElement === setPointInput) {
 		world.drawLine(setPoint, world.cY, setPoint, world.cY + world.cHeight, { color: "green" })
 	}
-	if (groundAngleSlider.isHovered || groundAngleSlider.isSelected || sliderDoubleHover.isHovered || focusedElement == groundDegreesInput) {
+	if (groundAngleSlider.isHovered || groundAngleSlider.isSelected || infoHover.isHovered || focusedElement == groundDegreesInput) {
 		world.displayGroundAngle({ color: "green", thickness: 2 });
 	}
 
 	locationGraph.draw();
+	otherGraph.draw()
 	
 	car.update();
 	car.draw()
@@ -891,6 +940,6 @@ setInterval(() => {
 	groundAngleSlider.draw();
 	setPointSlider.draw();
 
-	sliderDoubleHover.draw();
+	infoHover.draw();
 
 }, Math.floor(1000 / FPS))
