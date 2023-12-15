@@ -121,9 +121,15 @@ main {
 	left: 0.5rem;
 }
 
+#secondary-graph-options input {
+	height: 0.9rem;
+	width: 0.9rem;
+	margin-left: 0.1rem;
+}
+
 #secondary-graph-options input:after {
 	position: absolute;
-	content: attr(title);
+	content: attr(instant-title);
 
 	background-color: attr(color);
 	padding: 0.1rem 0.5rem;

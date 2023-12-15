@@ -881,23 +881,24 @@ locationGraph.createDataPoint("car position", {color: "black", thickness: 5})
 locationGraph.createDataPoint("setpoint", {color: "green", thickness: 5})
 
 const checkBoxBox = document.getElementById("secondary-graph-options")
-function makeDataPoint(name, color) {
+function makeDataPoint(name, color, titleName) {
 	const checkBox = document.createElement("input");
 	checkBox.type = "checkbox";
 	checkBox.name = `${name.toLowerCase()}-graph-line`;
-	checkBox.title = `Show ${name}`;
+	checkBox.setAttribute("instant-title", `Show ${name}`);
+	checkBox.title = `Show ${titleName ?? name} (${color})`;
 
 	checkBox.style.color = color;
 	
-	otherGraph.createDataPoint(name.toLowerCase(), {color: color, thickness: 5, centerX: true, condition: () => checkBox.checked});
+	otherGraph.createDataPoint(name.toLowerCase(), {color: color, thickness: 3, centerX: true, condition: () => checkBox.checked});
 	checkBoxBox.appendChild(checkBox);
 }
 
-makeDataPoint("Output", "green");
-makeDataPoint("Error", "red");
-makeDataPoint("P", "#669966");
-makeDataPoint("I", "#9999ff");
-makeDataPoint("D", "#b58b36");
+makeDataPoint("Output", "Green");
+makeDataPoint("Error", "Red");
+makeDataPoint("P", "Orange", "P Term Output");
+makeDataPoint("I", "Olive", "I Term Output");
+makeDataPoint("D", "Navy", "D Term Output");
 
 // main loop
 setInterval(() => {
