@@ -3,7 +3,7 @@ Random website ideas I decided to make for no real reason besides for the fun of
 
 ## Links to projects (In order of how good I think they are)
 1. [rock-paper-scissors-battle](https://michael-lesirge.github.io/simple-web/rock-paper-scissors-battle)
-0. [pid-demo](https://michael-lesirge.github.io/simple-webhtml)
+0. [pid-demo](https://michael-lesirge.github.io/simple-web/pid-demo)
 0. [text-changer](https://michael-lesirge.github.io/simple-web/text-changer)
 0. [roman-numerals](https://michael-lesirge.github.io/simple-web/roman-numerals)
 0. [chess](https://michael-lesirge.github.io/simple-web/chess) (incomplete)
