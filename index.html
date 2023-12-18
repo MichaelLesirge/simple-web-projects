@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio - Projects</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+
+        h1 {
+            margin: 0;
+        }
+
+        header {
+            margin-bottom: 1rem;
+        }
+
+        .projects {
+            display: flex;
+            flex-wrap: wrap;
+            width: 100%;
+            justify-content: space-evenly;
+            gap: 20px;
+        }
+
+        .project {
+            position: relative;
+
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+            overflow: hidden;
+            width: 19rem;
+
+            text-decoration: none;
+            color: black;
+        }
+
+        .project:hover {
+            scale: 1.05;
+        }
+
+        .project:active {
+            scale: 1.025;
+            border: 1px solid blue;
+        }
+
+        .project img {
+            width: 100%;
+            height: 10rem;
+            display: block;
+            border-bottom: 1px solid #ddd;
+
+            /* object-fit: contain; */
+        }
+
+        .project .info {
+            padding: 15px;
+        }
+
+        .project h3 {
+            margin-top: 0;
+            margin-bottom: 0rem;
+            font-size: 1.2em;
+            /* text-decoration: underline; */
+        }
+
+        .project p {
+            margin-bottom: 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- This was super rushed so the code is kinda a mess -->
+
+    <header>
+        <h1>My Random Projects</h1>
+        <span>Simple Projects in plain HTML, CSS, and JS</span>
+    </header>
+    <main class="projects">
+
+    </main>
+
+    <script>
+        const projectsElement = document.querySelector(".projects");
+
+        const projects = [
+            {
+                name: "rock-paper-scissors-battle",
+                title: "Battle Royal",
+                desc: "Watch team Rock, team Paper, and team Scissors fight to rule the box",
+            },
+            {
+                name: "pid-demo",
+                title: "PID Simulation",
+                desc: "Simulation to demonstrate the use of a PID controller",
+            },
+            {
+                name: "text-changer",
+                title: "Text Effect Changer",
+                desc: "Funny tool to change text",
+            },
+            {
+                name: "roman-numerals",
+                title: "Roman Numeral Converter",
+                desc: "Tool to convert to and from roman numerals, with explanations",
+            },
+            {
+                name: "chess",
+                title: "Chess (Incomplete)",
+                desc: "Chess, but where you win by taking the opponents king since I got bored",
+            },
+            {
+                name: "fancy-effects",
+                title: "Random Effects",
+                desc: "Some random sort of nice looking effects/animations",
+            },
+            // {
+            //     name: "customisable-dice-roller",
+            //     title: "Dice Roller (Incomplete)",
+            //     desc: "Some random sort of nice looking effects/animations",
+            // },
+            {
+                name: "happy-holiday-eve",
+                title: "Happy Holiday Eve Eve",
+                desc: "Random thing I thought was kinda funny at the time",
+            },
+            {
+                name: "dont-leave",
+                title: "Don't Leave",
+                desc: "Random thing I thought was kinda funny at the time",
+            },
+        ]
+
+        projects.forEach(({name, title, desc}) => {
+            projectsElement.innerHTML += `
+            <a class="project" href="${name ?? ""}" target="_blank">
+                <img src="images/${name || "blank"}.png" alt="Screenshot of ${title ?? "Project"}">
+                <div class="info">
+                    <h3 title="${name}">${title ?? "Empty"}</h3>
+                    <p>${desc ?? "Future Project"}</p>
+                </div>
+            </a>
+            `
+        })
+
+    </script>
+
+</body>
+
+</html>
