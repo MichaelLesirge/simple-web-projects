@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portfolio - Projects</title>
+    <title>All Projects</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -40,15 +40,19 @@
 
             text-decoration: none;
             color: black;
+            
+            /* transition: transform 0.3s ease-in-out; */
+            transition: scale 0.1s ease-in-out;
         }
 
         .project:hover {
+            /* transform: translateY(-5px); */
             scale: 1.05;
+            
         }
 
         .project:active {
-            scale: 1.025;
-            border: 1px solid blue;
+            filter: brightness(0.9);
         }
 
         .project img {
