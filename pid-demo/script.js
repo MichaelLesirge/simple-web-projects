@@ -63,6 +63,7 @@ function makeSettings(header, values, { getInputElements = false } = {}) {
 		const label = document.createElement("label");
 		label.innerText = displayName + ": ";
 		label.setAttribute("for", name);
+		label.setAttribute("title", rules.title);
 
 		// .category .controls .item input
 		const input = document.createElement("input");
@@ -122,7 +123,7 @@ const [groundDegreesInput, setPointInput, carPointInput] = makeSettings("General
 
 const physicsSettings = makeSettings("World", {
 	gravity: { name: "Gravity", value: 9.8, min: 0, title: "Gravity of world", step: 0.1 },
-	friction: { name: "Friction", value: 0.02, min: 0, title: "Friction How easily the car slides", step: 0.1 },
+	friction: { name: "Friction", value: 0.02, min: 0, title: "How easily the car slides", step: 0.1 },
 	airDensity: { name: "Air Density", value: 1.225, min: 0, title: "How strong air resistance is", step: 0.1 },
 });
 
