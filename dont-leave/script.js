@@ -19,6 +19,7 @@ document.addEventListener("mouseleave", () => {
 
     if (count == messages.length) {
         done = true;
+        // dog shit code:
         face.innerText = faces.evil;
         fetch("https://api.ipify.org?format=json")
             .then((response) => response.json())
@@ -29,14 +30,25 @@ document.addEventListener("mouseleave", () => {
                         face.innerText = faces.evil;
                         const textarea = document.createElement("textarea");
                         face.appendChild(textarea);
+
+                        console.log(data)
     
                         delete data.currency;
                         delete data.location.country.flag;
                         delete data.location.country.languages;
+                        delete data.security;
+                        delete data.time_zone;
+                        delete data.location.country.borders;
+                        delete data.location.country.population;
+                        delete data.location.country.population_density;
                         textarea.rows = 16;
                         textarea.cols = 60;
                         const ipInfo = JSON.stringify(data, undefined, 2).split("\n");
                         let i = 0;
+
+                        document.title = faces.evil;
+
+                        document.body.style.cursor = "not-allowed;";
                         const interval = setInterval(() => {
                             if (i < ipInfo.length) {
                                 textarea.value += ipInfo[i] + "\n";
@@ -44,10 +56,12 @@ document.addEventListener("mouseleave", () => {
                             }
                             else {
                                 textarea.scrollTop = textarea.scrollTop;
+                                console.log(`https://earth.google.com/web/@${data.location.latitude},${data.location.longitude},150000a`)
+                                window.open(`https://earth.google.com/web/@${data.location.latitude},${data.location.longitude},150000a`);
                                 clearInterval(interval)
                             }
                             i++;
-                        }, 500)
+                        }, 100)
                     });
             });
 
