@@ -17,12 +17,13 @@ html {
 body {
 	width: 100%;
 	height: 100%;
+
+	background-color: darkgray;
 }
 
 main {
 	display: grid;
 
-	background-color: darkgray;
 
 	height: 100%;
 
@@ -32,6 +33,21 @@ main {
 	grid-template-areas:
 	"display settings"
 	"display graph";
+}
+
+@media only screen and (max-width: 600px){
+	main {
+		display: flex;
+		flex-direction: column;
+	}
+
+	#display {
+		height: 100vh;
+	}
+
+	#settings {
+		height: min-content;
+	}
 }
 
 #header {

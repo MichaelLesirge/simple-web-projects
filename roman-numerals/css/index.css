@@ -157,3 +157,24 @@ body {
     width: max-content;
     white-space: nowrap;
 }
+
+@media only screen and (max-width: 600px) {
+    .under-text {
+        flex-direction: column;
+        width: max-content;
+    }
+
+    .explanation .card-numeral {
+        font-size: 300%;
+    }
+
+    .under-text.settings {
+        margin-bottom: 1rem;
+    }  
+
+    .input-box input {
+        margin: 0rem;
+        padding: 0.5rem;
+        width: 90%;
+    }
+}

@@ -824,7 +824,8 @@ class Graph extends CanvasDrawer {
 	}
 }
 
-const sliderWidth = 16;
+
+const sliderWidth = document.body.clientWidth < 600 ? 0 : 16;
 const world = new Floor(displayCanvas, [sliderWidth, 0], [displayCanvas.width - sliderWidth, displayCanvas.height / 1.618]);
 
 const car = new Car(displayCanvas, "car_outline.png", world)
