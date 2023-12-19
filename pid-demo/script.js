@@ -110,7 +110,7 @@ const pidSettings = makeSettings("PID Gains", {
 })
 
 const settingsITerm = makeSettings("I Term Rules", {
-	maxAccum: { name: "Max Accumulation", min: 0, title: "This value is used to constrain the I accumulator to help manage integral wind-up.", step: 10 },
+	maxAccum: { name: "Max Accum", min: 0, title: "This value is used to constrain the I accumulator to help manage integral wind-up.", step: 10 },
 	zone: { name: "Zone", min: 0, title: "This value specifies the range the |error| must be within for the integral constant to take effect.", step: 10 },
 })
 
