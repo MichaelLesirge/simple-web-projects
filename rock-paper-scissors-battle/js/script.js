@@ -10,7 +10,7 @@ for (const [name, value] of Object.entries(SLIDER_DEFAULTS)) {
 	document.querySelector(`.slider-group.${name} .slider`).setAttribute("value", value);
 }
 
-const sliderVals = {
+const sliderValues = {
 	speed: undefined, // set by slider
 	count: undefined, // set by slider
 	scale: undefined, // set by slider
@@ -25,14 +25,11 @@ const CONFIG = {
 
 	speedDifAmount: 0.1,
 };
-console.info("CONFIG object is aviable to change and will update in real time");
+console.info("CONFIG object is available to change and will update in real time");
 console.info(CONFIG);
 
 const root = document.querySelector(":root");
 const arena = document.querySelector(".arena");
-
-const startBtn = document.querySelector("#start");
-const resetBtn = document.querySelector("#reset");
 
 function randInt(min, max) {
 	// min and max included
@@ -79,8 +76,8 @@ class Entity {
 	halfWidth = undefined;
 	halfHeight = undefined;
 
-	constructor(type, speedMultiplyer = 1, x = undefined, y = undefined) {
-		this.speedMultiplyer = speedMultiplyer;
+	constructor(type, speedMultiplier = 1, x = undefined, y = undefined) {
+		this.speedMultiplayer = speedMultiplier;
 		this.canMove = true;
 
 		this.el = document.createElement("div");
@@ -129,7 +126,7 @@ class Entity {
 	}
 
 	move() {
-		if (sliderVals.count > 250 && randInt(0, 2) == 0) {
+		if (sliderValues.count > 250 && randInt(0, 2) == 0) {
 			this.changePos(this.lastChangeX, this.lastChangeY);
 		}
 
@@ -157,13 +154,13 @@ class Entity {
 			}
 		}
 
-		if (minDistanceToEnemy < 30 * sliderVals.scale) {
+		if (minDistanceToEnemy < 30 * sliderValues.scale) {
 			this.setType(enemy.type);
 			return;
 		}
 
-		let xChange = randInt(-CONFIG.randomExtraSpeed * 10, CONFIG.randomExtraSpeed * 10) / 10;
-		let yChange = randInt(-CONFIG.randomExtraSpeed * 10, CONFIG.randomExtraSpeed * 10) / 10;
+		let xChange = (randInt(-CONFIG.randomExtraSpeed * 10, CONFIG.randomExtraSpeed * 10) / 10) * sliderValues.scale;
+		let yChange = (randInt(-CONFIG.randomExtraSpeed * 10, CONFIG.randomExtraSpeed * 10) / 10) * sliderValues.scale;
 
 		if (target && (!enemy || minDistanceToEnemy > minDistanceToTarget / CONFIG.bloodLust)) {
 			xChange += target.centerX - this.centerX;
@@ -173,8 +170,8 @@ class Entity {
 			yChange += (enemy.centerY - this.centerY) * -1;
 		}
 
-		xChange = clamp(xChange, -sliderVals.speed, sliderVals.speed) * this.speedMultiplyer;
-		yChange = clamp(yChange, -sliderVals.speed, sliderVals.speed) * this.speedMultiplyer;
+		xChange = clamp(xChange, -sliderValues.speed, sliderValues.speed) * this.speedMultiplayer;
+		yChange = clamp(yChange, -sliderValues.speed, sliderValues.speed) * this.speedMultiplayer;
 
 		this.changePos(xChange, yChange);
 
@@ -218,46 +215,114 @@ class Entity {
 		return v;
 	}
 	function makeSlider(name, updateFunc) {
-		const slider_gruop = document.querySelector(".slider-group." + name);
-		const slider = slider_gruop.querySelector(".slider");
-		const currentValDisplay = slider_gruop.querySelector(".current-val");
+		const slider_group = document.querySelector(".slider-group." + name);
+		const slider = slider_group.querySelector(".slider");
+		const currentValDisplay = slider_group.querySelector(".current-val");
 		function func() {
 			const newVal = updateFunc(slider.value);
-			sliderVals[name] = newVal;
+			sliderValues[name] = newVal;
 			currentValDisplay.innerText = newVal;
 		}
 		slider.addEventListener("input", func);
 		func();
 	}
 
-	let gameInveralId;
-	resetBtn.onclick = (e) => {
-		startBtn.disabled = false;
-
-		if (gameInveralId) clearInterval(gameInveralId);
-
-		setEntityCount(0);
-		setEntityCount(sliderVals.count);
-	};
-
-	startBtn.onclick = (e) => {
-		startBtn.disabled = true;
-
-		// arena.requestFullscreen();
-
-		gameInveralId = setInterval(() => entities.forEach((entity) => entity.move()), 1000 / CONFIG.fps);
-	};
+	let gameIntervalId;
+	let isRunning = false;
+	let isReset = true;
 
 	const resetSettingsBtn = document.querySelector("#reset-sliders");
+	const startBtn = document.querySelector("#start");
+	const resetBtn = document.querySelector("#reset");
+	const fullscreenBtn = document.querySelector("#fullscreen")
+	
+	const reset = () => {	
+		isReset = true;	
+		if (isRunning) toggleStart();
+		
+		console.log()
+		setEntityCount(0);
+		setEntityCount(sliderValues.count);
+	};
 
-	resetSettingsBtn.onclick = (e) => {
+	const toggleStart = () => {
+		if (isRunning) {
+			isRunning = false;
+			startBtn.innerText = "Start Battle!"
+			clearInterval(gameIntervalId);
+		}
+		else {
+			isRunning = true;
+			startBtn.innerText = "Pause Battle.";
+			isReset = false;
+			gameIntervalId = setInterval(() => entities.forEach((entity) => entity.move()), 1000 / CONFIG.fps);
+		}
+
+	};
+
+	const resetSettings = () => {
 		for (const [name, value] of Object.entries(SLIDER_DEFAULTS)) {
 			const el = document.querySelector(`.slider-group.${name} .slider`);
 			el.value = value;
 			el.dispatchEvent(new Event("input"));
 		}
 	};
+
+	const fullscreen = () => {
+		arena.requestFullscreen().then(() => {
+			if (isReset) reset();
+		});
+	}
+
+	resetSettingsBtn.addEventListener("click", resetSettings);
+	startBtn.addEventListener("click", toggleStart);
+	resetBtn.addEventListener("click", reset);
+	fullscreenBtn.addEventListener("click", fullscreen);	
+
+	document.addEventListener("keydown", (e) => {
+		switch (e.key) {
+			case " ":
+				toggleStart()
+				break;
+			case "r":
+				reset()
+				break;
+			case "f":
+				fullscreen()
+				break;
+		}
+	})
+
 })();
+
+let timeout;
+let wakeTime = 2 * 1000;
+let currentCursor = document.body.style.cursor;
+currentCursor == 'none' ? 'default' : currentCursor;
+
+function hideMouseCursor() {
+	if (document.body.style.cursor !== 'none' && window.innerHeight === screen.height) {
+		document.body.style.cursor = 'none';
+	}
+}
+function showMouseCursor() {
+	clearTimeout(timeout);
+	if (document.body.style.cursor !== 'default') {
+		document.body.style.cursor = 'default';
+	}
+}
+document.onmousemove = function () {
+	// wake up on mouse move ...
+	showMouseCursor();
+	// goto sleep after a few moments
+	timeout = setTimeout(hideMouseCursor, wakeTime);
+};
+document.onmousedown = function () {
+	// wake up on mouse click
+	showMouseCursor();
+	// goto sleep after a few moments
+	timeout = setTimeout(hideMouseCursor, wakeTime);
+};
 
 (() => {
 	let isDown = false;
@@ -286,9 +351,9 @@ class Entity {
 			});
 
 			if (current) {
-				const arenaRech = arena.getBoundingClientRect();
-				curXoffset = -arenaRech.x - current.halfWidth;
-				curYoffset = -arenaRech.y - current.halfHeight;
+				const arenaRect = arena.getBoundingClientRect();
+				curXoffset = -arenaRect.x - current.halfWidth;
+				curYoffset = -arenaRect.y - current.halfHeight;
 
 				current.canMove = false;
 			}

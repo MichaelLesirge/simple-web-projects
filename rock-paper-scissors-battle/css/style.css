@@ -129,6 +129,8 @@ body {
     
     width: 100%;
     height: 100%;
+
+    background-color: white;
 }
 
 .arena .entity {
@@ -153,7 +155,7 @@ body {
     cursor: -webkit-grabbing;
     cursor: grabbing;
 
-    scale: 105%;
+    scale: calc(var(--icon-scale) + 0.25);
 }
 
 .btn {
@@ -176,6 +178,10 @@ body {
 
 .btn#reset {
     background-color: lightslategray;
+}
+
+.btn#fullscreen {
+    background-color: transparent;
 }
 
 .btn#reset-sliders {
