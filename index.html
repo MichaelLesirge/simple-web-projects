@@ -62,17 +62,27 @@
             filter: brightness(0.9);
         }
 
-        .project img {
+        .project .project-image {
             width: 100%;
             height: 10rem;
             display: block;
             border-bottom: 1px solid #ddd;
 
-            /* object-fit: contain; */
+        }
+
+        .project .github-logo {
+            width: 1em;
+            height: 1em;
+            display: inline-block;
         }
 
         .project .info {
             padding: 15px;
+        }
+        
+        .project .title {
+            display: flex;
+            justify-content: space-between;
         }
 
         .project h3 {
@@ -149,12 +159,14 @@
             },
         ]
 
+        // yaaa, not my finest work \/
+        // <span class="title"><h3 title="${name}">${title ?? "Empty"}</h3><img width=10 class="github-logo" src="images/github.png" alt="github logo"></span>
         projects.forEach(({name, title, desc}) => {
             projectsElement.innerHTML += `
             <a class="project" href="${name ?? ""}" target="_blank">
-                <img src="images/${name || "blank"}.png" alt="Screenshot of ${title ?? "Project"}">
+                <img width=500 class="project-image" src="images/${name || "blank"}.png" alt="Screenshot of ${title ?? "Project"}">
                 <div class="info">
-                    <h3 title="${name}">${title ?? "Empty"}</h3>
+                    <span class="title"><h3 title="${name}">${title ?? "Empty"}</h3></span>
                     <p>${desc ?? "Future Project"}</p>
                 </div>
             </a>
