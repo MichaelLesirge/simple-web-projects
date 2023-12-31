@@ -258,12 +258,12 @@ function updateCanvasSizes(canvas) {
 
     const ctx = canvas.getContext('2d');
 
-    const chars = Array.from(charRange("a", "z"));
+    const chars = charRange("a", "z") + charRange("0", "9") + "アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨョロヲゴゾドボポヴッン";
     const fallingCharArr = [];
 
-    const fontSize = 40;
-    const trail = 30;
-    const trailGap = 15;
+    const fontSize = 20;
+    const trail = 20;
+    const trailGap = 20;
 
     const maxColum = canvas.width / fontSize;
 
@@ -272,7 +272,7 @@ function updateCanvasSizes(canvas) {
     }
 
     for (var i = 0; i < maxColum; i++) {
-        fallingCharArr.push({x: i * fontSize, y: randomFloat(-500, 0), speed: randomFloat(1, 5)});
+        fallingCharArr.push({ x: i * fontSize, y: randomFloat(-500, 0), speed: randomFloat(1, 5) });
     }
 
     function clear() {
@@ -282,9 +282,10 @@ function updateCanvasSizes(canvas) {
     }
 
     ctx.font = fontSize + "px san-serif";
+    ctx.textAlign = "center";
     function draw() {
         for (const fallingChar of fallingCharArr) {
-            
+
 
             for (let i = 0; i < trail; i++) {
                 ctx.fillStyle = `rgba(0, 255, 0, ${(trail - i + 1) / trail})`
@@ -300,5 +301,9 @@ function updateCanvasSizes(canvas) {
         }
     }
 
-    startLoop(() => {}, clear, draw)
+    startLoop(() => { }, clear, draw)
 }
+
+// {
+
+// }
