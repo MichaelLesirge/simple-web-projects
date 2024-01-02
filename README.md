@@ -1,7 +1,9 @@
+<a href="https://michael-lesirge.github.io/simple-web/"><img src="https://github.com/michael-lesirge/simple-web/assets/100492377/62bc38b9-1fa9-421d-93dc-041814e77ed0" alt="" width=20>Visit Project Page</a>
+
 # Random projects made for the web
 Random website ideas I decided to make for no real reason besides for the fun of it, or I thought it would be funny at the time. No frameworks or anything, just plain old HTML, CSS, and JS. No backend for anything either.
 
-## Links to projects (In order of how good I think they are)
+## Links of all projects (In order of how good I think they are)
 1. [rock-paper-scissors-battle](https://michael-lesirge.github.io/simple-web/rock-paper-scissors-battle)
 0. [pid-demo](https://michael-lesirge.github.io/simple-web/pid-demo)
 0. [text-changer](https://michael-lesirge.github.io/simple-web/text-changer)
