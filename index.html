@@ -25,7 +25,21 @@
         }
 
         header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
             margin-bottom: 1rem;
+        }
+
+        .github-info {
+            display: flex;
+            justify-content: center;
+            gap: 1px;
+
+            border-bottom: 1px solid black;
+
+            text-decoration: none;
         }
 
         .projects {
@@ -95,18 +109,53 @@
         .project p {
             margin-bottom: 0;
         }
+
+        #github-foot { display: none; }
+        @media screen and (max-width: 700px) {
+            #github-head { display: none; }
+            #github-foot { display: unset; }
+
+            footer {
+                height: 2rem;
+            }
+        }
+
+        footer {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            width: 100%;
+        }
     </style>
 </head>
 <body>
     <!-- This was super rushed so the code is kinda a mess -->
 
     <header>
-        <h1>My Random Projects</h1>
-        <span>Simple Projects in plain HTML, CSS, and JS</span>
+        <div>
+            <h1>My Random Projects</h1>
+            <span>Simple Projects in plain HTML, CSS, and JS</span>
+        </div>
+        <div id="github-head">
+            <a class="github-info" href="https://github.com/michael-lesirge/simple-web">
+                Michael Lesirge
+                <img src="images/github.png" alt="Github" style="width: 1rem; height: 1rem;">
+            </a>
+        </div>
     </header>
     <main class="projects">
 
     </main>
+
+    <footer>
+        <div id="github-foot">
+            <a class="github-info" href="https://github.com/michael-lesirge/simple-web">
+                github.com/michael-lesirge
+                <img src="images/github.png" alt="Logo" style="width: 1rem; height: 1rem;">
+            </a>
+        </div>
+    </footer>
 
     <script>
         const projectsElement = document.querySelector(".projects");
@@ -142,32 +191,38 @@
                 title: "Random Effects",
                 desc: "Some random sort of nice looking effects/animations",
             },
+            {
+                name: "tic-tac-toe/HTML-CSS-JS",
+                url: "https://raw.githack.com/michael-lesirge/tic-tac-toe/main/HTML-CSS-JS/",
+                title: "Tic Tac Toe",
+                desc: "Highly customizable Tic Tac Toe game, from different repo",
+            },
+            // {
+            //     name: "happy-holiday-eve",
+            //     title: "Happy Holiday Eve Eve",
+            //     desc: "Random thing I thought was kinda funny at the time",
+            // },
             // {
             //     name: "customisable-dice-roller",
             //     title: "Dice Roller (Incomplete)",
-            //     desc: "Some random sort of nice looking effects/animations",
+            //     desc: "Dice roller tool",
             // },
-            {
-                name: "happy-holiday-eve",
-                title: "Happy Holiday Eve Eve",
-                desc: "Random thing I thought was kinda funny at the time",
-            },
-            {
-                name: "dont-leave",
-                title: "Don't Leave",
-                desc: "Random thing I thought was kinda funny at the time",
-            },
+            // {
+            //     name: "dont-leave",
+            //     title: "Don't Leave",
+            //     desc: "Random thing I thought was kinda funny at the time",
+            // },
         ]
 
         // yaaa, not my finest work \/
         // <span class="title"><h3 title="${name}">${title ?? "Empty"}</h3><img width=10 class="github-logo" src="images/github.png" alt="github logo"></span>
-        projects.forEach(({name, title, desc}) => {
+        projects.forEach(({name, title, desc, ...extra}) => {
             projectsElement.innerHTML += `
-            <a class="project" href="${name ?? ""}" target="_blank">
-                <img width=500 class="project-image" src="images/${name || "blank"}.png" alt="Screenshot of ${title ?? "Project"}">
+            <a class="project" href="${extra.url ?? name ?? ""}" target="_blank">
+                <img width=500 class="project-image" src="images/${name.split("/")[0] || "example"}.png" alt="Screenshot of ${title ?? "Project"}">
                 <div class="info">
-                    <span class="title"><h3 title="${name}">${title ?? "Empty"}</h3></span>
-                    <p>${desc ?? "Future Project"}</p>
+                    <span class="title"><h3 title="${name}">${title ?? "Untitled"}</h3></span>
+                    <p>${desc ?? ""}</p>
                 </div>
             </a>
             `
