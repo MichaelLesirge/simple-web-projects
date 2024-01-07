@@ -235,11 +235,11 @@ class Entity {
 	const startBtn = document.querySelector("#start");
 	const resetBtn = document.querySelector("#reset");
 	const fullscreenBtn = document.querySelector("#fullscreen")
-	
-	const reset = () => {	
-		isReset = true;	
+
+	const reset = () => {
+		isReset = true;
 		if (isRunning) toggleStart();
-		
+
 		console.log()
 		setEntityCount(0);
 		setEntityCount(sliderValues.count);
@@ -269,15 +269,22 @@ class Entity {
 	};
 
 	const fullscreen = () => {
-		arena.requestFullscreen().then(() => {
-			if (isReset) reset();
-		});
+		if (!window.screenTop && !window.screenY) {
+			arena.requestFullscreen().then(() => {
+				if (isReset) reset();
+			});
+		}
+		else {
+			document.exitFullscreen().then(() => {
+				if (isReset) reset();
+			})
+		}
 	}
 
 	resetSettingsBtn.addEventListener("click", resetSettings);
 	startBtn.addEventListener("click", toggleStart);
 	resetBtn.addEventListener("click", reset);
-	fullscreenBtn.addEventListener("click", fullscreen);	
+	fullscreenBtn.addEventListener("click", fullscreen);
 
 	document.addEventListener("keydown", (e) => {
 		switch (e.key) {
