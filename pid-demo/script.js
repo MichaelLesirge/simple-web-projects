@@ -19,6 +19,7 @@ function fullResolution(canvas) {
 }
 
 // #settings #settings-menu
+const pidControlMenu = document.getElementById("pid-control-menu");
 const settingsMenu = document.getElementById("settings-menu");
 
 function setAllowedChars(input, pattern) {
@@ -30,7 +31,7 @@ function setAllowedChars(input, pattern) {
 	});
 }
 
-function makeSettings(header, values, { getInputElements = false } = {}) {
+function makeSettings(header, values, form, { getInputElements = false } = {}) {
 	// .category
 	const category = document.createElement("fieldset");
 	category.classList.add("category");
@@ -82,7 +83,7 @@ function makeSettings(header, values, { getInputElements = false } = {}) {
 		input.step = 1;
 		document.addEventListener("click", (event) => input.step = event.target == input ? rules.step : "any")
 
-		settingsMenu.addEventListener("reset", () => { if (input.oninput) setTimeout(input.oninput) })
+		form.addEventListener("reset", () => { if (input.oninput) setTimeout(input.oninput) })
 
 		inputs.push(input);
 
@@ -93,7 +94,7 @@ function makeSettings(header, values, { getInputElements = false } = {}) {
 
 	category.appendChild(categoryControls);
 
-	settingsMenu.appendChild(category);
+	form.appendChild(category);
 
 	return getInputElements ? inputs : updateObject;
 
@@ -107,37 +108,37 @@ const pidSettings = makeSettings("PID Gains", {
 	P: { value: 1, min: 0, title: "The proportional gain value.", step: 0.1 },
 	I: { value: 0, min: 0, title: "The integral gain value", step: 0.1 },
 	D: { value: 0, min: 0, title: "The derivative gain value", step: 0.1 },
-})
+}, pidControlMenu)
 
 const settingsITerm = makeSettings("I Term Rules", {
 	maxAccum: { name: "Max Accum", min: 0, title: "This value is used to constrain the I accumulator to help manage integral wind-up.", step: 10 },
 	zone: { name: "Zone", min: 0, title: "This value specifies the range the |error| must be within for the integral constant to take effect.", step: 10 },
-})
+}, pidControlMenu)
 
 const [groundDegreesInput, setPointInput, carPointInput] = makeSettings("General", {
 	slopeDegrees: { name: "Floor Angle Degrees", title: "Angle of the floor in degrees, between 90 and -90 with 0 being level" },
 	setPoint: { name: "Car Set Point", title: "Set point of car in pixels, 0 is center of canvas" },
 	carPoint: { name: "Car Position", title: "Position of car in pixels, 0 is center of canvas" },
-}, { getInputElements: true });
+}, settingsMenu, { getInputElements: true });
 
 
 const physicsSettings = makeSettings("World", {
 	gravity: { name: "Gravity", value: 9.8, min: 0, title: "Gravity of world", step: 0.1 },
 	friction: { name: "Friction", value: 0.02, min: 0, title: "How easily the car slides", step: 0.1 },
 	airDensity: { name: "Air Density", value: 1.225, min: 0, title: "How strong air resistance is", step: 0.1 },
-});
+}, settingsMenu);
 
 const carSettings = makeSettings("Car", {
 	maxMotorPower: { name: "Max Motor Power", value: 10, min: 0, max: 60, title: "Max amount of force motors can spin wheels with", step: 0.1 },
 	mass: { name: "Mass", value: 3, min: 0, title: "Mass of car, how much gravity effects car", step: 0.1 },
 	dragCoefficient: { name: "Drag Coefficient", value: 0.01, min: 0, title: "How much drag effects car", step: 0.1 },
-});
+}, settingsMenu);
 
 const infoLineOpacities = makeSettings("Info Lines Opacity", {
 	carMotorPower: { name: "Motor Power", value: 0, min: 0, max: 1, title: "How visible arrow showing car's motor force is", step: 0.1 },
 	force: { name: "Forces", value: 0, min: 0, max: 1, title: "How visible force arrows are, force arrows are gravity, friction, air resistance, and velocity", step: 0.1 },
 	carOutlineLines: { name: "Car Outline", value: 0, min: 0, max: 1, title: "How visible car outline is", step: 0.1 },
-});
+}, settingsMenu);
 
 const resetCarButton = document.getElementById("reset-button");
 
@@ -851,7 +852,7 @@ const carPidController = new PidController();
 // set up ground angle inputs
 groundAngleSlider.oninput = () => {
 	world.setFloorOffset(groundAngleSlider.getLocalCenteredPosition() * -2);
-	groundDegreesInput.value = Math.round(world.getFloorDegrees());
+	groundDegreesInput.value = Math.round(world.getFloorDegrees() * 10) / 10;
 }
 groundDegreesInput.oninput = () => {
 	world.setFloorDegrees(Number(groundDegreesInput.value));
