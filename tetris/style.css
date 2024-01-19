@@ -1,0 +1,38 @@
+:root {
+    --color: #C2FFAE;
+}
+
+* {
+    box-sizing: border-box;
+
+    margin: 0;
+    padding: 0;
+}
+
+body, html {
+    width: 100%;
+    height: 100%;
+}
+
+body {
+    color: white;
+    background: black;
+    font-family: DejaVuSansMono, monospace;
+    
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.game {
+    /* color: green; */
+    color: var(--color);
+
+    font-size: 2;
+    line-height: 1.2;
+
+    transform: scale(1.2, 1.0);
+    letter-spacing: 2px;
+}
