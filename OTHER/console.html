@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <p>JS Testing</p>
+    <script>
+        const x = 3;
+        const y = 3;
+
+        console.assert(true, "Failed");
+        
+        console.log({x, y});
+
+        console.table([x, y]);
+
+        console.groupCollapsed("Test");
+        for (let i = 0; i < 12; i++) {
+            console.log("Test " + i);
+        }
+        console.groupEnd()
+
+        console.dir(window)
+
+        console.count("test");
+        console.count("test");
+        console.count("test");
+
+        console.time("timer");
+
+        console.timeLog("timer");
+        console.timeLog("timer");
+
+        function func() {
+            console.trace("Called here")
+        }
+        func()
+
+        console.log("%c CSS in Console ", "color: green; font-weight: bold; background-color: black;")
+    </script>
+</body>
+</html>
