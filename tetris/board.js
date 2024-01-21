@@ -31,7 +31,7 @@ export default class Board {
         return board;
     }
 
-    drawGrid(grid, { x = 0, y = 0, width, height, transparentBackground = 1 } = {}) {
+    drawGrid(grid, { x = 0, y = 0, width, height} = {}) {
 
         x = Math.floor(x);
         y = Math.floor(y);
@@ -41,7 +41,7 @@ export default class Board {
 
         for (let row = 0; row < height; row++) {
             for (let col = 0; col < width; col++) {
-                this.grid[y + row][x + col] = (grid[row][col] ?? 0) || (transparentBackground ? this.grid[y + row][x + col] : 0);
+                if (grid[row][col]) this.grid[y + row][x + col] = 1;
             }
         }
     }

@@ -21,11 +21,11 @@ export default class TetrisPiece {
     }
 
     save() {
-        this.saved = [this.x, this.y, this.state];
+        this.saved = [this.x, this.y, this.width, this.height, this.state];
     }
-
+    
     load() {
-        [this.x, this.y, this.state] = this.saved;
+        [this.x, this.y, this.width, this.height, this.state] = this.saved;
     }
 
     setState(state) {
@@ -38,41 +38,31 @@ export default class TetrisPiece {
     }
 
     spin() {
-        this.setState((this.state + 1) % this.states.length)
-        // [this.height, this.width] = [this.width, this.height]
+        this.state = (this.state + 1) % this.states.length;
+        [this.height, this.width] = [this.width, this.height];
     }
 
     getGrid() {
         return this.states[this.state];
     }
 
-    hasInvalidState(grid) {
+    hasValidState(grid) {
         const currentState = this.states[this.state];
-
-        for (let row = 0; row < this.height; row++) {
-            for (let col = 0; col < this.width; col++) {
-                if (currentState[row][col] && 
-                    (this.x < 0 || this.x + this.width > grid[0].length || grid[row + this.y][col + this.x])
-                ) return true;
-            }
-        }
-
-        return false;
-    }
-
-    landed(grid) {
-        const currentState = this.states[this.state];
-
-        const y = this.y + 1;
+        
+        const height = grid.length;
+        const width = height && grid[0].length;
 
         for (let row = 0; row < this.height; row++) {
             for (let col = 0; col < this.width; col++) {
                 if (currentState[row][col] && (
-                    y + row >= grid.length || grid[row + y][col + this.x])
-                ) return true;
+                        this.x < 0 || this.x + col >= width ||
+                        this.y < 0 || this.y + row >= height
+                        || grid[row + this.y][col + this.x]
+                    )
+                ) return false;
             }
         }
 
-        return false;
+        return true;
     }
 }

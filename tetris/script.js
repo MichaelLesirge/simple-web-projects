@@ -86,28 +86,29 @@ const normalDropSpeed = 30;
 const fastDropSpeed = 5;
 
 function loop({frame, i}) {
-    
     const frameBoard = board.getDrawingCopy();
 
     if (i && (i % (keys["ArrowDown"] ? fastDropSpeed : normalDropSpeed) == 0)) {
 
-        const hitsBottom = controlledPiece.landed(frameBoard.getGrid())
+        controlledPiece.save();
 
-        if (hitsBottom) {
+        controlledPiece.y++;
+
+        if (!controlledPiece.hasValidState(board.getGrid())) {
+
+            controlledPiece.load()
+
             board.drawGrid(controlledPiece.getGrid(), {x: controlledPiece.x, y: controlledPiece.y});
             
             const fullLines = board.findFullLines();
             console.log("+", fullLines);
 
-            controlledPiece = new TetrisPiece(shapes.I);
+            controlledPiece = spawnRandomPiece();
             
-            if (controlledPiece.landed(board.grid)) {
+            if (!controlledPiece.hasValidState(board.getGrid())) {
                 controller.pause();
                 setTimeout(alert("You lose"), 10);
             }
-        }
-        else {
-            controlledPiece.y++;
         }
     }
 
@@ -126,7 +127,7 @@ function loop({frame, i}) {
         keys["ArrowRight"] = false;
     }
 
-    if (controlledPiece.hasInvalidState(frameBoard.getGrid())) {
+    if (!controlledPiece.hasValidState(board.getGrid())) {
         controlledPiece.load();
     }
 
