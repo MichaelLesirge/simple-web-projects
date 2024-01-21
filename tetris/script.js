@@ -101,7 +101,8 @@ function loop({frame, i}) {
             board.drawGrid(controlledPiece.getGrid(), {x: controlledPiece.x, y: controlledPiece.y});
             
             const fullLines = board.findFullLines();
-            console.log("+", fullLines);
+            console.log("+", fullLines.length);
+            board.clearLines(fullLines);
 
             controlledPiece = spawnRandomPiece();
             

@@ -17,6 +17,11 @@ export default class Board {
         return linesToDelete;
     }
 
+    clearLines(linesToDelete) {
+        this.grid = Array.from({ length: linesToDelete.length }, () => Array.from({ length: this.width }, () => 0)).concat(
+            this.grid.filter((value, index) => !linesToDelete.includes(index)));
+    }
+
     getGrid() {
         return this.grid;
     }
