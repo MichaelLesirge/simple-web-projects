@@ -24,6 +24,10 @@
             margin: 0;
         }
 
+        button {
+            cursor: pointer;
+        }
+
         header {
             display: flex;
             justify-content: space-between;
@@ -66,15 +70,16 @@
 
             text-decoration: none;
             color: black;
-            
+
             /* transition: transform 0.3s ease-in-out; */
             transition: scale 0.1s ease-in-out;
         }
 
-        .project:hover, .project:focus {
+        .project:hover,
+        .project:focus {
             /* transform: translateY(-5px); */
             scale: 1.05;
-            
+
         }
 
         .project:active {
@@ -98,7 +103,7 @@
         .project .info {
             padding: 15px;
         }
-        
+
         .project .title {
             display: flex;
             justify-content: space-between;
@@ -115,13 +120,17 @@
             margin-bottom: 0;
         }
 
-        #github-foot { display: none; }
-        @media screen and (max-width: 700px) {
-            #github-head { display: none; }
-            #github-foot { display: unset; }
+        #github-foot {
+            display: none;
+        }
 
-            footer {
-                height: 2rem;
+        @media screen and (max-width: 700px) {
+            #github-head {
+                display: none;
+            }
+
+            #github-foot {
+                display: unset;
             }
         }
 
@@ -129,11 +138,16 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            flex-direction: column;
+
+            margin-top: 1rem;
+            gap: 1rem;
 
             width: 100%;
         }
     </style>
 </head>
+
 <body>
     <!-- This was super rushed so the code is kinda a mess -->
 
@@ -142,7 +156,8 @@
             <h1>My Random Projects</h1>
             <span>Simple Projects in plain HTML, CSS, and JS</span>
         </div>
-        <noscript class="warning">Warning: You have JavaScript disabled on this site. Most projects here require JavaScript for all functionality.</noscript>
+        <noscript class="warning">Warning: You have JavaScript disabled on this site. Most projects here require
+            JavaScript for all functionality.</noscript>
         <div id="github-head">
             <a class="github-info" href="https://github.com/michael-lesirge/simple-web-projects">
                 Michael Lesirge
@@ -155,6 +170,7 @@
     </main>
 
     <footer>
+        <button id="more">Show More</button>
         <div id="github-foot">
             <a class="github-info" href="https://github.com/michael-lesirge/simple-web-projects">
                 github.com/michael-lesirge
@@ -193,6 +209,11 @@
                 desc: "Chess, but where you win by taking the opponents king since I got bored",
             },
             {
+                name: "tetris",
+                title: "Tetris (Incomplete)",
+                desc: "Recreation of the original tetris game",
+            },
+            {
                 name: "fancy-effects",
                 title: "Random Effects",
                 desc: "Some random sort of nice looking effects/animations",
@@ -203,26 +224,38 @@
                 title: "Tic Tac Toe",
                 desc: "Highly customizable Tic Tac Toe game, from different repo",
             },
-            // {
-            //     name: "happy-holiday-eve",
-            //     title: "Happy Holiday Eve Eve",
-            //     desc: "Random thing I thought was kinda funny at the time",
-            // },
-            // {
-            //     name: "customisable-dice-roller",
-            //     title: "Dice Roller (Incomplete)",
-            //     desc: "Dice roller tool",
-            // },
+        ];
+
+        const extraProjects = [
+            {
+                name: "happy-holiday-eve",
+                title: "Happy Holiday Eve Eve",
+                desc: "Random thing I thought was kinda funny at the time",
+            },
+            {
+                name: "customisable-dice-roller",
+                title: "Dice Roller (Incomplete)",
+                desc: "Dice roller tool",
+            },
             {
                 name: "dont-leave",
                 title: "Don't Leave",
                 desc: "Random thing I thought was kinda funny at the time",
             },
+            {
+                name: "this",
+                url: "/",
+                title: "Project Page",
+                desc: "This page",
+            },
         ]
+
+        // TODO, have all projects in one big array, create one row at a time until screen is full, then have bottom{load more} load one more row
 
         // yaaa, not my finest work \/
         // <span class="title"><h3 title="${name}">${title ?? "Empty"}</h3><img width=10 class="github-logo" src="images/github.png" alt="github logo"></span>
-        projects.forEach(({name, title, desc, ...extra}) => {
+
+        function createProject({ name, title, desc, ...extra }) {
             projectsElement.innerHTML += `
             <a class="project" href="${extra.url ?? name ?? ""}" target="_blank">
                 <img width=500 class="project-image" src="images/${name.split("/")[0] || "example"}.png" alt="Screenshot of ${title ?? "Project"}">
@@ -231,8 +264,16 @@
                     <p>${desc ?? ""}</p>
                 </div>
             </a>
-            `
-        })
+            `;
+        }
+
+        projects.forEach(createProject)
+
+        const loadMoreButton = document.getElementById("more");
+        loadMoreButton.addEventListener("click", (data) => {
+            loadMoreButton.remove();
+            extraProjects.forEach(createProject);
+        });
 
     </script>
 
