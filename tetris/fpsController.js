@@ -4,7 +4,7 @@ export default class FpsController {
 
         this.setFrameRate(FPS)
 
-        this.tref;   
+        this.tref;
         this.callback = callback;
         this.isPlaying = false;
     }
@@ -12,7 +12,7 @@ export default class FpsController {
     getFrameRate() {
         return this.fps;
     }
-    
+
     setFrameRate(newFPS) {
         this.fps = newFPS;
         this.delay = 1000 / this.fps;
@@ -21,7 +21,6 @@ export default class FpsController {
         this.time = null;
     };
 
-   
     start() {
         if (!this.isPlaying) {
             this.isPlaying = true;

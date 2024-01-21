@@ -7,6 +7,16 @@ export default class Board {
         this.grid = Array.from({ length: height }, () => Array.from({ length: width }, () => 0));
     }
 
+    findFullLines() {
+        const linesToDelete = [];
+
+        for (let i = 0; i < this.grid.length; i++) {            
+            if (this.grid[i].every((val) => val)) linesToDelete.push(i)
+        }
+
+        return linesToDelete;
+    }
+
     getGrid() {
         return this.grid;
     }
@@ -21,7 +31,7 @@ export default class Board {
         return board;
     }
 
-    drawGrid(grid, {x = 0, y = 0, width, height, transparentBackground = 1} = {}) {
+    drawGrid(grid, { x = 0, y = 0, width, height, transparentBackground = 1 } = {}) {
 
         x = Math.floor(x);
         y = Math.floor(y);
@@ -32,7 +42,7 @@ export default class Board {
         for (let row = 0; row < height; row++) {
             for (let col = 0; col < width; col++) {
                 this.grid[y + row][x + col] = (grid[row][col] ?? 0) || (transparentBackground ? this.grid[y + row][x + col] : 0);
-            }   
+            }
         }
     }
 }

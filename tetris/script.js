@@ -91,24 +91,27 @@ function loop({frame, i}) {
 
     if (i && (i % (keys["ArrowDown"] ? fastDropSpeed : normalDropSpeed) == 0)) {
 
-        const startY = controlledPiece.y;
-
-        controlledPiece.y++;
-
-        const hitsBottom = controlledPiece.hitsBottom(frameBoard.getGrid())
+        const hitsBottom = controlledPiece.landed(frameBoard.getGrid())
 
         if (hitsBottom) {
-            controlledPiece.y = startY;
             board.drawGrid(controlledPiece.getGrid(), {x: controlledPiece.x, y: controlledPiece.y});
+            
+            const fullLines = board.findFullLines();
+            console.log("+", fullLines);
 
-            controlledPiece = spawnRandomPiece();
-
-            if (controlledPiece.hitsBottom(board.grid)) {
-                alert("You lose");
+            controlledPiece = new TetrisPiece(shapes.I);
+            
+            if (controlledPiece.landed(board.grid)) {
                 controller.pause();
+                setTimeout(alert("You lose"), 10);
             }
         }
+        else {
+            controlledPiece.y++;
+        }
     }
+
+    controlledPiece.save();
 
     if (keys["ArrowUp"]) {
         controlledPiece.spin();
@@ -121,6 +124,10 @@ function loop({frame, i}) {
     if (keys["ArrowRight"]) {
         controlledPiece.x++;
         keys["ArrowRight"] = false;
+    }
+
+    if (controlledPiece.hasInvalidState(frameBoard.getGrid())) {
+        controlledPiece.load();
     }
 
     frameBoard.drawGrid(controlledPiece.getGrid(), {x: controlledPiece.x, y: controlledPiece.y});
