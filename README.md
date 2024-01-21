@@ -9,7 +9,7 @@ Random website ideas I decided to make for no real reason besides for the fun of
 0. [text-changer](https://michael-lesirge.github.io/simple-web-projects/text-changer)
 0. [roman-numerals](https://michael-lesirge.github.io/simple-web-projects/roman-numerals)
 0. [chess](https://michael-lesirge.github.io/simple-web-projects/chess) (incomplete)
-0. [tetris](https://michael-lesirge.github.io/simple-web-projects/chess) (incomplete)
+0. [tetris](https://michael-lesirge.github.io/simple-web-projects/tetris) (incomplete)
 0. [fancy-effects](https://michael-lesirge.github.io/simple-web-projects/fancy-effects)
 0. [customisable-dice-roller](https://michael-lesirge.github.io/simple-web-projects/customisable-dice-roller) (incomplete)
 0. [happy-holiday-eve](https://michael-lesirge.github.io/simple-web-projects/happy-holiday-eve)
