@@ -4,16 +4,17 @@ function rotate90degrees(grid) {
 }
 
 export default class TetrisPiece {
-    numOfStates = 4;
+    maxNumOfStates = 4;
 
     constructor(shape, { x = 0, y = 0, state = 0 } = {}) {
         this.x = x;
         this.y = y;
 
         this.states = [];
-        for (let i = 0; i < this.numOfStates; i++) {
+        for (let i = 0; i < this.maxNumOfStates; i++) {
             this.states.push(shape);
             shape = rotate90degrees(shape)
+            if (shape == this.states[0]) break
         }
 
         this.setState(state);
@@ -55,8 +56,8 @@ export default class TetrisPiece {
         for (let row = 0; row < this.height; row++) {
             for (let col = 0; col < this.width; col++) {
                 if (currentState[row][col] && (
-                        this.x < 0 || this.x + col >= width ||
-                        this.y < 0 || this.y + row >= height
+                        this.x + col < 0 || this.x + col >= width ||
+                        this.y + row < 0 || this.y + row >= height
                         || grid[row + this.y][col + this.x]
                     )
                 ) return false;

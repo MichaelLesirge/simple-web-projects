@@ -27,50 +27,55 @@ const shapes = {
     ],
 
     I: [
-        [1],
-        [1],
-        [1],
-        [1],
+        [0, 0, 1, 0],
+        [0, 0, 1, 0],
+        [0, 0, 1, 0],
+        [0, 0, 1, 0],
     ],
 
     S: [
+        [0, 0, 0],
         [0, 1, 1],
         [1, 1, 0],
     ],
 
     Z: [
+        [0, 0, 0],
         [1, 1, 0],
         [0, 1, 1],
     ],
 
     L: [
-        [1, 0],
-        [1, 0],
-        [1, 1],
+        [0, 1, 0],
+        [0, 1, 0],
+        [0, 1, 1],
     ],
 
     J: [
-        [0, 1],
-        [0, 1],
-        [1, 1],
+        [0, 1, 0],
+        [0, 1, 0],
+        [1, 1, 0],
     ],
 
     T: [
-        [0, 1, 0],
+        [0, 0, 0],
         [1, 1, 1],
+        [0, 1, 0],
     ],
 }
 
-const allShapes = Object.values(shapes);
+const allShapes = Object.keys(shapes);
 
 function spawnRandomPiece() {
-    const shape = random(allShapes.length);    
-    const piece = new TetrisPiece(allShapes[shape])
+    const shape = allShapes[random(allShapes.length)];    
+    const piece = new TetrisPiece(shapes[shape])
+
+    console.log(shape, piece.states.length)
     
     piece.x = Math.round((board.width / 2) - (piece.width / 2));
     piece.y = 0;
 
-    piece.setState(random(piece.numOfStates));
+    piece.setState(random(piece.maxNumOfStates));
     
     console.table(piece.getGrid());
     console.log("Width: " + piece.width, "Height: " + piece.height)
@@ -82,8 +87,10 @@ let controlledPiece = spawnRandomPiece();
 
 const keys = {}
 
+const scoring = [0, 40, 100, 300, 1200]
+
 const normalDropSpeed = 30;
-const fastDropSpeed = 5;
+const fastDropSpeed = normalDropSpeed / 10;
 
 function loop({frame, i}) {
     const frameBoard = board.getDrawingCopy();
@@ -127,6 +134,13 @@ function loop({frame, i}) {
         controlledPiece.x++;
         keys["ArrowRight"] = false;
     }
+    if (keys[" "]) {
+        while (controlledPiece.hasValidState(board.getGrid())) {
+            controlledPiece.save()
+            controlledPiece.y++;
+        }
+        keys[" "] = false;
+    }
 
     if (!controlledPiece.hasValidState(board.getGrid())) {
         controlledPiece.load();
@@ -141,6 +155,10 @@ const controller = new FpsController(
     loop, FPS
 )
 
+window.addEventListener("keydown", (event) => {
+    if (event.key == "Escape") controller.toggleOn()
+});
+
 controller.start();
 
 window.addEventListener("keydown", (event) => keys[event.key] = true);
@@ -152,8 +170,10 @@ function gridToTetrisString(grid) {
 
     const blockWidth = 2;
 
+    // const full = "█".repeat(blockWidth);
+    const full = "[" + " ".repeat(blockWidth - 2) + "]";
+
     const empty = " ".repeat(blockWidth - 1) + ".";
-    const full = "[" + " ".repeat(blockWidth - 2) + "]"
 
     const linePaddingLeft = "〈!";
     const linePaddingRight = "!〉";
