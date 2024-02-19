@@ -38,13 +38,22 @@ export default class FpsController {
         }
     };
 
-    toggleOn() {
+    toggle() {
         if (this.isPlaying) this.pause()
         else this.start()
     }
 
+    getTimestampString() {
+        let seconds = Math.floor(this.timestamp / 1000);
+        let minutes = Math.floor(seconds / 60)
+        seconds -= minutes * 60;
+        return minutes + ":" + (seconds < 10 ? "0" : "") + seconds;
+    }
+
+    // Has to be anonymise for when it is passed to requestAnimationFrame
     loop = (timestamp) => {
         if (this.time === null) this.time = timestamp;
+        this.timestamp = timestamp; 
 
         const seg = Math.floor((timestamp - this.time) / this.delay);
 

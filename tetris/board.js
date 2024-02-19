@@ -1,10 +1,14 @@
 
 export default class Board {
     constructor(width, height) {
-        this.width = width ?? 0;
-        this.height = height ?? 0;
+        this.width = width;
+        this.height = height;
 
-        this.grid = Array.from({ length: height }, () => Array.from({ length: width }, () => 0));
+        this.reset();
+    }
+
+    reset() {
+        this.grid = Array.from({ length: this.height }, () => Array.from({ length: this.width }, () => 0));
     }
 
     findFullLines() {
@@ -30,7 +34,7 @@ export default class Board {
         const board = new Board();
 
         board.width = this.width;
-        board.height = this.width;
+        board.height = this.height;
         board.grid = structuredClone(this.grid);
 
         return board;

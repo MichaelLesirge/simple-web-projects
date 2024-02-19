@@ -7,10 +7,10 @@
     <link rel="stylesheet" href="style.css">
     <script type="module" src="script.js"></script>
 
-    <title>Tetris</title>
+    <title>Original Tetris</title>
 </head>
 <body>
-    <h1>Tetris</h1>
+    <h1>Tetris (Electronika 60) 1985, USSR</h1>
     <pre class="game">
 〈! . . . . . . . . . .!〉
 〈! . . . . . . . . . .!〉
@@ -35,5 +35,13 @@
 〈!====================!〉
    \/\/\/\/\/\/\/\/\/\/   
     </pre>
+    <div class="game-over" style="display: none;">
+        <div>Game Over</div>
+        <div>Score: <span id="score">0</span></div>
+        <div>High Score: <span id="high-score">0</span></div>
+        <button id="play-again">Play Again</button>
+    </div>
+
+    <script src="audio.js"></script>
 </body>
 </html>
