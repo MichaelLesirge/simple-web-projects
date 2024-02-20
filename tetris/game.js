@@ -2,38 +2,28 @@ function random(max) {
     return Math.floor(Math.random() * max);
 }
 
-
-function rotate90degrees(grid) {
-    return grid[0].map((val, index) => grid.map(row => row[index]).reverse())
-}
-
 const MAX_NUM_OF_STATES = 4;
 class TetrisPiece {
-    constructor(shape, { x = 0, y = 0, state = 0 } = {}) {
+    constructor(type, { x = 0, y = 0, rotation = 0 } = {}) {
+        this.type = type;
+
         this.x = x;
         this.y = y;
 
-        this.states = [];
-        for (let i = 0; i < MAX_NUM_OF_STATES; i++) {
-            this.states.push(shape);
-            shape = rotate90degrees(shape)
-            if (shape == this.states[0]) break
-        }
-
-        this.setState(state);
+        this.setState(rotation);
         this.save();
     }
 
     save() {
-        this.saved = [this.x, this.y, this.width, this.height, this.state];
+        this.saved = [this.x, this.y, this.width, this.height, this.rotation];
     }
     
     load() {
-        [this.x, this.y, this.width, this.height, this.state] = this.saved;
+        [this.x, this.y, this.width, this.height, this.rotation] = this.saved;
     }
 
     setState(state) {
-        this.state = state;
+        this.rotation = state;
 
         const grid = this.getGrid();
 
@@ -42,7 +32,7 @@ class TetrisPiece {
     }
 
     spin() {
-        this.state = (this.state + 1) % this.states.length;
+        this.rotation = (this.rotation + 1) % this.type.rotations.length;
         [this.height, this.width] = [this.width, this.height];
     }
 
@@ -59,18 +49,18 @@ class TetrisPiece {
     }
 
     getGrid() {
-        return this.states[this.state];
+        return this.type.rotations[this.rotation];
     }
 
     hasValidState(grid) {
-        const currentState = this.states[this.state];
+        const currentGrid = this.getGrid();
         
         const height = grid.length;
         const width = grid[0].length;
 
         for (let row = 0; row < this.height; row++) {
             for (let col = 0; col < this.width; col++) {
-                if (currentState[row][col] && (
+                if (currentGrid[row][col] && (
                         this.x + col < 0 || this.x + col >= width ||
                         this.y + row < 0 || this.y + row >= height
                         || grid[row + this.y][col + this.x]
@@ -84,9 +74,9 @@ class TetrisPiece {
 }
 
 export default class Tetris {
-    constructor(board, shapes, displayBoard, dropDelayFrames = 1, softDropDelayFrames = 1, pieceQueueSize = 1) {
+    constructor(board, pieceTypes, displayBoard, dropDelayFrames = 1, softDropDelayFrames = 1, pieceQueueSize = 1) {
         this.board = board;
-        this.shapes = shapes;
+        this.pieceTypes = pieceTypes;
         this.displayBoard = displayBoard;
 
         this.dropDelayFrames = dropDelayFrames;
@@ -97,11 +87,11 @@ export default class Tetris {
 
     fillPieceQueue() {
         while (this.pieceQueue.length < this.pieceQueueSize) {
-            const shape = this.shapes[random(this.shapes.length)];
-            const piece = new TetrisPiece(shape, {
-                x: Math.round(this.board.width / 2 - shape[0].length / 2),
+            const type = this.pieceTypes[random(this.pieceTypes.length)];
+            const piece = new TetrisPiece(type, {
+                x: Math.round(this.board.width / 2 - type.largestDim / 2),
                 y: 0,
-                state: random(MAX_NUM_OF_STATES)
+                rotation: random(type.rotations.length)
             });
             this.pieceQueue.push(piece);
         }

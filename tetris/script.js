@@ -11,6 +11,10 @@ String.prototype.padCenter = function (maxLength, fillString = " ") {
     return fillString.repeat(half) + this + fillString.repeat(paddingNeeded - half)
 }
 
+String.prototype.replaceAt = function(index, replacement) {
+    return this.substring(0, index) + replacement + this.substring(index + replacement.length);
+}
+
 // TODO:
 // 0. TETRIS {DONE}
 // 1. show full lines, level, score, high score, time {DONE}
@@ -47,55 +51,92 @@ startGameButton.addEventListener("click", startGame);
 
 const messages = [];
 
-const shapes = {
-    O: [
+class ShapeType {
+    constructor(name, shape, maxRotations = 4) {
+        this.name = name;
+        this.shape = shape;
+        this.maxRotations = maxRotations;
+
+        this.height = shape.length;
+        this.width = shape[0].length;
+
+        this.largestDim = Math.max(this.width, this.height);
+
+        this.rotations = [];
+        if (maxRotations !== null) {
+            for (let i = 0; i < maxRotations; i++) {
+                this.rotations.push(shape);
+                shape = this.rotate90degrees(shape)
+                if (shape == this.rotations[0]) break
+            }
+        }
+        else {
+            this.rotations.push(...shape);
+        }
+    }
+
+    rotate90degrees(grid) {
+        return grid[0].map((val, index) => grid.map(row => row[index]).reverse())
+    }
+}
+
+const shapes = [
+    new ShapeType("O", [
         [1, 1],
         [1, 1],
-    ],
+    ]),
 
-    I: [
-        [0, 0, 1, 0],
-        [0, 0, 1, 0],
-        [0, 0, 1, 0],
-        [0, 0, 1, 0],
-    ],
+    new ShapeType("I", [
+        [0, 1, 0, 0],
+        [0, 1, 0, 0],
+        [0, 1, 0, 0],
+        [0, 1, 0, 0],
+    ], 2),
 
-    S: [
+    new ShapeType("S", [[
         [0, 0, 0],
         [0, 1, 1],
         [1, 1, 0],
-    ],
+    ], [
+        [0, 1, 0],
+        [0, 1, 1],
+        [0, 0, 1],
+    ]], null),
 
-    Z: [
+    new ShapeType("Z", [[
         [0, 0, 0],
         [1, 1, 0],
         [0, 1, 1],
-    ],
+    ], [
+        [0, 0, 1],
+        [0, 1, 1],
+        [0, 1, 0],
+    ]], null),
 
-    L: [
+    new ShapeType("L", [
         [0, 1, 0],
         [0, 1, 0],
         [0, 1, 1],
-    ],
+    ]),
 
-    J: [
+    new ShapeType("J", [
         [0, 1, 0],
         [0, 1, 0],
         [1, 1, 0],
-    ],
+    ]),
 
-    T: [
+    new ShapeType("T", [
         [0, 0, 0],
         [1, 1, 1],
         [0, 1, 0],
-    ],
-}
+    ]),
+]
 
 const dropsPerSecond = 3;
 const softDropsPerSecond = 30
 
 const board = new Board(WIDTH, HEIGHT);
-const game = new Tetris(board, Object.values(shapes), displayBoard, Math.round(FPS / dropsPerSecond), Math.round(FPS / softDropsPerSecond));
+const game = new Tetris(board, shapes, displayBoard, Math.round(FPS / dropsPerSecond), Math.round(FPS / softDropsPerSecond));
 
 function displayBoard(game, board) {
     gameElement.innerText = gameToString(game, board ?? game.board);
@@ -117,7 +158,7 @@ window.addEventListener("keydown", (event) => {
         if (event.key === "Escape") {
             if (controller.isPlaying) {
                 controller.pause()
-                messages.push("Paused");
+                messages.unshift("Paused");
                 game.draw();
             }
             else {
@@ -144,7 +185,7 @@ function startGame() {
     controller.start();
 }
 
-function endGame(params) {
+function endGame() {
     gameOverBox.style.display = "block";
     controller.pause();
     if (localStorage.getItem("high-score") ?? 0 <= game.score) localStorage.setItem("high-score", game.score);
@@ -178,10 +219,13 @@ function boardToLines(board) {
     lines.push((" ".repeat(linePaddingLeft.length) + (bottom2.repeat(width * BLOCK_WIDTH / bottom2.length)) + " ".repeat(linePaddingRight.length)));
 
     const message = messages.pop();
-    if (message) lines[Math.floor(height / 2)] = 
-        linePaddingLeft +
-        message.padCenter(width, empty_fill_char).split("").map((letter) => letter.padCenter(BLOCK_WIDTH)).join("")
-        + linePaddingRight;
+    if (message) {
+        const lineIndex = Math.floor(board.height / 2);
+        const stringStartOffset = linePaddingLeft.length + Math.floor(board.width / 2) * BLOCK_WIDTH - Math.floor(message.length / 2)
+        for (let i = 0; i < message.length; i++) {
+            lines[lineIndex] = lines[lineIndex].replaceAt(stringStartOffset + i, message[i]);
+        }
+    }
 
     return lines;
 }
