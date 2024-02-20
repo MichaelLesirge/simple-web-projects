@@ -4,7 +4,7 @@ export default class FpsController {
 
         this.setFrameRate(FPS)
 
-        this.tref;
+        this.frameReference;
         this.callback = callback;
         this.isPlaying = false;
     }
@@ -24,13 +24,13 @@ export default class FpsController {
     start() {
         if (!this.isPlaying) {
             this.isPlaying = true;
-            this.tref = requestAnimationFrame(this.loop);
+            this.frameReference = requestAnimationFrame(this.loop);
         }
     };
 
     pause() {
         if (this.isPlaying) {
-            cancelAnimationFrame(this.tref);
+            cancelAnimationFrame(this.frameReference);
             this.isPlaying = false;
             this.time = null;
             this.frame = -1;
@@ -47,7 +47,7 @@ export default class FpsController {
         let seconds = Math.floor(this.timestamp / 1000);
         let minutes = Math.floor(seconds / 60)
         seconds -= minutes * 60;
-        return minutes + ":" + (seconds < 10 ? "0" : "") + seconds;
+        return minutes + ":" + String(seconds).padStart(2, '0');
     }
 
     // Has to be anonymise for when it is passed to requestAnimationFrame
@@ -68,7 +68,7 @@ export default class FpsController {
         }
 
         if (this.isPlaying) {
-            this.tref = requestAnimationFrame(this.loop);
+            this.frameReference = requestAnimationFrame(this.loop);
         }
     }
 }

@@ -42,8 +42,7 @@ export function loadAudio() {
             request.responseType = 'arraybuffer';
 
             request.onload = function () {
-                audioCtx.decodeAudioData(request.response, next,
-                    (e) => "Error with decoding audio data: " + e.err);
+                audioCtx.decodeAudioData(request.response, next, (e) => "Error with decoding audio data: " + e.err);
             }
             request.send();
         }
@@ -64,15 +63,3 @@ export function loadAudio() {
 
     return audioCtx;
 }
-
-// document.getElementById("mute-sound").addEventListener("click", function (e) {
-//     muteSound = !muteSound
-
-//     if (muteSound)
-//         ambienceAudioSource && ambienceAudioSource.stop(0)
-//     else
-//         ambienceAudioSource = playAudio(ambienceBuffer, true)
-
-//     e.target.innerHTML = muteSound ? "UNMUTE SOUND" : "MUTE SOUND"
-//     e.target.blur()
-// })
