@@ -12,36 +12,37 @@
 <body>
     <h1>Tetris (Electronika 60) 1985, USSR</h1>
     <pre class="game">
-〈! . . . . . . . . . .!〉
-〈! . . . . . . . . . .!〉
-〈! . . . . . . . . . .!〉
-〈! . . . . . . . . . .!〉
-〈! . . . . . . . . . .!〉
-〈! . . . . . . . . . .!〉
-〈! . . . . . . . . . .!〉
-〈! . . . . . . . . . .!〉
-〈! . . . . . . . . . .!〉
-〈! . . . . . . . . . .!〉
-〈! . . . . . . . . . .!〉
-〈! . . . . . . . . . .!〉
-〈! . . . . . . . . . .!〉
-〈! . . . . . . . . . .!〉
-〈! . . . . . . . . . .!〉
-〈! . . . . . . . . . .!〉
-〈! . . . . . . . . . .!〉
-〈! . . . . . . . . . .!〉
-〈! . . . . . . . . . .!〉
-〈! . . . . . . . . . .!〉
-〈!====================!〉
-   \/\/\/\/\/\/\/\/\/\/   
+FULL LINES: 0     &lt;! . . . . . . . . . .!&gt;                  
+LEVEL: 0          &lt;! . . . . . . . . . .!&gt;                  
+SCORE: 0          &lt;! . . . . . . . . . .!&gt;                  
+TIME: 0:00        &lt;! . . . . . . . . . .!&gt;                  
+                  &lt;! . . . . . . . . . .!&gt;                  
+                  &lt;! . . . . . . . . . .!&gt;                  
+                  &lt;! . . . . . . . . . .!&gt;                  
+                  &lt;! . . . . . . . . . .!&gt;                  
+                  &lt;! . . . . . . . . . .!&gt;                  
+                  &lt;! . . . . . . . . . .!&gt;                  
+                  &lt;! . . . . . . . . . .!&gt;                  
+                  &lt;! . . . . . . . . . .!&gt;                  
+                  &lt;! . . . . . . . . . .!&gt;                  
+                  &lt;! . . . . . . . . . .!&gt;                  
+                  &lt;! . . . . . . . . . .!&gt;                  
+                  &lt;! . . . . . . . . . .!&gt;                  
+                  &lt;! . . . . . . . . . .!&gt;                  
+                  &lt;! . . . . . . . . . .!&gt;                  
+                  &lt;! . . . . . . . . . .!&gt;                  
+                  &lt;! . . . . . . . . . .!&gt;                  
+                  &lt;!====================!&gt;                  
+                    \/\/\/\/\/\/\/\/\/\/                     
     </pre>
-    <div class="game-over" style="display: none;">
+    <div id="start-box" class="info-box">
+        Press Any Key To Begin
+    </div>
+    <div id="game-over-box" class="info-box" style="display: none;">
         <div>Game Over</div>
         <div>Score: <span id="score">0</span></div>
         <div>High Score: <span id="high-score">0</span></div>
         <button id="play-again">Play Again</button>
     </div>
-
-    <script src="audio.js"></script>
 </body>
 </html>

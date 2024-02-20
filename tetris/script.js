@@ -3,6 +3,7 @@ console.log("https://tetris.wiki/Tetris_%28Electronika_60%29")
 import Board from "./board.js";
 import Tetris from "./game.js";
 import FpsController from "./fpsController.js";
+import { playAudioKey, loadAudio } from "./audio.js";
 
 String.prototype.padCenter = function (maxLength, fillString = " ") {
     const paddingNeeded = Math.max(maxLength - this.length, 0);
@@ -11,13 +12,14 @@ String.prototype.padCenter = function (maxLength, fillString = " ") {
 }
 
 // TODO:
-// 0. TETRIS
+// 0. TETRIS {DONE}
 // 1. show full lines, level, score, high score, time {DONE}
 // 2. next piece {DONE}
 // 3. new game {DONE}
 // 4. sound effects
-// 5. wall bouncing
-// 6. clean up code
+// 5. make accurate to original game
+// 6. Better start/end screen
+// 7. clean up code
 
 const WIDTH = 10;
 const HEIGHT = 20;
@@ -37,7 +39,9 @@ const linePaddingRight = "!>";
 
 const gameElement = document.querySelector(".game");
 
-const gameOverBox = document.querySelector(".game-over");
+const startBox = document.getElementById("start-box");
+
+const gameOverBox = document.getElementById("game-over-box");
 const startGameButton = document.getElementById("play-again");
 startGameButton.addEventListener("click", startGame);
 
@@ -97,11 +101,32 @@ function displayBoard(game, board) {
     gameElement.innerText = gameToString(game, board ?? game.board);
 }
 
+let started = false;
+
 const keys = {}
 
+let audioCtx;
 window.addEventListener("keydown", (event) => {
-    keys[event.key] = true;
-    window.playAudioKey(event.key);
+    if (!started) {
+        startGame();
+        startBox.remove();
+        audioCtx = loadAudio();
+        started = true;
+    }
+    else {
+        if (event.key === "Escape") {
+            if (controller.isPlaying) {
+                controller.pause()
+                messages.push("Paused");
+                game.draw();
+            }
+            else {
+                controller.start();
+            }
+        };
+        if (!event.repeat) playAudioKey(event.key, audioCtx);
+        keys[event.key] = true;
+    }
 });
 window.addEventListener("keyup", (event) => keys[event.key] = false);
 
@@ -112,19 +137,6 @@ const controller = new FpsController(
         game.draw();
     }, FPS
 )
-
-window.addEventListener("keydown", (event) => {
-    if (event.key === "Escape") {
-        if (controller.isPlaying) {
-            controller.pause()
-            messages.push("Paused");
-            game.draw();
-        }
-        else {
-            controller.start();
-        }
-    };
-})
 
 function startGame() {
     gameOverBox.style.display = "none";
@@ -141,8 +153,6 @@ function endGame(params) {
 
     startGameButton.focus();
 }
-
-startGame();
 
 function boardToLines(board) {
     

@@ -20,7 +20,7 @@ body {
     letter-spacing: 1.2px;
 }
 
-.game-over {
+.info-box {
     position: absolute;
     top: 50%;
     left: 50%;

@@ -1,74 +1,69 @@
 
+
+const path = "./sounds/"
+
 let audioCtx;
 let keyAudioBuffers = [];
 let spaceAudioBuffer;
 let ambienceBuffer;
 let ambienceAudioSource;
-let muteSound; 
+let muteSound = false; 
 
-const path = "./sounds/"
-
-function playAudioKey(keyCode) {
-    console.log(keyCode);
-    if (keyCode === " ") {
-        playAudio(spaceAudioBuffer)
-        return
-    }
-
-    let i = Math.random() * keyAudioBuffers.length << 0
-    playAudio(keyAudioBuffers[i]);
-}
-
-function playAudio(buffer, loop) {
-    if (!buffer || muteSound)
-        return
+function playAudio(buffer, loop, audioCtx) {
+    if (!buffer || muteSound) return
 
     let source = audioCtx.createBufferSource();
     source.buffer = buffer;
     source.connect(audioCtx.destination);
 
-    if (loop)
-        source.loop = true;
+    if (loop) source.loop = true;
 
-    
     source.start(0);
     
     return source
 }
 
-function loadAudioBuffer(filename, next) {
-    function performReq(filename) {
-        let request = new XMLHttpRequest();
-
-        request.open('GET', path + filename, true);
-        request.responseType = 'arraybuffer';
-
-        request.onload = function () {
-            audioCtx.decodeAudioData(request.response, next,
-                function (e) { "Error with decoding audio data" + e.err });
-        }
-        request.send();
+export function playAudioKey(keyCode, audioCtx) {
+    if (keyCode === " ") {
+        playAudio(spaceAudioBuffer, false, audioCtx)
+        return
     }
 
-    (filename.map && filename.map(performReq)) || performReq(filename)
+    let i = Math.random() * keyAudioBuffers.length << 0
+    playAudio(keyAudioBuffers[i], false, audioCtx);
 }
 
-audioCtx = new (window.AudioContext || window.webkitAudioContext)()
+export function loadAudio() {
+    function loadAudioBuffer(filenames, next) {
+        function performReq(filename) {
+            let request = new XMLHttpRequest();
 
-loadAudioBuffer(['key1.ogg', 'key2.ogg', 'key3.ogg', 'key4.ogg'],
-    function (buffer) {
-        keyAudioBuffers.push(buffer)
-    })
+            request.open('GET', path + filename, true);
+            request.responseType = 'arraybuffer';
 
-loadAudioBuffer("space.ogg", function (buffer) {
-    spaceAudioBuffer = buffer
-})
+            request.onload = function () {
+                audioCtx.decodeAudioData(request.response, next,
+                    (e) => "Error with decoding audio data: " + e.err);
+            }
+            request.send();
+        }
 
-loadAudioBuffer('ambience.ogg', function (buffer) {
-    ambienceAudioSource = playAudio(ambienceBuffer = buffer, true)
-})
+        filenames.map(performReq);
+    }
 
-loadAudioBuffer('beep.ogg', playAudio)
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)()
+
+    loadAudioBuffer(["key1.ogg", "key2.ogg", "key3.ogg", "key4.ogg"],
+        (buffer) => keyAudioBuffers.push(buffer))
+
+    loadAudioBuffer(["space.ogg"], (buffer) => spaceAudioBuffer = buffer)
+
+    loadAudioBuffer(["ambience.ogg"], (buffer) => ambienceAudioSource = playAudio(ambienceBuffer = buffer, true, audioCtx))
+
+    loadAudioBuffer(["beep.ogg"], (buffer) => playAudio(buffer, false, audioCtx))
+
+    return audioCtx;
+}
 
 // document.getElementById("mute-sound").addEventListener("click", function (e) {
 //     muteSound = !muteSound
@@ -81,5 +76,3 @@ loadAudioBuffer('beep.ogg', playAudio)
 //     e.target.innerHTML = muteSound ? "UNMUTE SOUND" : "MUTE SOUND"
 //     e.target.blur()
 // })
-
-window.playAudioKey = playAudioKey
