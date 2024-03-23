@@ -1,5 +1,7 @@
 console.log("https://tetris.wiki/Tetris_%28Electronika_60%29")
 
+// TODO, add R=reset and M=mute, get mobile working and add buttons for all actions
+
 // ---- Imports ---
 
 import Board from "./board.js";
@@ -100,7 +102,7 @@ function startGame() {
     
     controller.start();
 
-    window.addEventListener("beforeunload", beforeUnloadHandler);
+    if (location.host != '127.0.0.1:5500') window.addEventListener("beforeunload", beforeUnloadHandler);
 }
 
 function endGame() {
