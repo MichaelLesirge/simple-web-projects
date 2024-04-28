@@ -1,0 +1,21 @@
+extension that makes hides all youtube comments that say "Who's here in" or "first" 
+or any other regex pattern, specified by user in popup
+
+link to regex wiki and chatGPT
+
+Delete Modes:
+Delete (On, Default, fully removes comments)
+Line (On, turns comments into thin line that can be clicked on to expand)
+Off (Off, also toggled by power button)
+
+Word Modes:
+Simple: text box with comma separated words with option for case sensitive and full words
+Advanced: Regex, simple words are also here
+
+Extra features
+- Filter out like range
+- Filter out date range
+
+document.querySelectorAll("#comment").forEach(c => {
+    console.log(c.querySelector("yt-attributed-string").innerText)
+})
