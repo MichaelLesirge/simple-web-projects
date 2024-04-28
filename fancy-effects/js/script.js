@@ -83,10 +83,31 @@ function startLoop(init, clear, draw) {
     loop();
 }
 
-const dpr = Math.ceil(window.devicePixelRatio || 1);
+function respondToVisibility(element, callback, ratio = 0) {
+    const options = {
+        root: document.documentElement,
+    };
+
+    const observer = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+            callback(entry.intersectionRatio > ratio);
+        });
+    }, options);
+
+    observer.observe(element);
+}
+
+
 function updateCanvasSizes(canvas) {
-    canvas.width = canvas.clientWidth * dpr;
-    canvas.height = canvas.clientHeight * dpr;
+
+    function updateCanvasSizeWithDpr() {
+        const dpr = Math.ceil(window.devicePixelRatio || 1);
+        canvas.width = canvas.clientWidth * dpr;
+        canvas.height = canvas.clientHeight * dpr;
+    }
+
+    window.addEventListener("resize", updateCanvasSizeWithDpr);
+    updateCanvasSizeWithDpr()
 }
 
 {
@@ -98,7 +119,7 @@ function updateCanvasSizes(canvas) {
     const settings = {
         startTime: new Date().getTime(),
 
-        durationSeconds: 15 * 60,
+        durationSeconds: 60 * 30,
 
         maxCycles: Math.max(colors.length, 100),
 
@@ -149,6 +170,8 @@ function updateCanvasSizes(canvas) {
     }
 
     function init() {
+        settings.startTime = new Date().getTime();
+
         ctx.lineCap = "round";
 
         arcs = colors.map((color, index) => {
@@ -210,7 +233,8 @@ function updateCanvasSizes(canvas) {
     base.spacing = (base.length - base.initialRadius - base.clearance) / 2 / colors.length;
 
     function draw() {
-        const currentTime = new Date().getTime(), elapsedTime = (currentTime - settings.startTime) / 1000;
+        const currentTime = new Date().getTime();
+        const elapsedTime = (currentTime - settings.startTime) / 1000;
 
         arcs.forEach((arc, index) => {
             const radius = base.initialRadius + (base.spacing * index);
@@ -249,7 +273,9 @@ function updateCanvasSizes(canvas) {
         });
     }
 
-    startLoop(init, clear, draw);
+    respondToVisibility(canvas, init, 1)
+    canvas.addEventListener("click", init)
+    startLoop(init, clear, draw)
 }
 
 {
@@ -304,6 +330,84 @@ function updateCanvasSizes(canvas) {
     startLoop(() => { }, clear, draw)
 }
 
-// {
+{
+    const canvas = document.getElementById('particle');
+    updateCanvasSizes(canvas)
 
-// }
+    const ctx = canvas.getContext('2d');
+    const particles = [];
+
+    const particlesNum = 100;
+    const distanceConnect = 100;
+
+    const colors = ['#f35d4f', '#f36849', '#c0d988', '#6ddaf1', '#f1e85b'];
+
+    class Factory {
+        constructor() {
+            this.x = Math.round(Math.random() * canvas.width);
+            this.y = Math.round(Math.random() * canvas.height);
+            this.rad = Math.round(Math.random() * 1) + 1;
+            this.rgba = colors[Math.round(Math.random() * 3)];
+            this.vx = Math.round(Math.random() * 3) - 1.5;
+            this.vy = Math.round(Math.random() * 3) - 1.5;
+        }
+    }
+
+    function init() {
+        for (var i = 0; i < particlesNum; i++) {
+            particles.push(new Factory());
+        }
+    };
+
+    function clear() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "black";
+        ctx.fillRect(0, 0, canvas.width, canvas.height)
+        ctx.fill();
+    }
+
+    function draw() {
+
+        ctx.globalCompositeOperation = 'lighter';
+        for (const particle of particles) {
+            let factor = 1;
+            for (const otherParticle of particles) {
+                if (particle.rgba === otherParticle.rgba && findDistance(particle, otherParticle) < distanceConnect) {
+                    ctx.strokeStyle = particle.rgba;
+                    ctx.beginPath();
+                    ctx.moveTo(particle.x, particle.y);
+                    ctx.lineTo(otherParticle.x, otherParticle.y);
+                    ctx.stroke();
+                    factor++;
+                }
+            }
+
+            ctx.fillStyle = particle.rgba;
+            ctx.strokeStyle = particle.rgba;
+
+            ctx.beginPath();
+            ctx.arc(particle.x, particle.y, particle.rad * factor, 0, Math.PI * 2, true);
+            ctx.fill();
+            ctx.closePath();
+
+            ctx.beginPath();
+            ctx.arc(particle.x, particle.y, (particle.rad + 5) * factor, 0, Math.PI * 2, true);
+            ctx.stroke();
+            ctx.closePath();
+
+            particle.x += particle.vx;
+            particle.y += particle.vy;
+
+            if (particle.x > canvas.width) particle.x = 0;
+            if (particle.x < 0) particle.x = canvas.width;
+            if (particle.y > canvas.height) particle.y = 0;
+            if (particle.y < 0) particle.y = canvas.height;
+        }
+    }
+
+    function findDistance(p1, p2) {
+        return Math.sqrt((p2.x - p1.x) ** 2 + (p2.y - p1.y) ** 2);
+    }
+
+    startLoop(init, clear, draw)
+}
