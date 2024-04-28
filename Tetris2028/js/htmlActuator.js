@@ -5,12 +5,13 @@ export default class HTMLActuator {
      * @param {HTMLDivElement} bestContainer 
      * @param {HTMLDivElement} messageContainer 
      */
-    constructor(gridContainer, scoreContainer, bestContainer, messageContainer) {
+    constructor(gridContainer, scoreContainer, bestContainer, messageContainer, base = 2) {
         this.gridContainer = gridContainer;
         this.scoreContainer = scoreContainer;
         this.bestContainer = bestContainer;
         this.messageContainer = messageContainer;
-
+        
+        this.base = base;
         this.score = 0;
 
         this.gridBackgroundSize = null;
@@ -38,7 +39,9 @@ export default class HTMLActuator {
                         innerTile.classList.add("tile-inner");
 
                         innerTile.textContent = data.value;
-                        innerTile.setAttribute("value", data.value > 2048 ? "super" : data.value);
+                        
+                        const value = this.baseLog(this.base, data.value);
+                        innerTile.setAttribute("value", value > 11 ? "super" : value);
 
                         tile.appendChild(innerTile);
                     }
@@ -59,6 +62,10 @@ export default class HTMLActuator {
                 }
             }
         });
+    }
+
+    baseLog(x, y) {
+        return Math.log(y) / Math.log(x);
     }
 
     continue() {

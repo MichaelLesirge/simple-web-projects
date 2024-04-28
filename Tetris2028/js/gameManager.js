@@ -1,15 +1,27 @@
 import Tile from "./tile.js";
 
+function objectToArray(obj) {
+    const keys = [];
+    for (const [key, count] of Object.entries(obj)) {
+        for (let i = 0; i < count; i++) {
+            keys.push(key)
+        }
+    }
+    return keys
+}
+
 export default class GameManager {
     /**
      * @param {import("./board.js").default} grid 
      * @param {import("./keyboardInputManager.js").default} inputManager 
      * @param {import("./htmlActuator.js").default} actuator 
      * @param {import("./localStorageManager.js").default} scoreManager 
-     * @param {number} startTiles 
-     * @param {number[]} tileStartValueBag 
      */
-    constructor(grid, inputManager, actuator, scoreManager, startTiles = 2, tileStartValueBag = [2, 2, 2, 2, 2, 2, 2, 2, 2, 4]) {
+    constructor(grid, inputManager, actuator, scoreManager, {startTiles = 2, tileStartValueBag = [2]} = {}) {
+
+        if (!Array.isArray(tileStartValueBag)) {
+            tileStartValueBag = objectToArray(tileStartValueBag);
+        }
 
         this.grid = grid;
         this.inputManager = inputManager;

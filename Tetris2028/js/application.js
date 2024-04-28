@@ -4,7 +4,7 @@ import KeyboardInputManager from "./keyboardInputManager.js";
 import HTMLActuator from "./htmlActuator.js";
 import LocalStorageManager from "./localStorageManager.js";
 
-
+const base = 2;
 requestAnimationFrame(() =>
     new GameManager(
         new Grid(4, 4),
@@ -27,7 +27,9 @@ requestAnimationFrame(() =>
             document.getElementById("score"),
             document.getElementById("best"),
             document.getElementById("game-message"),
+            base,
         ),
         new LocalStorageManager("bestScore", 0),
+        {startTiles: 2, tileStartValueBag: {2: 9, 4: 1}}
     )
 );

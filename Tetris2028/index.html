@@ -10,36 +10,35 @@
     <meta name="HandheldFriendly" content="True">
     <meta name="MobileOptimized" content="320">
     <meta name="viewport"
-        content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no, minimal-ui">
+        content="width=device-width, initial-scale=1.0, minimal-ui">
 
     <script type="module" src="js/application.js"></script>
 </head>
 
 <body>
-    <div class="container">
-        <header class="heading">
-            <h1 class="title">TetraMerge2048</h1>
-            <div class="scores-container">
-                <div class="score-container" id="score">0</div>
-                <div class="score-container" id="best">0</div>
-            </div>
-        </header>
-        <div class="game-container">
-            <div class="game-message" id="game-message">
-                <p></p>
-                <div class="lower">
-                    <a class="keep-playing-button">Keep going</a>
-                    <a class="retry-button">Try again</a>
-                </div>
-            </div>
-
-            <div class="grid-container" id="grid">
-
+    <header class="heading">
+        <h1 class="title">TetraMerge2048</h1>
+        <div class="scores-container">
+            <div class="score-container" id="score">0</div>
+            <div class="score-container" id="best">0</div>
+        </div>
+    </header>
+    <div class="game-container">
+        <div class="game-message" id="game-message">
+            <p id="game-message-text"></p>
+            <div class="lower">
+                <a class="keep-playing-button">Keep going</a>
+                <a class="retry-button">Try again</a>
             </div>
         </div>
-        <!-- <main class="game-explanation">
-            INFO
-        </main> -->
+    
+        <div class="grid-container" id="grid">
+    
+        </div>
+    </div>
+    <main class="game-explanation">
+        <!-- test -->
+    </main>
 </body>
 
 </html>
