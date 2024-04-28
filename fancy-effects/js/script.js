@@ -31,7 +31,7 @@ function randChar(charSet) {
 
     const randomCharSet = charRange("a", "z") + charRange("A", "Z") + charRange("0", "9") + "`-=[]\\;',./~_+{}|:\"<>?".repeat(2);
     const iterWait = 50;
-    const addAfter = 3000;
+    const addAfter = 1000;
 
     document.querySelectorAll(".hacker-text").forEach((element) => {
         let isActive = false;
