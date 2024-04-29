@@ -52,10 +52,6 @@ function toggleElementById(elementId) {
 }
 
 const gameDisplayText = document.querySelector(".game");
-const [hideStartBox, showStartBox] = toggleElementById("start-box");
-const [hideGameOverBox, showGameOverBox] = toggleElementById("game-over-box");
-
-const startGameButton = document.getElementById("play-again");
 
 // Mutable State
 const messagesQueue = [];
@@ -96,8 +92,6 @@ const controller = new FpsController(
 const beforeUnloadHandler = (event) => event.preventDefault();
 
 function startGame() {
-    hideGameOverBox();
-
     game.reset();
     
     controller.start();
@@ -110,9 +104,6 @@ function endGame() {
 
     window.removeEventListener("beforeunload", beforeUnloadHandler);
 
-    showGameOverBox();
-    startGameButton.focus();
-
     if ((localStorage.getItem("high-score") ?? 0) <= game.score) localStorage.setItem("high-score", game.score);
     
     document.getElementById("score").innerText = game.score;
@@ -123,15 +114,12 @@ function endGame() {
 // --- Create Start Game Controls ---
 
 window.addEventListener("keydown", (event) => {
-    if (!started && event.key == " ") {
+    if (!started) {
         startGame();
-        hideStartBox();
         audioCtx = loadAudio();
         started = true;
     }
 });
-
-startGameButton.addEventListener("click", startGame);
 
 // Pause option
 
@@ -217,5 +205,5 @@ function gameToString(game, board) {
             .padEnd(width)
     }
 
-    return lines.join("\n")
+    return lines.join("\n") + " "
 }
