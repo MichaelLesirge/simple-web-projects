@@ -111,7 +111,7 @@ function updateCanvasSizes(canvas) {
 }
 
 {
-    const canvas = document.querySelector("#spiral");
+    const canvas = document.getElementById("spiral");
     updateCanvasSizes(canvas);
 
     const colors = ["#D0E7F5", "#D9E7F4", "#D6E3F4", "#BCDFF5", "#B7D9F4", "#C3D4F0", "#9DC1F3", "#9AA9F4", "#8D83EF", "#AE69F0", "#D46FF1", "#DB5AE7", "#D911DA", "#D601CB", "#E713BF", "#F24CAE", "#FB79AB", "#FFB6C1", "#FED2CF", "#FDDFD5", "#FEDCD1"];
@@ -279,27 +279,52 @@ function updateCanvasSizes(canvas) {
 }
 
 {
-    const canvas = document.querySelector('#matrix');
+    const canvas = document.getElementById('matrix');
     updateCanvasSizes(canvas)
 
     const ctx = canvas.getContext('2d');
 
     const chars = charRange("a", "z") + charRange("0", "9") + "アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨョロヲゴゾドボポヴッン";
-    const fallingCharArr = [];
-
+    
     const fontSize = 20;
     const trail = 20;
     const trailGap = 20;
-
+    
     const maxColum = canvas.width / fontSize;
+    
+    let fallingChars = [];
 
     function randomFloat(min, max) {
         return Math.random() * (max - min) + min;
     }
 
-    for (var i = 0; i < maxColum; i++) {
-        fallingCharArr.push({ x: i * fontSize, y: randomFloat(-500, 0), speed: randomFloat(1, 5) });
+    class Characters {
+        constructor(i = 1) {
+            this.x = i * fontSize;
+            this.y = randomFloat(-500, 0);
+            this.dy = randomFloat(1, 5)
+        }
+
+        update() {
+            this.y += this.dy;
+
+            if (this.y > canvas.height + trail * trailGap) {
+                this.y = randomFloat(-500, 0)
+                this.dy += randomFloat(-1.5, 1.5)
+            }
+        }
+
+        draw() {
+            for (let i = 0; i < trail; i++) {
+                ctx.fillStyle = `rgba(0, 255, 0, ${(trail - i + 1) / trail})`
+                ctx.fillText(randChar(chars), this.x, this.y - (i * trailGap));
+            }
+        }
     }
+
+    function init() {
+        fallingChars = Array.from( {length: maxColum}, (v, k) => new Characters(k))
+    };
 
     function clear() {
         ctx.fillStyle = "black";
@@ -307,56 +332,87 @@ function updateCanvasSizes(canvas) {
         ctx.fill();
     }
 
-    ctx.font = fontSize + "px san-serif";
-    ctx.textAlign = "center";
     function draw() {
-        for (const fallingChar of fallingCharArr) {
+        ctx.font = fontSize + "px san-serif";
+        ctx.textAlign = "center";
 
+        for (const fallingChar of fallingChars) {
 
-            for (let i = 0; i < trail; i++) {
-                ctx.fillStyle = `rgba(0, 255, 0, ${(trail - i + 1) / trail})`
-                ctx.fillText(randChar(chars), fallingChar.x, fallingChar.y - (i * trailGap));
-            }
+            fallingChar.update()
 
-            fallingChar.y += fallingChar.speed;
+            fallingChar.draw();
 
-            if (fallingChar.y > canvas.height + trail * trailGap) {
-                fallingChar.y = randomFloat(-500, 0)
-                fallingChar.speed += randomFloat(-1.5, 1.5)
-            }
         }
     }
 
-    startLoop(() => { }, clear, draw)
+    startLoop(init, clear, draw)
 }
 
 {
-    const canvas = document.getElementById('particle');
+    const canvas = document.getElementById("particle");
     updateCanvasSizes(canvas)
 
-    const ctx = canvas.getContext('2d');
-    const particles = [];
+    const ctx = canvas.getContext("2d");
 
     const particlesNum = 100;
     const distanceConnect = 100;
 
-    const colors = ['#f35d4f', '#f36849', '#c0d988', '#6ddaf1', '#f1e85b'];
+    const colors = ["#f35d4f", "#f36849", "#c0d988", "#6ddaf1", "#f1e85b"];
 
-    class Factory {
+    let particles = [];
+
+    class Particle {
         constructor() {
             this.x = Math.round(Math.random() * canvas.width);
             this.y = Math.round(Math.random() * canvas.height);
-            this.rad = Math.round(Math.random() * 1) + 1;
-            this.rgba = colors[Math.round(Math.random() * 3)];
+
+            this.radius = Math.round(Math.random() * 1) + 1;
+            this.color = colors[Math.round(Math.random() * 3)];
+            
             this.vx = Math.round(Math.random() * 3) - 1.5;
             this.vy = Math.round(Math.random() * 3) - 1.5;
+
+            this.connections = [];
+        }
+
+        draw() {
+            ctx.fillStyle = this.color;
+            ctx.strokeStyle = this.color;
+
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius * this.connections.length, 0, Math.PI * 2, true);
+            ctx.fill();
+            ctx.closePath();
+
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, (this.radius + 5) * this.connections.length, 0, Math.PI * 2, true);
+            ctx.stroke();
+            ctx.closePath();
+
+            for (const otherParticle of this.connections) {
+                ctx.strokeStyle = this.color;
+                ctx.beginPath();
+                ctx.moveTo(this.x, this.y);
+                ctx.lineTo(otherParticle.x, otherParticle.y);
+                ctx.stroke();
+            }
+        }
+
+        update() {
+            this.x += this.vx;
+            this.y += this.vy;
+
+            if (this.x > canvas.width) this.x = 0;
+            if (this.x < 0) this.x = canvas.width;
+            if (this.y > canvas.height) this.y = 0;
+            if (this.y < 0) this.y = canvas.height;
+
+            this.connections = particles.filter((otherParticle) => this.color === otherParticle.color && findDistance(this, otherParticle) < distanceConnect);
         }
     }
 
     function init() {
-        for (var i = 0; i < particlesNum; i++) {
-            particles.push(new Factory());
-        }
+        particles = Array.from( {length: particlesNum}, () => new Particle() )
     };
 
     function clear() {
@@ -368,40 +424,14 @@ function updateCanvasSizes(canvas) {
 
     function draw() {
 
-        ctx.globalCompositeOperation = 'lighter';
+        ctx.globalCompositeOperation = "lighter";
+
         for (const particle of particles) {
-            let factor = 1;
-            for (const otherParticle of particles) {
-                if (particle.rgba === otherParticle.rgba && findDistance(particle, otherParticle) < distanceConnect) {
-                    ctx.strokeStyle = particle.rgba;
-                    ctx.beginPath();
-                    ctx.moveTo(particle.x, particle.y);
-                    ctx.lineTo(otherParticle.x, otherParticle.y);
-                    ctx.stroke();
-                    factor++;
-                }
-            }
 
-            ctx.fillStyle = particle.rgba;
-            ctx.strokeStyle = particle.rgba;
+            particle.update();
 
-            ctx.beginPath();
-            ctx.arc(particle.x, particle.y, particle.rad * factor, 0, Math.PI * 2, true);
-            ctx.fill();
-            ctx.closePath();
-
-            ctx.beginPath();
-            ctx.arc(particle.x, particle.y, (particle.rad + 5) * factor, 0, Math.PI * 2, true);
-            ctx.stroke();
-            ctx.closePath();
-
-            particle.x += particle.vx;
-            particle.y += particle.vy;
-
-            if (particle.x > canvas.width) particle.x = 0;
-            if (particle.x < 0) particle.x = canvas.width;
-            if (particle.y > canvas.height) particle.y = 0;
-            if (particle.y < 0) particle.y = canvas.height;
+            particle.draw();
+            
         }
     }
 
