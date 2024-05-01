@@ -27,9 +27,9 @@ function randomChoice(values) {
     return values[Math.ceil(Math.random() * values.length) - 1]
 }
 
-    function randomFloat(min, max) {
-        return Math.random() * (max - min) + min;
-    }
+function randomFloat(min, max) {
+    return Math.random() * (max - min) + min;
+}
 
 {
 
@@ -77,17 +77,25 @@ function randomChoice(values) {
     })
 };
 
-function startLoop(init, clear, draw) {
+function startLoop(canvas, init, clear, nextFrame, { resetOnScroll = false, resetOnClick = false }) {
     init();
-    const loop = () => {
-        clear()
-        draw()
+    function loop() {
+        clear();
+        nextFrame();
         requestAnimationFrame(loop);
-    };
+    }
     loop();
+
+    function reset() {
+        clear();
+        init();
+    }
+
+    if (resetOnClick) canvas.addEventListener("click", reset)
+    if (resetOnScroll) respondToVisibility(canvas, reset, {ratio: 1})
 }
 
-function respondToVisibility(element, callback, ratio = 0) {
+function respondToVisibility(element, callback, { ratio = 0 }) {
     const options = {
         root: document.documentElement,
     };
@@ -130,6 +138,8 @@ function updateCanvasSizes(canvas) {
         pulseEnabled: true,
 
         backgroundColor: "black",
+
+        fontSize: 18,
     }
 
     const ctx = canvas.getContext("2d");
@@ -163,6 +173,18 @@ function updateCanvasSizes(canvas) {
             x: center.x + radius * Math.cos(angle),
             y: center.y + radius * Math.sin(angle)
         });
+    }
+
+    function secondsToHMS(seconds) {
+        const hours = Math.floor(seconds / 3600);
+        const minutes = Math.floor((seconds % 3600) / 60);
+        const remainingSeconds = Math.floor(seconds % 60);
+
+        const HH = String(hours).padStart(2, '0');
+        const MM = String(minutes).padStart(2, '0');
+        const SS = String(remainingSeconds).padStart(2, '0');
+
+        return `${HH}:${MM}:${SS}`;
     }
 
     let arcs = [];
@@ -236,7 +258,7 @@ function updateCanvasSizes(canvas) {
     };
     base.spacing = (base.length - base.initialRadius - base.clearance) / 2 / colors.length;
 
-    function draw() {
+    function nextFrame() {
         const currentTime = new Date().getTime();
         const elapsedTime = (currentTime - settings.startTime) / 1000;
 
@@ -275,11 +297,15 @@ function updateCanvasSizes(canvas) {
 
             drawPointOnArc(center, radius, base.circleRadius, angle);
         });
+
+        ctx.font = `${settings.fontSize}px serif`;
+        ctx.strokeStyle = "white";
+        ctx.textAlign = "center";
+
+        ctx.fillText(secondsToHMS(settings.durationSeconds - elapsedTime % settings.durationSeconds), center.x, Math.floor(center.y + settings.fontSize / 2));
     }
 
-    respondToVisibility(canvas, init, 1)
-    canvas.addEventListener("click", init)
-    startLoop(init, clear, draw)
+    startLoop(canvas, init, clear, nextFrame, { resetOnScroll: true, resetOnClick: true })
 }
 
 {
@@ -289,13 +315,13 @@ function updateCanvasSizes(canvas) {
     const ctx = canvas.getContext('2d');
 
     const chars = charRange("a", "z") + charRange("0", "9") + "アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨョロヲゴゾドボポヴッン";
-    
+
     const fontSize = 20;
     const trail = 20;
     const trailGap = 20;
-    
+
     const maxColum = canvas.width / fontSize;
-    
+
     let fallingChars = [];
 
     class Characters {
@@ -323,7 +349,7 @@ function updateCanvasSizes(canvas) {
     }
 
     function init() {
-        fallingChars = Array.from( {length: maxColum}, (v, k) => new Characters(k))
+        fallingChars = Array.from({ length: maxColum }, (v, k) => new Characters(k))
     };
 
     function clear() {
@@ -332,7 +358,7 @@ function updateCanvasSizes(canvas) {
         ctx.fill();
     }
 
-    function draw() {
+    function nextFrame() {
         ctx.font = fontSize + "px san-serif";
         ctx.textAlign = "center";
 
@@ -345,7 +371,7 @@ function updateCanvasSizes(canvas) {
         }
     }
 
-    startLoop(init, clear, draw)
+    startLoop(canvas, init, clear, nextFrame, { resetOnScroll: false, resetOnClick: true })
 }
 
 {
@@ -368,7 +394,7 @@ function updateCanvasSizes(canvas) {
 
             this.radius = randomFloat(1, 2);
             this.color = randomChoice(colors);
-            
+
             this.vx = randomFloat(-1.5, 1.5);
             this.vy = randomFloat(-1.5, 1.5);
 
@@ -412,7 +438,7 @@ function updateCanvasSizes(canvas) {
     }
 
     function init() {
-        particles = Array.from( {length: particlesNum}, () => new Particle() )
+        particles = Array.from({ length: particlesNum }, () => new Particle())
     };
 
     function clear() {
@@ -422,7 +448,7 @@ function updateCanvasSizes(canvas) {
         ctx.fill();
     }
 
-    function draw() {
+    function nextFrame() {
 
         ctx.globalCompositeOperation = "lighter";
 
@@ -431,7 +457,7 @@ function updateCanvasSizes(canvas) {
             particle.update();
 
             particle.draw();
-            
+
         }
     }
 
@@ -439,7 +465,7 @@ function updateCanvasSizes(canvas) {
         return Math.sqrt((p2.x - p1.x) ** 2 + (p2.y - p1.y) ** 2);
     }
 
-    startLoop(init, clear, draw)
+    startLoop(canvas, init, clear, nextFrame, { resetOnScroll: false, resetOnClick: true })
 }
 
 {
@@ -453,28 +479,61 @@ function updateCanvasSizes(canvas) {
     const rows = Math.floor(canvas.height / gridSize);
     const cols = Math.floor(canvas.width / gridSize);
 
-    const colors = ["#f35d4f", "#f36849", "#c0d988", "#6ddaf1", "#f1e85b"];
-
     const startingChanceOn = 0.3;
 
+    function randRGB() {
+        return [randomFloat(0, 255), randomFloat(0, 255), randomFloat(0, 255)]
+    }
+
+    function blendRGB(colors) {
+        const colorCount = colors.length;
+        let sumR = 0, sumG = 0, sumB = 0;
+
+        for (const color of colors) {
+            sumR += color[0] ** 2;
+            sumG += color[1] ** 2;
+            sumB += color[2] ** 2;
+        }
+
+        const blendedR = Math.sqrt(sumR / colorCount);
+        const blendedG = Math.sqrt(sumG / colorCount);
+        const blendedB = Math.sqrt(sumB / colorCount);
+
+        return [blendedR, blendedG, blendedB];
+    }
+
+    function cssRGB(color) {
+        return `rgb(${color[0]}, ${color[1]}, ${color[2]})`
+    }
+
     let grid, nextGrid;
-    
+
+    const DEAD = 0;
+
+    function makeGrid(width, height, func) {
+        return Array.from({ length: width }, () => Array.from({ length: height }, func));;
+    }
+
     function init() {
-        grid = Array.from({ length: rows }, () => Array.from({ length: cols }, () => Math.random() < startingChanceOn ? 0 : Math.floor(Math.random() * colors.length) + 1));;
-        nextGrid = Array.from({ length: rows }, () => Array.from({ length: cols }, () => 0));
+        grid = makeGrid(rows, cols, () => Math.random() < startingChanceOn ? DEAD : randRGB());
+        nextGrid = makeGrid(rows, cols, () => DEAD);
     }
 
     function update() {
         for (let i = 0; i < rows; i++) {
             for (let j = 0; j < cols; j++) {
-                const neighbors = countNeighbors(i, j);
-                const state = grid[i][j];
-                if (state === 0 && neighbors === 3) {
-                    nextGrid[i][j] = Math.floor(Math.random() * colors.length) + 1;
-                } else if (state !== 0 && (neighbors < 2 || neighbors > 3)) {
-                    nextGrid[i][j] = 0;
+
+                const neighbors = getNeighbors(i, j);
+                const neighborsCount = neighbors.length;
+
+                const tile = grid[i][j];
+
+                if (tile === DEAD && neighborsCount === 3) {
+                    nextGrid[i][j] = blendRGB(neighbors);
+                } else if (tile !== 0 && (neighborsCount < 2 || neighborsCount > 3)) {
+                    nextGrid[i][j] = DEAD;
                 } else {
-                    nextGrid[i][j] = state;
+                    nextGrid[i][j] = tile;
                 }
             }
         }
@@ -482,33 +541,46 @@ function updateCanvasSizes(canvas) {
         [nextGrid, grid] = [grid, nextGrid];
     }
 
-    function countNeighbors(row, col) {
-        let count = 0;
+    function getNeighbors(row, col) {
+        let neighbors = [];
         for (let i = -1; i <= 1; i++) {
             for (let j = -1; j <= 1; j++) {
                 if (i === 0 && j === 0) continue;
-                const neighborRow = (row + i + rows) % (rows);
-                const neighborCol = (col + j + cols) % (cols);
-                if (grid[neighborRow][neighborCol] !== 0) {
-                    count++;
+
+                const tile = grid[(row + i + rows) % rows][(col + j + cols) % cols];
+
+                if (tile !== 0) {
+                    neighbors.push(tile)
                 }
+
             }
         }
-        return count;
+        return neighbors;
+    }
+
+    function clear() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "black";
+        ctx.fillRect(0, 0, canvas.width, canvas.height)
+        ctx.fill();
     }
 
     function draw() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
         for (let i = 0; i < rows; i++) {
             for (let j = 0; j < cols; j++) {
-                const colorIndex = grid[i][j];
-                if (colorIndex !== 0) {
-                    ctx.fillStyle = colors[colorIndex - 1];
+                const tile = grid[i][j];
+                if (tile !== 0) {
+                    ctx.fillStyle = cssRGB(tile);
                     ctx.fillRect(j * gridSize, i * gridSize, gridSize, gridSize);
                 }
             }
         }
     }
 
-    startLoop(init, update, draw);
+    function nextFrame() {
+        update();
+        draw();
+    }
+
+    startLoop(canvas, init, clear, nextFrame, { resetOnScroll: false, resetOnClick: true })
 }
