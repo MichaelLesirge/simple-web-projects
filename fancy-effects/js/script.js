@@ -23,9 +23,13 @@ function charRange(startChar, stopChar) {
     return Array.from({ length: stopChar.charCodeAt() - startChar.charCodeAt() + 1 }, (_, i) => String.fromCharCode(i + startChar.charCodeAt())).join("");
 }
 
-function randChar(charSet) {
-    return charSet[Math.ceil(Math.random() * charSet.length) - 1]
+function randomChoice(values) {
+    return values[Math.ceil(Math.random() * values.length) - 1]
 }
+
+    function randomFloat(min, max) {
+        return Math.random() * (max - min) + min;
+    }
 
 {
 
@@ -54,7 +58,7 @@ function randChar(charSet) {
                 for (let i = 0; i < curChars.length; i++) {
                     // curChars[i] = curChars[i] === startString[i] ? curChars[i] : randChar(charSet);
                     if (curChars[i] !== startChars[i]) {
-                        curChars[i] = randChar(charSet);
+                        curChars[i] = randomChoice(charSet);
                         if (count * iterWait > addAfter) charSet += " ";
                     }
                     if (curChars[i] === " ") curChars[i] = startChars[i];
@@ -294,10 +298,6 @@ function updateCanvasSizes(canvas) {
     
     let fallingChars = [];
 
-    function randomFloat(min, max) {
-        return Math.random() * (max - min) + min;
-    }
-
     class Characters {
         constructor(i = 1) {
             this.x = i * fontSize;
@@ -317,7 +317,7 @@ function updateCanvasSizes(canvas) {
         draw() {
             for (let i = 0; i < trail; i++) {
                 ctx.fillStyle = `rgba(0, 255, 0, ${(trail - i + 1) / trail})`
-                ctx.fillText(randChar(chars), this.x, this.y - (i * trailGap));
+                ctx.fillText(randomChoice(chars), this.x, this.y - (i * trailGap));
             }
         }
     }
@@ -363,14 +363,14 @@ function updateCanvasSizes(canvas) {
 
     class Particle {
         constructor() {
-            this.x = Math.round(Math.random() * canvas.width);
-            this.y = Math.round(Math.random() * canvas.height);
+            this.x = randomFloat(0, canvas.width);
+            this.y = randomFloat(0, canvas.height);
 
-            this.radius = Math.round(Math.random() * 1) + 1;
-            this.color = colors[Math.round(Math.random() * 3)];
+            this.radius = randomFloat(1, 2);
+            this.color = randomChoice(colors);
             
-            this.vx = Math.round(Math.random() * 3) - 1.5;
-            this.vy = Math.round(Math.random() * 3) - 1.5;
+            this.vx = randomFloat(-1.5, 1.5);
+            this.vy = randomFloat(-1.5, 1.5);
 
             this.connections = [];
         }
@@ -440,4 +440,75 @@ function updateCanvasSizes(canvas) {
     }
 
     startLoop(init, clear, draw)
+}
+
+{
+    const canvas = document.getElementById("conway");
+    updateCanvasSizes(canvas);
+
+    const ctx = canvas.getContext("2d");
+
+    const gridSize = 10;
+
+    const rows = Math.floor(canvas.height / gridSize);
+    const cols = Math.floor(canvas.width / gridSize);
+
+    const colors = ["#f35d4f", "#f36849", "#c0d988", "#6ddaf1", "#f1e85b"];
+
+    const startingChanceOn = 0.3;
+
+    let grid, nextGrid;
+    
+    function init() {
+        grid = Array.from({ length: rows }, () => Array.from({ length: cols }, () => Math.random() < startingChanceOn ? 0 : Math.floor(Math.random() * colors.length) + 1));;
+        nextGrid = Array.from({ length: rows }, () => Array.from({ length: cols }, () => 0));
+    }
+
+    function update() {
+        for (let i = 0; i < rows; i++) {
+            for (let j = 0; j < cols; j++) {
+                const neighbors = countNeighbors(i, j);
+                const state = grid[i][j];
+                if (state === 0 && neighbors === 3) {
+                    nextGrid[i][j] = Math.floor(Math.random() * colors.length) + 1;
+                } else if (state !== 0 && (neighbors < 2 || neighbors > 3)) {
+                    nextGrid[i][j] = 0;
+                } else {
+                    nextGrid[i][j] = state;
+                }
+            }
+        }
+
+        [nextGrid, grid] = [grid, nextGrid];
+    }
+
+    function countNeighbors(row, col) {
+        let count = 0;
+        for (let i = -1; i <= 1; i++) {
+            for (let j = -1; j <= 1; j++) {
+                if (i === 0 && j === 0) continue;
+                const neighborRow = (row + i + rows) % (rows);
+                const neighborCol = (col + j + cols) % (cols);
+                if (grid[neighborRow][neighborCol] !== 0) {
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
+
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        for (let i = 0; i < rows; i++) {
+            for (let j = 0; j < cols; j++) {
+                const colorIndex = grid[i][j];
+                if (colorIndex !== 0) {
+                    ctx.fillStyle = colors[colorIndex - 1];
+                    ctx.fillRect(j * gridSize, i * gridSize, gridSize, gridSize);
+                }
+            }
+        }
+    }
+
+    startLoop(init, update, draw);
 }
