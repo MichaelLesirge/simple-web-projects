@@ -4,6 +4,8 @@
         "customisable",
         "Royale",
         "setpoint",
-        "Tetris"
+        "Tetris",
+        "tetromino",
+        "tetrominos"
     ],
 }

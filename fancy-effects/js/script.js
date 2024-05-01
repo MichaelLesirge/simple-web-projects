@@ -31,6 +31,10 @@ function randomFloat(min, max) {
     return Math.random() * (max - min) + min;
 }
 
+function randomInt(min, max) {
+    return Math.floor(randomFloat(min, max))
+}
+
 {
 
     const randomCharSet = charRange("a", "z") + charRange("A", "Z") + charRange("0", "9") + "`-=[]\\;',./~_+{}|:\"<>?".repeat(2);
@@ -77,11 +81,13 @@ function randomFloat(min, max) {
     })
 };
 
-function startLoop(canvas, init, clear, nextFrame, { resetOnScroll = false, resetOnClick = false }) {
+function startLoop(canvas, init, clear, nextFrame, { resetOnScroll = false, resetOnClick = false, alwaysRun = true} = {}) {
     init();
     function loop() {
-        clear();
-        nextFrame();
+        if (alwaysRun || isInViewport(canvas)) {
+            clear();
+            nextFrame();
+        }
         requestAnimationFrame(loop);
     }
     loop();
@@ -92,23 +98,30 @@ function startLoop(canvas, init, clear, nextFrame, { resetOnScroll = false, rese
     }
 
     if (resetOnClick) canvas.addEventListener("click", reset)
-    if (resetOnScroll) respondToVisibility(canvas, reset, {ratio: 1})
+    if (resetOnScroll) respondToVisibility(canvas, reset)
 }
 
-function respondToVisibility(element, callback, { ratio = 0 }) {
+function respondToVisibility(element, callback, { ratio = 0 } = {}) {
     const options = {
         root: document.documentElement,
     };
 
     const observer = new IntersectionObserver((entries, observer) => {
         entries.forEach(entry => {
-            callback(entry.intersectionRatio > ratio);
+            callback(entry.intersectionRatio > ratio, { observer });
         });
     }, options);
 
     observer.observe(element);
 }
 
+function isInViewport(element) {
+    const rect = element.getBoundingClientRect();
+    return (
+        rect.top >= 0 &&
+        rect.bottom <= (window.innerHeight || document.documentElement.clientHeight)
+    );
+}
 
 function updateCanvasSizes(canvas) {
 
@@ -192,7 +205,6 @@ function updateCanvasSizes(canvas) {
     function clear() {
         ctx.fillStyle = settings.backgroundColor;
         ctx.fillRect(0, 0, canvas.width, canvas.height)
-        ctx.fill();
     }
 
     function init() {
@@ -305,7 +317,7 @@ function updateCanvasSizes(canvas) {
         ctx.fillText(secondsToHMS(settings.durationSeconds - elapsedTime % settings.durationSeconds), center.x, Math.floor(center.y + settings.fontSize / 2));
     }
 
-    startLoop(canvas, init, clear, nextFrame, { resetOnScroll: true, resetOnClick: true })
+    startLoop(canvas, init, clear, nextFrame, { resetOnClick: true, resetOnScroll: true })
 }
 
 {
@@ -355,7 +367,6 @@ function updateCanvasSizes(canvas) {
     function clear() {
         ctx.fillStyle = "black";
         ctx.fillRect(0, 0, canvas.width, canvas.height)
-        ctx.fill();
     }
 
     function nextFrame() {
@@ -371,7 +382,7 @@ function updateCanvasSizes(canvas) {
         }
     }
 
-    startLoop(canvas, init, clear, nextFrame, { resetOnScroll: false, resetOnClick: true })
+    startLoop(canvas, init, clear, nextFrame, { resetOnClick: true })
 }
 
 {
@@ -445,7 +456,6 @@ function updateCanvasSizes(canvas) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.fillStyle = "black";
         ctx.fillRect(0, 0, canvas.width, canvas.height)
-        ctx.fill();
     }
 
     function nextFrame() {
@@ -465,7 +475,11 @@ function updateCanvasSizes(canvas) {
         return Math.sqrt((p2.x - p1.x) ** 2 + (p2.y - p1.y) ** 2);
     }
 
-    startLoop(canvas, init, clear, nextFrame, { resetOnScroll: false, resetOnClick: true })
+    startLoop(canvas, init, clear, nextFrame, { resetOnClick: true })
+}
+
+function makeGrid(width, height, func) {
+    return Array.from({ length: width }, () => Array.from({ length: height }, func));;
 }
 
 {
@@ -509,10 +523,6 @@ function updateCanvasSizes(canvas) {
     let grid, nextGrid;
 
     const DEAD = 0;
-
-    function makeGrid(width, height, func) {
-        return Array.from({ length: width }, () => Array.from({ length: height }, func));;
-    }
 
     function init() {
         grid = makeGrid(rows, cols, () => Math.random() < startingChanceOn ? DEAD : randRGB());
@@ -562,7 +572,6 @@ function updateCanvasSizes(canvas) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.fillStyle = "black";
         ctx.fillRect(0, 0, canvas.width, canvas.height)
-        ctx.fill();
     }
 
     function draw() {
@@ -582,5 +591,178 @@ function updateCanvasSizes(canvas) {
         draw();
     }
 
-    startLoop(canvas, init, clear, nextFrame, { resetOnScroll: false, resetOnClick: true })
+    startLoop(canvas, init, clear, nextFrame, { resetOnClick: true })
+}
+
+{
+    const canvas = document.getElementById("tetris");
+    updateCanvasSizes(canvas);
+
+    const ctx = canvas.getContext("2d");
+
+    const rows = 30;
+    const gridSize = canvas.height / rows;
+
+    const colsExtra = canvas.height % gridSize;
+    ctx.translate(colsExtra / 2, 0)
+
+    const cols = (canvas.width - colsExtra) / gridSize;
+
+
+    let grid;
+    let currentTetromino;
+
+    const EMPTY = null;
+
+    class Tetromino {
+        constructor(type, color) {
+            this.type = type;
+            this.color = color;
+
+            this.min_x = 0;
+            this.max_x = cols - this.type.length + 1;
+
+            const pad = Math.floor(rows * 0.1);
+            this.x = randomInt(pad, this.max_x - pad);
+            this.y = 0;
+        }
+
+        new() {
+            return new Tetromino(this.type, this.color);
+        }
+
+        draw() {
+            for (let i = 0; i < this.type.length; i++) {
+                for (let j = 0; j < this.type[i].length; j++) {
+                    if (this.type[i][j]) {
+                        ctx.fillStyle = this.color;
+                        ctx.fillRect((this.x + j) * gridSize, (this.y + i) * gridSize, gridSize, gridSize);
+                    }
+                }
+            }
+        }
+
+        moveDown() {
+            this.y++;
+        }
+
+        moveRight() {
+            this.x = Math.min(this.x + 1, this.max_x);
+        }
+
+        moveLeft() {
+            this.x = Math.max(this.x - 1, this.min_x);
+        }
+
+        rotate() {
+            const rotated = [];
+            for (let i = 0; i < this.type[0].length; i++) {
+                rotated.push(this.type.map(row => row[i]).reverse());
+            }
+            this.type = rotated;
+        }
+    }
+
+    const tetrominos = [
+        new Tetromino([
+            [1, 1, 1, 1]], "#00ffff"),
+        new Tetromino([
+            [1, 1],
+            [1, 1]], "#ffff00"),
+        new Tetromino([
+            [0, 1, 0],
+            [1, 1, 1]], "#800080"),
+        new Tetromino([
+            [0, 1, 1],
+            [1, 1, 0]], "#00ff00"),
+        new Tetromino([
+            [1, 1, 0],
+            [0, 1, 1]], "#ff0000"),
+        new Tetromino([
+            [1, 0, 0],
+            [1, 1, 1]], "#0000ff"),
+        new Tetromino([
+            [0, 0, 1],
+            [1, 1, 1]], "#ff7f00"),
+    ];
+
+    function init() {
+        grid = makeGrid(rows, cols, () => EMPTY);
+        currentTetromino = null;
+    }
+
+    let moveStack = [];
+
+    function update() {
+        if (currentTetromino === null) {
+            currentTetromino = randomChoice(tetrominos).new();
+
+            const moveSet = randomChoice([
+                [currentTetromino.moveLeft, currentTetromino.moveLeft, currentTetromino.moveLeft, currentTetromino.moveLeft, currentTetromino.moveLeft, currentTetromino.moveLeft, currentTetromino.rotate],
+                [currentTetromino.moveRight, currentTetromino.moveRight, currentTetromino.moveRight, currentTetromino.moveRight, currentTetromino.moveRight, currentTetromino.moveRight, currentTetromino.rotate]
+            ]);
+
+            moveStack = Array.from({ length: randomInt(0, rows * 0.5) }, () => randomChoice(moveSet))
+        }
+
+        if (canMoveDown(currentTetromino)) {
+            currentTetromino.moveDown();
+            const move = moveStack.pop();
+            if (move !== undefined) move.bind(currentTetromino)()
+        } else {
+            placeTetrominoOnGrid(currentTetromino);
+            currentTetromino = null;
+        }
+    }
+
+    function canMoveDown(tetromino) {
+        for (let i = 0; i < tetromino.type.length; i++) {
+            for (let j = 0; j < tetromino.type[i].length; j++) {
+                if (tetromino.type[i][j]) {
+                    const nextRow = tetromino.y + i + 1;
+                    if (nextRow >= rows || grid[nextRow][tetromino.x + j] !== EMPTY) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    function placeTetrominoOnGrid(tetromino) {
+        for (let i = 0; i < tetromino.type.length; i++) {
+            for (let j = 0; j < tetromino.type[i].length; j++) {
+                if (tetromino.type[i][j]) {
+                    grid[tetromino.y + i][tetromino.x + j] = tetromino.color;
+                }
+            }
+        }
+    }
+
+    function clear() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "black";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+
+    function draw() {
+        for (let i = 0; i < rows; i++) {
+            for (let j = 0; j < cols; j++) {
+                ctx.strokeStyle = 'white';
+                ctx.fillStyle = grid[i][j] ?? "black";
+
+                ctx.fillRect(j * gridSize, i * gridSize, gridSize, gridSize);
+            }
+        }
+
+        if (currentTetromino !== null) currentTetromino.draw();
+    }
+
+    function nextFrame() {
+        update();
+        clear();
+        draw();
+    }
+
+    startLoop(canvas, init, clear, nextFrame, { resetOnClick: true })
 }
