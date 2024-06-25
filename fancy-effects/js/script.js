@@ -36,7 +36,6 @@ function randomInt(min, max) {
 }
 
 {
-
     const randomCharSet = charRange("a", "z") + charRange("A", "Z") + charRange("0", "9") + "`-=[]\\;',./~_+{}|:\"<>?".repeat(2);
     const iterWait = 50;
     const addAfter = 1000;
@@ -81,15 +80,41 @@ function randomInt(min, max) {
     })
 };
 
-function startLoop(canvas, init, clear, nextFrame, { resetOnScroll = false, resetOnClick = false, alwaysRun = true} = {}) {
+
+setInterval(() => {
+    const header = document.querySelector("header");
+    if (isInViewport(header, {outOfViewPortRatio: 0.5})) {
+        window.history.replaceState( {} , document.title, window.location.origin + window.location.pathname);
+    }
+}, 100)
+
+const FPS = 60;
+function startLoop(element, init, clear, nextFrame, { resetOnScroll = false, resetOnClick = false, alwaysRun = false} = {}) {
     init();
+    nextFrame()
+
+    const interval = 1000 / FPS;
+    let lastTime = performance.now();
+    
+    const hash = ("#" + element.parentElement.id)
     function loop() {
-        if (alwaysRun || isInViewport(canvas)) {
+
+        const currentTime = performance.now();
+
+        if (currentTime - lastTime >= interval && (alwaysRun || isInViewport(element))) {
             clear();
             nextFrame();
+            lastTime = currentTime;
         }
+        
+        if (window.location.hash != hash && isInViewport(element, {outOfViewPortRatio: 0})) {
+            window.history.replaceState( {} , document.title, window.location.origin + window.location.pathname + hash);
+        }
+        
         requestAnimationFrame(loop);
     }
+
+
     loop();
 
     function reset() {
@@ -97,29 +122,33 @@ function startLoop(canvas, init, clear, nextFrame, { resetOnScroll = false, rese
         init();
     }
 
-    if (resetOnClick) canvas.addEventListener("click", reset)
-    if (resetOnScroll) respondToVisibility(canvas, reset)
+    if (resetOnClick) element.addEventListener("click", reset)
+    if (resetOnScroll) respondToVisibility(element, reset)
 }
 
-function respondToVisibility(element, callback, { ratio = 0 } = {}) {
+function respondToVisibility(element, callback, { thresholdRatio = 0 } = {}) {
     const options = {
         root: document.documentElement,
+        rootMargin: "0px",
+        threshold: thresholdRatio,
     };
 
-    const observer = new IntersectionObserver((entries, observer) => {
-        entries.forEach(entry => {
-            callback(entry.intersectionRatio > ratio, { observer });
+    const intersectionCallback = (entries, observer) => {
+        entries.forEach((entry) => {
+            callback({entry, observer})
         });
-    }, options);
+    };
+
+    const observer = new IntersectionObserver(intersectionCallback, options);
 
     observer.observe(element);
 }
 
-function isInViewport(element) {
+function isInViewport(element, {outOfViewPortRatio = 1} = {}) {
     const rect = element.getBoundingClientRect();
     return (
-        rect.top >= 0 &&
-        rect.bottom <= (window.innerHeight || document.documentElement.clientHeight)
+        rect.top + (rect.height * outOfViewPortRatio) >= 0 &&
+        rect.bottom - (rect.height * outOfViewPortRatio) <= (window.innerHeight || document.documentElement.clientHeight)
     );
 }
 
@@ -136,7 +165,7 @@ function updateCanvasSizes(canvas) {
 }
 
 {
-    const canvas = document.getElementById("spiral");
+    const canvas = document.getElementById("spiral-canvas");
     updateCanvasSizes(canvas);
 
     const colors = ["#D0E7F5", "#D9E7F4", "#D6E3F4", "#BCDFF5", "#B7D9F4", "#C3D4F0", "#9DC1F3", "#9AA9F4", "#8D83EF", "#AE69F0", "#D46FF1", "#DB5AE7", "#D911DA", "#D601CB", "#E713BF", "#F24CAE", "#FB79AB", "#FFB6C1", "#FED2CF", "#FDDFD5", "#FEDCD1"];
@@ -193,9 +222,9 @@ function updateCanvasSizes(canvas) {
         const minutes = Math.floor((seconds % 3600) / 60);
         const remainingSeconds = Math.floor(seconds % 60);
 
-        const HH = String(hours).padStart(2, '0');
-        const MM = String(minutes).padStart(2, '0');
-        const SS = String(remainingSeconds).padStart(2, '0');
+        const HH = String(hours).padStart(2, "0");
+        const MM = String(minutes).padStart(2, "0");
+        const SS = String(remainingSeconds).padStart(2, "0");
 
         return `${HH}:${MM}:${SS}`;
     }
@@ -321,10 +350,10 @@ function updateCanvasSizes(canvas) {
 }
 
 {
-    const canvas = document.getElementById('matrix');
+    const canvas = document.getElementById("matrix-canvas");
     updateCanvasSizes(canvas)
 
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext("2d");
 
     const chars = charRange("a", "z") + charRange("0", "9") + "アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨョロヲゴゾドボポヴッン";
 
@@ -386,7 +415,7 @@ function updateCanvasSizes(canvas) {
 }
 
 {
-    const canvas = document.getElementById("particle");
+    const canvas = document.getElementById("particle-canvas");
     updateCanvasSizes(canvas)
 
     const ctx = canvas.getContext("2d");
@@ -483,7 +512,7 @@ function makeGrid(width, height, func) {
 }
 
 {
-    const canvas = document.getElementById("conway");
+    const canvas = document.getElementById("conway-canvas");
     updateCanvasSizes(canvas);
 
     const ctx = canvas.getContext("2d");
@@ -595,7 +624,7 @@ function makeGrid(width, height, func) {
 }
 
 {
-    const canvas = document.getElementById("tetris");
+    const canvas = document.getElementById("tetris-canvas");
     updateCanvasSizes(canvas);
 
     const ctx = canvas.getContext("2d");
@@ -748,7 +777,7 @@ function makeGrid(width, height, func) {
     function draw() {
         for (let i = 0; i < rows; i++) {
             for (let j = 0; j < cols; j++) {
-                ctx.strokeStyle = 'white';
+                ctx.strokeStyle = "white";
                 ctx.fillStyle = grid[i][j] ?? "black";
 
                 ctx.fillRect(j * gridSize, i * gridSize, gridSize, gridSize);

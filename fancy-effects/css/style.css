@@ -22,7 +22,7 @@ main {
     scroll-snap-type: y mandatory;
 }
 
-main section {
+main section, main header {
     overflow: hidden;
     scroll-snap-align: start;
 
