@@ -1,6 +1,6 @@
 // canvasUtil.js and util.js imports
 import { startLoop, updateCanvasSizes } from "./canvasUtil.js";
-import { randomChoice, randomInt, makeGrid } from "./util.js";
+import { randomChoice, randomInt, makeGrid, getPermutations } from "./util.js";
 
 // Constants
 const EMPTY = null;
@@ -25,24 +25,32 @@ function generateRotations(shape) {
     return rotations;
 }
 
+const Moves = {
+    LEFT: "left",
+    RIGHT: "right",
+    ROTATE: "rotate",
+    NONE: "nothing",
+}
+
 // Tetromino class
 class Tetromino {
-    constructor(type, color, start, { target } = {}) {
-        this.rotations = generateRotations(type);
+    constructor(shape, color, start, { moves = [] } = {}) {
+        this.rotations = generateRotations(shape);
         this.color = color;
 
         this.orientation = start.orientation;
         this.x = start.x;
         this.y = start.y;
 
-        this.target = target;
+        this.moves = moves;
     }
 
     get shape() {
         return this.rotations[this.orientation];
     }
 
-    draw(ctx, gridSize) {
+    draw(ctx, gridSize, opacity = 1) {
+        ctx.globalAlpha = opacity;
         ctx.fillStyle = this.color;
         this.shape.forEach((row, i) => {
             row.forEach((cell, j) => {
@@ -51,6 +59,7 @@ class Tetromino {
                 }
             });
         });
+        ctx.globalAlpha = 1;
     }
 
     rotate() {
@@ -73,6 +82,10 @@ class Tetromino {
         this.x--;
     }
 
+    copy() {
+        return new Tetromino(this.shape, this.color, this.saveState());
+    }
+
     saveState() {
         return {
             x: this.x,
@@ -87,20 +100,27 @@ class Tetromino {
         this.orientation = state.orientation;
     }
 
-    setTarget(target) {
-        this.target = target;
+    setMoves(moves) {
+        this.moves = moves;
     }
 
     moveToTarget() {
-        if (!this.target) return;
+        const move = this.moves.shift();
 
-        if (this.x < this.target.x) {
-            this.moveLeft();
-        } else if (this.x > this.target.x) {
-            this.moveRight();
+        if (move === undefined) {
+            return;
         }
-        else if (this.orientation !== this.target.orientation) {
-            this.rotate();
+
+        switch (move) {
+            case Moves.LEFT:
+                this.moveLeft()
+                break;
+            case Moves.RIGHT:
+                this.moveRight()
+                break;
+            case Moves.ROTATE:
+                this.rotate()
+                break;
         }
     }
 }
@@ -113,10 +133,12 @@ class Grid {
         this.grid = makeGrid(rows, cols, () => emptyValue);
     }
 
-    copy() {
-        const newGrid = new Grid(this.rows, this.cols, EMPTY);
-        newGrid.grid = this.grid.map((row) => row.slice());
-        return newGrid;
+    saveState() {
+        return this.grid.map(row => row.slice());
+    }
+
+    restoreState(state) {
+        this.grid = state.map(row => row.slice());
     }
 
     doesCollide(tetromino) {
@@ -141,18 +163,6 @@ class Grid {
                 }
             });
         });
-    }
-
-    simulateDrop(tetromino) {
-        const simulationGrid = this.copy();
-        const simulationTetromino = new Tetromino(tetromino.shape, tetromino.color, { x: tetromino.x, y: tetromino.y, orientation: tetromino.orientation });
-
-        while (!simulationGrid.doesCollide(simulationTetromino)) {
-            simulationTetromino.moveDown();
-        }
-        simulationTetromino.moveUp();
-        simulationGrid.placeTetromino(simulationTetromino);
-        return simulationGrid.getPenalty();
     }
 
     getHeights() {
@@ -183,14 +193,17 @@ class Grid {
 
     getPenalty() {
         const heights = this.getHeights();
+
         const holes = this.getHoles();
         const maxHeight = Math.max(...heights);
-        const avgHeight = heights.reduce((sum, height) => sum + height, 0) / this.cols;
+        const avgHeight = heights.reduce((sum, height) => sum + height, 0) / heights.length;
+        const bumpiness = heights.slice(1).reduce((sum, height, index) => sum + Math.abs(height - heights[index]), 0) / (heights.length - 1);
 
         return (
-            10 * holes +
-            0.75 * avgHeight +
-            3 * maxHeight
+            15 * holes +
+            5 * avgHeight +
+            3 * bumpiness +
+            2 * maxHeight
         );
     }
 
@@ -240,54 +253,88 @@ class TetrisGame {
         this.grid = new Grid(this.rows, this.cols);
 
         this.currentTetromino = this.createNewTetromino();
+
+        this.trailLen = Math.floor(this.rows * 0.9)
+        this.trail = []
     }
 
     createNewTetromino() {
-        const { shape, color } = randomChoice(TETROMINOS);
-
+        let { shape, color } = randomChoice(TETROMINOS);
         const start = {
             x: randomInt(0, this.cols - shape[0].length),
             y: 0,
             orientation: 0
         };
 
-        const tetromino = new Tetromino(shape, color, start);
-
-        const target = this.findBestTarget(tetromino);
-        tetromino.setTarget(target)
-
-        return tetromino;
+        return new Tetromino(shape, color, start);
     }
 
-    findBestTarget(tetromino) {
-        let bestPenalty = Infinity;
-        let bestTarget = { x: tetromino.x, orientation: tetromino.orientation };
-        let shortestDistance = Infinity;
+    /**
+     * @param {Tetromino} tetromino 
+     */
+    findBestMoves() {
+        const tetromino = this.currentTetromino;
+        const grid = this.grid;
 
-        const range = (this.grid.rows - tetromino.y - tetromino.shape[0].length) - (tetromino.rotations.length - 1);
-        const currentX = tetromino.x;
-        const currentOrientation = tetromino.orientation;
+        const startingTetrominoState = tetromino.saveState();
+        const startingGridState = grid.saveState();
 
-        const minX = 0;
-        const maxX = this.cols - tetromino.shape[0].length;
 
-        for (let x = Math.max(minX, currentX - range); x < Math.min(currentX + range, maxX); x++) {
-            for (let orientation = 0; orientation < tetromino.rotations.length; orientation++) {
-                const testTetromino = new Tetromino(tetromino.shape, tetromino.color, { x, y: 0, orientation });
-                if (!this.grid.doesCollide(testTetromino)) {
-                    const penalty = this.grid.simulateDrop(testTetromino);
-                    const distance = Math.abs(currentX - x) + Math.abs(currentOrientation - orientation);
+        const deepExploreArea = 4;
+        const maxTravelableStrafe = grid.rows;
 
-                    if (penalty < bestPenalty || (penalty === bestPenalty && distance < shortestDistance)) {
-                        bestPenalty = penalty;
-                        bestTarget = { x, orientation };
-                        shortestDistance = distance;
+        const strafeDistance = maxTravelableStrafe - deepExploreArea;
+
+        const possibleMoves = Object.values(Moves);
+        const deepExploreMovePossibilities = getPermutations(possibleMoves, deepExploreArea)
+
+        let lowestPenaltyMoveSet = [];
+        let lowestPenalty = Infinity;
+
+        for (
+            let x = Math.max(-strafeDistance, -tetromino.x);
+            x <= Math.min(strafeDistance, grid.cols - tetromino.x - tetromino.shape[0].length);
+            x++
+        ) {
+            const baseMoves = Array.from({ length: Math.abs(x) }, () => (x > 0) ? Moves.RIGHT : Moves.LEFT);
+
+            const lowestMovePenaltyAcceptance = 0.00001;
+
+            for (const exploreMoves of deepExploreMovePossibilities) {
+
+                const moves = baseMoves.concat(exploreMoves);
+                tetromino.setMoves(moves.slice());
+
+                while (!grid.doesCollide(tetromino)) {
+                    const preMoveState = tetromino.saveState();
+                    tetromino.moveToTarget();
+                    if (grid.doesCollide(tetromino)) {
+                        tetromino.restoreState(preMoveState);
                     }
+
+                    tetromino.moveDown();
                 }
+
+                tetromino.moveUp();
+                grid.placeTetromino(tetromino);
+
+                const movesPenalty = grid.getPenalty()
+                if (
+                    movesPenalty < lowestPenalty ||
+                    ((movesPenalty - lowestPenalty < lowestMovePenaltyAcceptance) && lowestPenaltyMoveSet.length < moves.length)
+                ) {
+                    lowestPenalty = movesPenalty;
+                    lowestPenaltyMoveSet = moves;
+                }
+
+                tetromino.restoreState(startingTetrominoState);
+                grid.restoreState(startingGridState);
             }
         }
 
-        return bestTarget;
+        console.log(lowestPenalty, lowestPenaltyMoveSet);
+        tetromino.setMoves(lowestPenaltyMoveSet);
+        return lowestPenaltyMoveSet;
     }
 
     update() {
@@ -309,6 +356,9 @@ class TetrisGame {
             if (this.grid.doesCollide(this.currentTetromino)) {
                 this.init();
             }
+            else {
+                this.findBestMoves();
+            }
         }
     }
 
@@ -320,8 +370,19 @@ class TetrisGame {
 
     draw() {
         this.grid.draw(this.ctx, this.gridSize);
+        
+        for (let i = 0; i < this.trail.length; i++) {
+            const tetromino = this.trail[i];
+            tetromino.draw(this.ctx, this.gridSize, (((i + 1) / this.trailLen) ** 3) * 0.5)
+        }
+
         if (this.currentTetromino) {
             this.currentTetromino.draw(this.ctx, this.gridSize);
+
+            this.trail.push(this.currentTetromino.copy());
+            if (this.trail.length > this.trailLen) {
+                this.trail.shift();
+            }
         }
     }
 
@@ -336,6 +397,6 @@ class TetrisGame {
 export default function tetris() {
     const canvas = document.getElementById("tetris-canvas");
     const game = new TetrisGame(canvas);
-    startLoop(canvas, () => game.init(), () => game.clear(), () => game.nextFrame(), { resetOnClick: true, resetOnResize: true });
+    startLoop(canvas, () => game.init(), () => game.clear(), () => game.nextFrame(), { resetOnClick: true, resetOnResize: true, fps: 20 });
 }
 

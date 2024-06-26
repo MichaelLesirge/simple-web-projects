@@ -18,3 +18,21 @@ export function randomInt(min, max) {
 export function makeGrid(width, height, func) {
     return Array.from({ length: width }, () => Array.from({ length: height }, func));;
 }
+
+export function getPermutations(list, maxLen) {
+    maxLen = (maxLen ?? list.length)
+    const perm = list.map(v => [v]);
+    const generate = (perm, maxLen, currLen) => {
+        if (currLen === maxLen) {
+            return perm;
+        }
+        for (let i = 0, len = perm.length; i < len; i++) {
+            const currPerm = perm.shift();
+            for (let k = 0; k < list.length; k++) {
+                perm.push(currPerm.concat(list[k]));
+            }
+        }
+        return generate(perm, maxLen, currLen + 1);
+    };
+    return generate(perm, maxLen, 1);
+};

@@ -5,12 +5,11 @@ setInterval(() => {
     }
 }, 100)
 
-const FPS = 60;
-export function startLoop(element, init, clear, nextFrame, { resetOnScroll = false, resetOnClick = false, alwaysRun = false, resetOnResize = true} = {}) {
+export function startLoop(element, init, clear, nextFrame, { resetOnScroll = false, resetOnClick = false, alwaysRun = false, resetOnResize = true, fps = 60} = {}) {
     init();
     nextFrame()
 
-    const interval = 1000 / FPS;
+    const interval = 1000 / fps;
     let lastTime = performance.now();
     
     const hash = ("#" + element.parentElement.id)
@@ -24,6 +23,7 @@ export function startLoop(element, init, clear, nextFrame, { resetOnScroll = fal
             lastTime = currentTime;
         }
         
+        // TODO This should not be in here
         if (window.location.hash != hash && isInViewport(element, {outOfViewPortRatio: 0})) {
             window.history.replaceState( {} , document.title, window.location.origin + window.location.pathname + hash);
         }
