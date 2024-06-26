@@ -5,13 +5,55 @@ import { randomChoice, randomInt, makeGrid, getPermutations } from "./util.js";
 // Constants
 const EMPTY = null;
 const TETROMINOS = [
-    { shape: [[1, 1, 1, 1]], color: "#00ffff" },
-    { shape: [[1, 1], [1, 1]], color: "#ffff00" },
-    { shape: [[0, 1, 0], [1, 1, 1]], color: "#800080" },
-    { shape: [[0, 1, 1], [1, 1, 0]], color: "#00ff00" },
-    { shape: [[1, 1, 0], [0, 1, 1]], color: "#ff0000" },
-    { shape: [[1, 0, 0], [1, 1, 1]], color: "#0000ff" },
-    { shape: [[0, 0, 1], [1, 1, 1]], color: "#ff7f00" }
+    {
+        shape: [
+            [0, 0, 0, 0],
+            [1, 1, 1, 1],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0]
+        ], color: "#00ffff"
+    },
+    {
+        shape: [
+            [1, 1],
+            [1, 1]
+        ], color: "#ffff00"
+    },
+    {
+        shape: [
+            [0, 1, 0],
+            [1, 1, 1],
+            [0, 0, 0],
+        ], color: "#800080"
+    },
+    {
+        shape: [
+            [0, 1, 1],
+            [1, 1, 0],
+            [0, 0, 0],
+        ], color: "#00ff00"
+    },
+    {
+        shape: [
+            [1, 1, 0],
+            [0, 1, 1],
+            [0, 0, 0],
+        ], color: "#ff0000"
+    },
+    {
+        shape: [
+            [0, 0, 1],
+            [1, 1, 1],
+            [0, 0, 0],
+        ], color: "#0000ff"
+    },
+    {
+        shape: [
+            [0, 0, 1],
+            [1, 1, 1],
+            [0, 0, 0],
+        ], color: "#ff7f00"
+    }
 ];
 
 // Utility function to generate rotations
@@ -23,6 +65,14 @@ function generateRotations(shape) {
         ));
     }
     return rotations;
+}
+
+function removeTrailing(array, value) {
+    let i = array.length;
+    while (i > 0 && array[i - 1] === value) {
+        i--;
+    }
+    return array.slice(0, i);
 }
 
 const Moves = {
@@ -191,19 +241,39 @@ class Grid {
         return holes;
     }
 
+    getSurroundedHoles() {
+        let holes = 0;
+        const heights = this.getHeights();
+        for (let j = 0; j < this.cols; j++) {
+            for (let i = this.rows - heights[j]; i < this.rows; i++) {
+                if (
+                    (this.grid[i][j] === EMPTY) &&
+                    (j < 1 || this.grid[i][j - 1] !== EMPTY) &&
+                    (j >= this.cols || this.grid[i][j + 1] !== EMPTY)
+                ) {
+                    holes++;
+                }
+            }
+        }
+        return holes;
+    }
+
     getPenalty() {
         const heights = this.getHeights();
 
         const holes = this.getHoles();
+        const unfixableHoles = this.getSurroundedHoles();
         const maxHeight = Math.max(...heights);
         const avgHeight = heights.reduce((sum, height) => sum + height, 0) / heights.length;
         const bumpiness = heights.slice(1).reduce((sum, height, index) => sum + Math.abs(height - heights[index]), 0) / (heights.length - 1);
 
         return (
+            30 * unfixableHoles +
             15 * holes +
             5 * avgHeight +
-            3 * bumpiness +
-            2 * maxHeight
+            2 * maxHeight +
+            1 * bumpiness +
+            0
         );
     }
 
@@ -247,14 +317,15 @@ class TetrisGame {
         this.gridSize = this.canvas.height / this.rows;
 
         const colsExtra = this.canvas.height % this.gridSize;
+        this.ctx.translate(colsExtra / 2, 0)
 
-        this.cols = Math.floor((this.canvas.width - colsExtra) / this.gridSize);
+        this.cols = Math.floor(this.canvas.width / this.gridSize);
 
         this.grid = new Grid(this.rows, this.cols);
 
         this.currentTetromino = this.createNewTetromino();
 
-        this.trailLen = Math.floor(this.rows * 0.9)
+        this.trailLen = Math.floor(this.rows)
         this.trail = []
     }
 
@@ -292,12 +363,9 @@ class TetrisGame {
         let lowestPenalty = Infinity;
 
         for (
-            let x = Math.max(-strafeDistance, -tetromino.x);
-            x <= Math.min(strafeDistance, grid.cols - tetromino.x - tetromino.shape[0].length);
-            x++
+            let x = -strafeDistance; x <= strafeDistance; x++
         ) {
             const baseMoves = Array.from({ length: Math.abs(x) }, () => (x > 0) ? Moves.RIGHT : Moves.LEFT);
-
             const lowestMovePenaltyAcceptance = 0.00001;
 
             for (const exploreMoves of deepExploreMovePossibilities) {
@@ -324,7 +392,7 @@ class TetrisGame {
                     ((movesPenalty - lowestPenalty < lowestMovePenaltyAcceptance) && lowestPenaltyMoveSet.length < moves.length)
                 ) {
                     lowestPenalty = movesPenalty;
-                    lowestPenaltyMoveSet = moves;
+                    lowestPenaltyMoveSet = removeTrailing(moves, Moves.NONE);
                 }
 
                 tetromino.restoreState(startingTetrominoState);
@@ -370,11 +438,13 @@ class TetrisGame {
 
     draw() {
         this.grid.draw(this.ctx, this.gridSize);
-        
+
         for (let i = 0; i < this.trail.length; i++) {
             const tetromino = this.trail[i];
-            tetromino.draw(this.ctx, this.gridSize, (((i + 1) / this.trailLen) ** 3) * 0.5)
+            tetromino.draw(this.ctx, this.gridSize, (((i + 1) / this.trailLen)) * 0.5)
         }
+
+        console.log(this.grid.getHoles(), this.grid.getSurroundedHoles());
 
         if (this.currentTetromino) {
             this.currentTetromino.draw(this.ctx, this.gridSize);

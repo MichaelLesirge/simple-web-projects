@@ -1,8 +1,9 @@
 setInterval(() => {
-    const header = document.querySelector("header");
-    if (isInViewport(header, {outOfViewPortRatio: 0.5})) {
-        window.history.replaceState( {} , document.title, window.location.origin + window.location.pathname);
-    }
+    document.querySelectorAll(".title-section").forEach((element) => {
+        if (isInViewport(element, {outOfViewPortRatio: 0.5})) {
+            window.history.replaceState( {} , document.title, window.location.origin + window.location.pathname);
+        }
+    })
 }, 100)
 
 export function startLoop(element, init, clear, nextFrame, { resetOnScroll = false, resetOnClick = false, alwaysRun = false, resetOnResize = true, fps = 60} = {}) {
