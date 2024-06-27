@@ -22,17 +22,22 @@ main {
     scroll-snap-type: y mandatory;
 }
 
-main section, main header {
+.animation, .title-section {
     overflow: hidden;
     scroll-snap-align: start;
 
     height: 100vh;
     border-bottom: 1px dashed white;
+    margin-bottom: 1px;
 
     display: flex;
     align-items: center;
     justify-content: center;
     flex-direction: column;
+}
+
+footer.title-section {
+    border-bottom: 0;
 }
 
 #blob {
@@ -74,12 +79,16 @@ main section, main header {
     backdrop-filter: blur(11vmin);
 }
 
-.title {
+.title, .text {
+    font-family: 'Space Mono', monospace;
     font-size: 7rem;
 }
 
+.text {
+    font-size: 1rem;
+}
+
 .hacker-text {
-    font-family: 'Space Mono', monospace;
     user-select: none;
 }
 
