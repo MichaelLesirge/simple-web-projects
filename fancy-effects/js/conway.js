@@ -1,4 +1,4 @@
-import { startLoop, updateCanvasSizes } from "./canvasUtil.js";
+import { startLoop, updateCanvasSizes, setHashAutoFocus } from "./canvasUtil.js";
 import { randomFloat, makeGrid } from "./util.js";
 
 const canvas = document.getElementById("conway-canvas");
@@ -113,5 +113,6 @@ function nextFrame() {
 }
 
 export default function conway(params) {
+    setHashAutoFocus(canvas)
     startLoop(canvas, init, clear, nextFrame, { resetOnClick: true, resetOnResize: true })
 }

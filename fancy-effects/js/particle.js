@@ -1,5 +1,5 @@
-import { startLoop, updateCanvasSizes } from "./canvasUtil.js";
-import { randomChoice, randomFloat } from "./util.js";
+import { startLoop, updateCanvasSizes, setHashAutoFocus } from "./canvasUtil.js";
+import { randomChoice, randomFloat, } from "./util.js";
 
 const canvas = document.getElementById("particle-canvas");
 updateCanvasSizes(canvas)
@@ -106,5 +106,6 @@ function nextFrame() {
 }
 
 export default function particle() {
+    setHashAutoFocus(canvas)
     startLoop(canvas, init, clear, nextFrame, { resetOnClick: true, resetOnResize: false })
 }

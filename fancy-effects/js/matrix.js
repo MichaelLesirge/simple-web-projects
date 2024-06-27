@@ -1,4 +1,4 @@
-import { startLoop, updateCanvasSizes } from "./canvasUtil.js";
+import { startLoop, updateCanvasSizes, setHashAutoFocus } from "./canvasUtil.js";
 import { charRange, randomChoice, randomFloat } from "./util.js";
 
 const canvas = document.getElementById("matrix-canvas");
@@ -64,5 +64,6 @@ function nextFrame() {
 }
 
 export default function matrix() {
+    setHashAutoFocus(canvas)
     startLoop(canvas, init, clear, nextFrame, { resetOnClick: true, resetOnResize: true });
 }

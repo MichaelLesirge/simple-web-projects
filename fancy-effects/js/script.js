@@ -1,14 +1,20 @@
-import { charRange, randomChoice, randomFloat, randomInt } from "./util.js";
+import { charRange } from "./util.js";
 import makeFollowMouse from "./mouseFollower.js";
 import makeHackerText from "./hackerEffect.js";
+import { setHashAutoFocus } from "./canvasUtil.js";
 
 import spiral from "./spiral.js";
 import conway from "./conway.js";
 import tetris from "./tetris.js";
 import matrix from "./matrix.js";
 import particle from "./particle.js";
+// import mondrian from "./mondrian.js";
 
 makeFollowMouse(document.getElementById("blob"));
+
+document.querySelectorAll(".title-section").forEach(element => {
+    setHashAutoFocus(element, "", {offScreenRatio: 0.5})
+});
 
 makeHackerText(
     document.querySelectorAll(".hacker-text"),

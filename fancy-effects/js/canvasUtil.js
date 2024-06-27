@@ -1,11 +1,3 @@
-setInterval(() => {
-    document.querySelectorAll(".title-section").forEach((element) => {
-        if (isInViewport(element, {outOfViewPortRatio: 0.5})) {
-            window.history.replaceState( {} , document.title, window.location.origin + window.location.pathname);
-        }
-    })
-}, 100)
-
 export function startLoop(element, init, clear, nextFrame, { resetOnScroll = false, resetOnClick = false, alwaysRun = false, resetOnResize = true, fps = 60} = {}) {
     init();
     nextFrame()
@@ -13,7 +5,6 @@ export function startLoop(element, init, clear, nextFrame, { resetOnScroll = fal
     const interval = 1000 / fps;
     let lastTime = performance.now();
     
-    const hash = ("#" + element.parentElement.id)
     function loop() {
 
         const currentTime = performance.now();
@@ -23,12 +14,7 @@ export function startLoop(element, init, clear, nextFrame, { resetOnScroll = fal
             nextFrame();
             lastTime = currentTime;
         }
-        
-        // TODO This should not be in here
-        if (window.location.hash != hash && isInViewport(element, {outOfViewPortRatio: 0})) {
-            window.history.replaceState( {} , document.title, window.location.origin + window.location.pathname + hash);
-        }
-        
+                
         requestAnimationFrame(loop);
     }
 
@@ -80,4 +66,14 @@ export function updateCanvasSizes(canvas) {
 
     window.addEventListener("resize", updateCanvasSizeWithDpr);
     updateCanvasSizeWithDpr()
+}
+
+export function setHashAutoFocus(element, hash, {refreshRate = 100, offScreenRatio = 0} = {}) {
+    hash = hash ?? ("#" + element.parentElement.id)
+
+    setInterval(() => {
+        if (window.location.hash != hash && isInViewport(element, {outOfViewPortRatio: offScreenRatio})) {
+            window.history.replaceState( {} , document.title, window.location.origin + window.location.pathname + hash);
+        }
+    }, refreshRate)
 }

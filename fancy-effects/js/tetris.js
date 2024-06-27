@@ -1,5 +1,5 @@
 // canvasUtil.js and util.js imports
-import { startLoop, updateCanvasSizes } from "./canvasUtil.js";
+import { startLoop, updateCanvasSizes, setHashAutoFocus } from "./canvasUtil.js";
 import { randomInt, makeGrid, getPermutations } from "./util.js";
 
 // Constants
@@ -82,8 +82,6 @@ function removeTrailing(array, value) {
 }
 
 function shuffle(array) {
-    array = array.slice()
-
     let currentIndex = array.length;
 
     while (currentIndex != 0) {
@@ -93,8 +91,6 @@ function shuffle(array) {
 
         [array[currentIndex], array[randomIndex]] =  [array[randomIndex], array[currentIndex]];
     }
-
-    return array;
 }
 
 // Tetromino class
@@ -492,6 +488,7 @@ class TetrisGame {
 export default function tetris() {
     const canvas = document.getElementById("tetris-canvas");
     const game = new TetrisGame(canvas);
+    setHashAutoFocus(canvas);
     startLoop(canvas, () => game.init(), () => game.clear(), () => game.nextFrame(), { resetOnClick: true, resetOnResize: true, fps: 20 });
 }
 

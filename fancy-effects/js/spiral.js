@@ -1,4 +1,4 @@
-import { startLoop, updateCanvasSizes } from "./canvasUtil.js";
+import { startLoop, updateCanvasSizes, setHashAutoFocus } from "./canvasUtil.js";
 
 const canvas = document.getElementById("spiral-canvas");
 updateCanvasSizes(canvas);
@@ -183,5 +183,6 @@ function nextFrame() {
 }
 
 export default function spiral() {
+    setHashAutoFocus(canvas)
     startLoop(canvas, init, clear, nextFrame, { resetOnClick: true, resetOnScroll: true, resetOnResize: true })
 }
