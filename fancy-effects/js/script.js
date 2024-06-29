@@ -8,7 +8,7 @@ import conway from "./conway.js";
 import tetris from "./tetris.js";
 import matrix from "./matrix.js";
 import particle from "./particle.js";
-// import mondrian from "./mondrian.js";
+import mondrian from "./mondrian.js";
 
 makeFollowMouse(document.getElementById("blob"));
 
@@ -27,3 +27,4 @@ conway()
 tetris();
 matrix();
 particle();
+mondrian();
