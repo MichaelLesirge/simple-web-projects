@@ -307,8 +307,15 @@ class Grid {
             for (let j = 0; j < this.cols - jShift; j++) {
                 let row = i + iShift;
                 let col = j + jShift;
-                ctx.fillStyle = this.grid[row][col] || "black";
-                ctx.fillRect(col * gridSize, row * gridSize, gridSize, gridSize);
+
+                const cellColor = this.grid[row][col];
+
+                if (cellColor) {
+                    ctx.fillStyle = cellColor;
+                    ctx.fillRect(col * gridSize, row * gridSize, gridSize, gridSize);
+                }
+
+                ctx.lineWidth = 2;
                 ctx.strokeRect(col * gridSize, row * gridSize, gridSize, gridSize);
             }
         }
@@ -330,8 +337,7 @@ class TetrisGame {
         this.rows = 30;
         this.gridSize = this.canvas.height / this.rows;
 
-        const colsExtra = this.canvas.height % this.gridSize;
-        this.ctx.translate(colsExtra / 2, 0)
+        this.colsExtra = this.canvas.width % this.gridSize;
 
         this.cols = Math.floor(this.canvas.width / this.gridSize);
 
@@ -458,23 +464,29 @@ class TetrisGame {
     }
 
     draw() {
-        this.grid.draw(this.ctx, this.gridSize);
+        
+        this.ctx.save()
+        this.ctx.translate(this.colsExtra / 2, 0)
 
         for (let i = 0; i < this.trail.length; i++) {
             const tetromino = this.trail[i];
             if (tetromino) {
-                tetromino.draw(this.ctx, this.gridSize, (((i + 1) / this.trailLen)) * 0.5)
+                tetromino.draw(this.ctx, this.gridSize, (((i + 1) / this.trailLen)) * 0.32)
             }
         }
-
+        
         if (this.currentTetromino) {
             this.currentTetromino.draw(this.ctx, this.gridSize);
-
+            
             this.trail.push(this.currentTetromino.copy());
             if (this.trail.length > this.trailLen) {
                 this.trail.shift();
             }
         }
+
+        this.grid.draw(this.ctx, this.gridSize);
+        
+        this.ctx.restore()
     }
 
     nextFrame() {
