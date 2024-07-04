@@ -9,6 +9,8 @@ import tetris from "./tetris.js";
 import matrix from "./matrix.js";
 import particle from "./particle.js";
 import mondrian from "./mondrian.js";
+// import balls from "./balls.js";
+// import solar from "./solar.js";
 
 makeFollowMouse(document.getElementById("blob"));
 
@@ -28,3 +30,5 @@ tetris();
 matrix();
 particle();
 mondrian();
+// balls();
+// solar();
