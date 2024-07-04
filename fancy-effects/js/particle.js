@@ -28,7 +28,6 @@ class Particle {
     }
 
     draw() {
-
         const [x, y] = [this.getX(), this.getY()]
 
         ctx.fillStyle = this.color;
@@ -67,8 +66,10 @@ class Particle {
     }
 
     update() {
-        this.x += (this.vx / canvas.width);
-        this.y += (this.vy / canvas.height);
+        const speedModifier = Math.pow(0.87, this.connections.length)
+
+        this.x += (this.vx / canvas.width) * speedModifier;
+        this.y += (this.vy / canvas.height) * speedModifier;
 
         if (this.x > 1) this.x = 0;
         if (this.x < 0) this.x = 1;
