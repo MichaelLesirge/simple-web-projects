@@ -119,8 +119,8 @@ class Ball {
 
 function init() {
     let ballCount = Math.floor(canvas.width / 150);
-    console.log(canvas.width);
     allBalls = Array.from({ length: ballCount }, () => new Ball());
+    console.log(allBalls.length);
 }
 
 function clear() {
@@ -134,6 +134,7 @@ function nextFrame() {
 
     if (randomInt(0, 200) == 0) {
         allBalls.push(new Ball())
+        console.log(allBalls.length);
     }
 
     for (const ball of allBalls) {
