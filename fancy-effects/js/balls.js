@@ -1,5 +1,5 @@
 import { startLoop, updateCanvasSizes, setHashAutoFocus } from "./canvasUtil.js";
-import { randomFloat } from "./util.js";
+import { randomFloat, randomInt } from "./util.js";
 
 // TODO balls colliding with balls
 
@@ -7,8 +7,6 @@ const canvas = document.getElementById("balls-canvas");
 updateCanvasSizes(canvas);
 
 const ctx = canvas.getContext("2d");
-
-const ballCount = 25;
 
 const gravity = 3.8;
 const airDensity = 1.293;
@@ -20,7 +18,7 @@ let allBalls = [];
 
 class Ball {
     constructor() {
-        this.radius = randomFloat(5, 20);
+        this.radius = randomInt(0, 5) == 0 ? randomFloat(30, 60) : randomFloat(5, 30);
 
         this.mass = 4/3 * Math.PI * Math.pow(this.radius, 3);
         this.referenceArea = Math.PI * Math.pow(this.radius, 2);
@@ -29,7 +27,7 @@ class Ball {
         this.x = randomFloat(this.radius, canvas.width - this.radius);
         this.y = -this.radius;
         this.vy = 0;
-        this.vx = randomFloat(-2, 2);
+        this.vx = randomFloat(-7, 7);
         this.color = colors[Math.floor(Math.random() * colors.length)];
 
         this.elasticity = 0.8;
@@ -90,16 +88,23 @@ class Ball {
                 const vx2 = other.vx * cos + other.vy * sin;
                 const vy2 = other.vy * cos - other.vx * sin;
 
-                // Collision reaction
+                // Calculate combined elasticity
+                const combinedElasticity = (this.elasticity + other.elasticity) / 2;
+
+                // Collision reaction with elasticity
                 const totalMass = this.mass + other.mass;
-                const newVx1 = ((this.mass - other.mass) * vx1 + 2 * other.mass * vx2) / totalMass;
-                const newVx2 = ((other.mass - this.mass) * vx2 + 2 * this.mass * vx1) / totalMass;
+                const newVx1 = (vx1 * (this.mass - other.mass) + 2 * other.mass * vx2) / totalMass;
+                const newVx2 = (vx2 * (other.mass - this.mass) + 2 * this.mass * vx1) / totalMass;
+
+                // Apply elasticity to the velocity change
+                const finalVx1 = vx1 + (newVx1 - vx1) * combinedElasticity;
+                const finalVx2 = vx2 + (newVx2 - vx2) * combinedElasticity;
 
                 // Rotate velocities back
-                this.vx = newVx1 * cos - vy1 * sin;
-                this.vy = vy1 * cos + newVx1 * sin;
-                other.vx = newVx2 * cos - vy2 * sin;
-                other.vy = vy2 * cos + newVx2 * sin;
+                this.vx = finalVx1 * cos - vy1 * sin;
+                this.vy = vy1 * cos + finalVx1 * sin;
+                other.vx = finalVx2 * cos - vy2 * sin;
+                other.vy = vy2 * cos + finalVx2 * sin;
 
                 // Move balls apart to prevent sticking
                 const overlap = this.radius + other.radius - distance;
@@ -113,6 +118,8 @@ class Ball {
 }
 
 function init() {
+    let ballCount = Math.floor(canvas.width / 150);
+    console.log(canvas.width);
     allBalls = Array.from({ length: ballCount }, () => new Ball());
 }
 
@@ -125,8 +132,15 @@ function clear() {
 function nextFrame() {
     ctx.globalCompositeOperation = "lighter";
 
+    if (randomInt(0, 200) == 0) {
+        allBalls.push(new Ball())
+    }
+
     for (const ball of allBalls) {
+        canvas.globalAlpha = 0.01;
+        ball.draw()
         ball.update();
+        canvas.globalAlpha = 1;
         ball.draw();
     }
 }
