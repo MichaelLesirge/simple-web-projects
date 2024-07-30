@@ -3,6 +3,8 @@ import { startLoop, updateCanvasSizes, setHashAutoFocus } from "./canvasUtil.js"
 import { randomInt, makeGrid, getPermutations } from "./util.js";
 
 // Constants
+const TETRIS_GAME_ROWS = 30;
+
 const EMPTY = null;
 const TETROMINOS = [
     {
@@ -322,7 +324,6 @@ class Grid {
     }
 }
 
-
 // TetrisGame class
 class TetrisGame {
     constructor(canvas) {
@@ -334,7 +335,7 @@ class TetrisGame {
     init() {
         updateCanvasSizes(this.canvas);
 
-        this.rows = 30;
+        this.rows = TETRIS_GAME_ROWS;
         this.gridSize = this.canvas.height / this.rows;
 
         this.colsExtra = this.canvas.width % this.gridSize;
@@ -348,6 +349,12 @@ class TetrisGame {
 
         this.trailLen = Math.floor(this.rows * 3.5)
         this.trail = Array.from({ length: this.trailLen })
+
+        const deepExploreArea = 5;
+        const possibleMoves = Object.values(MOVES);
+        this.deepExploreMovePossibilities = getPermutations(possibleMoves, deepExploreArea)
+
+        this.baseMovesPossibilities = Array.from({length: this.rows * 2 + 1}, (_, x) => Array.from({ length: this.rows}, (_, i) => i < (x - this.rows) ? ((x > 0) ? MOVES.LEFT : MOVES.RIGHT) : MOVES.NONE)); // ok   
     }
 
     createNewTetromino() {
@@ -377,27 +384,31 @@ class TetrisGame {
         const startingTetrominoState = tetromino.saveState();
         const startingGridState = grid.saveState();
 
-
-        const deepExploreArea = 4;
-        const maxTravelableStrafe = grid.rows;
-
-        const strafeDistance = maxTravelableStrafe - deepExploreArea;
-
-        const possibleMoves = Object.values(MOVES);
-        const deepExploreMovePossibilities = getPermutations(possibleMoves, deepExploreArea)
+        const lowestMovePenaltyAcceptance = 0.1;
 
         let lowestPenaltyMoveSet = [];
         let lowestPenalty = Infinity;
 
-        for (
-            let x = -strafeDistance; x <= strafeDistance; x++
-        ) {
-            const baseMoves = Array.from({ length: Math.abs(x) }, () => (x > 0) ? MOVES.RIGHT : MOVES.LEFT);
-            const lowestMovePenaltyAcceptance = 0.00001;
+        for (const baseMoves of this.baseMovesPossibilities) {
 
-            for (const exploreMoves of deepExploreMovePossibilities) {
+            for (const exploreMoves of this.deepExploreMovePossibilities) {
 
-                const moves = baseMoves.concat(exploreMoves);
+                tetromino.setMoves(baseMoves.slice());
+
+                while (!grid.doesCollide(tetromino)) {
+                    const preMoveState = tetromino.saveState();
+                    tetromino.moveToTarget();
+                    if (grid.doesCollide(tetromino)) {
+                        tetromino.restoreState(preMoveState);
+                    }
+
+                    tetromino.moveDown();
+                }
+
+                tetromino.restoreState(startingTetrominoState);
+
+                const moves = removeTrailing(baseMoves.slice(0, -exploreMoves.length - tetromino.moves.length).concat(exploreMoves), MOVES.NONE);
+
                 tetromino.setMoves(moves.slice());
 
                 while (!grid.doesCollide(tetromino)) {
@@ -419,7 +430,7 @@ class TetrisGame {
                     ((movesPenalty - lowestPenalty < lowestMovePenaltyAcceptance) && lowestPenaltyMoveSet.length < moves.length)
                 ) {
                     lowestPenalty = movesPenalty;
-                    lowestPenaltyMoveSet = removeTrailing(moves, MOVES.NONE);
+                    lowestPenaltyMoveSet = moves;
                 }
 
                 tetromino.restoreState(startingTetrominoState);
@@ -490,6 +501,7 @@ class TetrisGame {
     }
 
     nextFrame() {
+        this.draw();
         this.update();
         this.clear();
         this.draw();
