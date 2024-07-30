@@ -97,7 +97,7 @@ function shuffle(array) {
 
 // Tetromino class
 class Tetromino {
-    constructor(shape, color, start, { moves = [] } = {}) {
+    constructor(shape, color, start, { moves = null } = {}) {
         this.rotations = generateRotations(shape);
         this.color = color;
 
@@ -325,7 +325,11 @@ class Grid {
 }
 
 // TetrisGame class
+const deepExploreMovePossibilities = getPermutations(Object.values(MOVES), 4)
+const baseMovesPossibilities = Array.from({length: TETRIS_GAME_ROWS * 2 + 1}, (_, x) => Array.from({ length: TETRIS_GAME_ROWS}, (_, i) => i < (x - TETRIS_GAME_ROWS) ? ((x > 0) ? MOVES.LEFT : MOVES.RIGHT) : MOVES.NONE)); // ok   
+
 class TetrisGame {
+
     constructor(canvas) {
         this.canvas = canvas;
         this.ctx = canvas.getContext("2d");
@@ -346,15 +350,10 @@ class TetrisGame {
 
         this.tetrominoBag = []
         this.currentTetromino = this.createNewTetromino();
+        this.currentTetromino.setMoves([]);
 
         this.trailLen = Math.floor(this.rows * 3.5)
         this.trail = Array.from({ length: this.trailLen })
-
-        const deepExploreArea = 5;
-        const possibleMoves = Object.values(MOVES);
-        this.deepExploreMovePossibilities = getPermutations(possibleMoves, deepExploreArea)
-
-        this.baseMovesPossibilities = Array.from({length: this.rows * 2 + 1}, (_, x) => Array.from({ length: this.rows}, (_, i) => i < (x - this.rows) ? ((x > 0) ? MOVES.LEFT : MOVES.RIGHT) : MOVES.NONE)); // ok   
     }
 
     createNewTetromino() {
@@ -389,9 +388,9 @@ class TetrisGame {
         let lowestPenaltyMoveSet = [];
         let lowestPenalty = Infinity;
 
-        for (const baseMoves of this.baseMovesPossibilities) {
+        for (const baseMoves of baseMovesPossibilities) {
 
-            for (const exploreMoves of this.deepExploreMovePossibilities) {
+            for (const exploreMoves of deepExploreMovePossibilities) {
 
                 tetromino.setMoves(baseMoves.slice());
 
@@ -444,6 +443,10 @@ class TetrisGame {
     }
 
     update() {
+        if (this.currentTetromino.moves == null) {
+            this.findBestMoves();
+        }
+
         const oldState = this.currentTetromino.saveState();
         this.currentTetromino.moveToTarget();
 
@@ -461,9 +464,6 @@ class TetrisGame {
             this.currentTetromino = this.createNewTetromino();
             if (this.grid.doesCollide(this.currentTetromino)) {
                 this.init();
-            }
-            else {
-                this.findBestMoves();
             }
         }
     }
@@ -501,7 +501,6 @@ class TetrisGame {
     }
 
     nextFrame() {
-        this.draw();
         this.update();
         this.clear();
         this.draw();
