@@ -70,6 +70,45 @@ class Ball {
             this.x = this.radius;
             this.vx *= -this.elasticity;
         }
+
+        for (const other of allBalls) {
+            if (other === this) continue; // Skip self
+
+            const dx = this.x - other.x;
+            const dy = this.y - other.y;
+            const distance = Math.hypot(dx, dy);
+
+            if (distance < this.radius + other.radius) {
+                // Collision detected
+                const angle = Math.atan2(dy, dx);
+                const sin = Math.sin(angle);
+                const cos = Math.cos(angle);
+
+                // Rotate velocity vectors
+                const vx1 = this.vx * cos + this.vy * sin;
+                const vy1 = this.vy * cos - this.vx * sin;
+                const vx2 = other.vx * cos + other.vy * sin;
+                const vy2 = other.vy * cos - other.vx * sin;
+
+                // Collision reaction
+                const totalMass = this.mass + other.mass;
+                const newVx1 = ((this.mass - other.mass) * vx1 + 2 * other.mass * vx2) / totalMass;
+                const newVx2 = ((other.mass - this.mass) * vx2 + 2 * this.mass * vx1) / totalMass;
+
+                // Rotate velocities back
+                this.vx = newVx1 * cos - vy1 * sin;
+                this.vy = vy1 * cos + newVx1 * sin;
+                other.vx = newVx2 * cos - vy2 * sin;
+                other.vy = vy2 * cos + newVx2 * sin;
+
+                // Move balls apart to prevent sticking
+                const overlap = this.radius + other.radius - distance;
+                this.x += overlap * cos * (this.radius / (this.radius + other.radius));
+                this.y += overlap * sin * (this.radius / (this.radius + other.radius));
+                other.x -= overlap * cos * (other.radius / (this.radius + other.radius));
+                other.y -= overlap * sin * (other.radius / (this.radius + other.radius));
+            }
+        }
     }
 }
 
