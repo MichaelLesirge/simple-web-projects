@@ -2,7 +2,7 @@ export function startLoop(element, init, clear, nextFrame, { resetOnScroll = fal
     init();
     nextFrame()
 
-    const interval = 1000 / fps;
+    const interval = fps ? (1000 / fps) : 0;
     let lastTime = performance.now();
     
     function loop() {
