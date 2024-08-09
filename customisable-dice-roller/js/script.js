@@ -8,8 +8,8 @@ class Dice {
 	constructor(min, max) {
 		this.min = min;
 		this.max = max;
-		this.range_len = max-min+1;
-		this.range = Array.from({length: this.range_len}, (_, i) => i + min);
+		this.rangeSize = max - min + 1;
+		this.range = Array.from({ length: this.rangeSize }, (_, i) => i + min);
 
 		this.average = (max + min) / 2;
 	}
@@ -32,19 +32,19 @@ document.querySelectorAll(".info-container").forEach((container, index) => {
 
 		const showArrow = "<";
 		const hideArrow = ">";
-	
+
 		const showMessage = "show stats";
 		const hideMessage = "hide stats";
-	
+
 		label.innerText = hideArrow;
-		label.title = hideMessage;	
-	
+		label.title = hideMessage;
+
 		function toggle() {
 			label.innerText = label.innerText === hideArrow ? showArrow : hideArrow;
 			label.title = label.title === showMessage ? hideMessage : showMessage;
 			container.classList.toggle("hidden");
 		}
-	
+
 		// todo just start it hidden
 		if (window.innerWidth < 800) toggle();
 	}
@@ -52,46 +52,46 @@ document.querySelectorAll(".info-container").forEach((container, index) => {
 	// add dragging
 	{
 		const statSectionTitle = infoContainer.querySelector(".stat-section-title");
-	
+
 		let isDown = false;
 		let offset = 0;
-	
+
 		statSectionTitle.addEventListener("touchstart", dragStart, false);
 		statSectionTitle.addEventListener("touchend", dragEnd, false);
 		document.addEventListener("touchmove", drag, false);
-	
+
 		statSectionTitle.addEventListener("mousedown", dragStart, false);
 		statSectionTitle.addEventListener("mouseup", dragEnd, false);
 		document.addEventListener("mousemove", drag, false);
-	
+
 		function dragStart(event) {
 			isDown = true;
 			container.classList.add("grabbed");
-	
+
 			if (index !== lastMoved) {
 				zIndexMax++;
 				lastMoved = index;
 				container.style.zIndex = zIndexMax;
 			}
-	
+
 			offset = container.offsetTop - event.clientY;
 		}
-	
+
 		function dragEnd(event) {
 			isDown = false;
 			container.classList.remove("grabbed");
 		}
-	
+
 		const titleRect = statSectionTitle.getBoundingClientRect();
 		const titleLeft = titleRect.x;
 		const titleRight = titleRect.x + titleRect.width;
-	
+
 		function drag(event) {
 			if (isDown) {
 				if (event.clientX < titleLeft || event.clientX > titleRight) {
 					dragEnd();
 				}
-	
+
 				let newTop = event.clientY + offset;
 				if (newTop < 0) {
 					newTop = 1;
@@ -100,7 +100,7 @@ document.querySelectorAll(".info-container").forEach((container, index) => {
 					newTop = document.documentElement.clientHeight - containerRect.height;
 					dragEnd();
 				}
-	
+
 				container.style.top = newTop + "px";
 			}
 		}
@@ -112,7 +112,7 @@ document.querySelectorAll(".info-container").forEach((container, index) => {
 const form = document.querySelector(".create-dice");
 form.addEventListener("submit", (event) => {
 	event.preventDefault();
-	
+
 });
 
 // --- class="num-only" ---
@@ -135,12 +135,11 @@ document.querySelectorAll("select.value-title").forEach((select) => {
 		})
 		if (selected_option) select.title = selected_option.title;
 	}
-	
+
 	select.addEventListener("change", update)
 	update()
 })
 
-// TODO make clear-input not overflow by shrinking font
 
 // --- dice input color change ---
 
@@ -149,4 +148,37 @@ const inputDiceColor = formDice.querySelector("#dice-color");
 
 inputDiceColor.addEventListener("input", (event) => {
 	formDice.style.setProperty("--color", event.target.value);
+});
+
+// --- clear input font shrink ---
+document.querySelectorAll(".clear-input").forEach((input) => {
+	const originalFontSize = parseFloat(window.getComputedStyle(input).fontSize);
+	const minFontSize = 8; // Minimum font size in pixels
+
+	function adjustFontSize() {
+		let fontSize = originalFontSize;
+		input.style.fontSize = `${fontSize}px`;
+
+		// Store the original dimensions
+		const originalWidth = input.offsetWidth;
+		const originalHeight = input.offsetHeight;
+
+		while (input.scrollWidth > originalWidth && fontSize > minFontSize) {
+			fontSize -= 0.5;
+			input.style.fontSize = `${fontSize}px`;
+		}
+
+		// Restore the original dimensions
+		input.style.width = `${originalWidth}px`;
+		input.style.height = `${originalHeight}px`;
+	}
+
+	// Adjust font size on input
+	input.addEventListener('input', adjustFontSize);
+
+	// Adjust font size on window resize
+	window.addEventListener('resize', adjustFontSize);
+
+	// Initial adjustment
+	adjustFontSize();
 });

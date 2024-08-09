@@ -54,6 +54,7 @@ body {
 .options {
 	display: flex;
 	justify-content: space-between;
+	gap: 1rem;
 
 	position: fixed;
 	bottom: 0;
