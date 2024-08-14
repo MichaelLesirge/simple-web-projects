@@ -326,7 +326,18 @@ class Grid {
 
 // TetrisGame class
 const deepExploreMovePossibilities = getPermutations(Object.values(MOVES), 4)
-const baseMovesPossibilities = Array.from({length: TETRIS_GAME_ROWS * 2 + 1}, (_, x) => Array.from({ length: TETRIS_GAME_ROWS}, (_, i) => i < (x - TETRIS_GAME_ROWS) ? ((x > 0) ? MOVES.LEFT : MOVES.RIGHT) : MOVES.NONE)); // ok   
+const baseMovesPossibilities = Array.from(
+    {length: TETRIS_GAME_ROWS + 1},
+    (_, x) => Array.from(
+        { length: TETRIS_GAME_ROWS},
+        (_, i) => i < x ? MOVES.LEFT : MOVES.NONE))
+    .concat(Array.from(
+        {length: TETRIS_GAME_ROWS},
+        (_, x) => Array.from(
+        { length: TETRIS_GAME_ROWS},
+        (_, i) => i <= x ? MOVES.RIGHT : MOVES.NONE))
+    );
+
 
 class TetrisGame {
 
@@ -350,6 +361,12 @@ class TetrisGame {
 
         this.tetrominoBag = []
         this.currentTetromino = this.createNewTetromino();
+        
+        // Sneaky no S or Z to start
+        while (this.currentTetromino.shape == TETROMINOS[3].shape || this.currentTetromino == TETROMINOS[4].shape) {
+            this.currentTetromino = this.createNewTetromino();
+        }
+
         this.currentTetromino.setMoves([]);
 
         this.trailLen = Math.floor(this.rows * 3.5)
@@ -383,7 +400,7 @@ class TetrisGame {
         const startingTetrominoState = tetromino.saveState();
         const startingGridState = grid.saveState();
 
-        const lowestMovePenaltyAcceptance = 0.1;
+        const lowestMovePenaltyAcceptance = 0.01;
 
         let lowestPenaltyMoveSet = [];
         let lowestPenalty = Infinity;
@@ -426,7 +443,7 @@ class TetrisGame {
                 const movesPenalty = grid.getPenalty()
                 if (
                     movesPenalty < lowestPenalty ||
-                    ((movesPenalty - lowestPenalty < lowestMovePenaltyAcceptance) && lowestPenaltyMoveSet.length < moves.length)
+                    ((movesPenalty - lowestPenalty < lowestMovePenaltyAcceptance) && lowestPenaltyMoveSet.length > moves.length)
                 ) {
                     lowestPenalty = movesPenalty;
                     lowestPenaltyMoveSet = moves;
@@ -512,6 +529,6 @@ export default function tetris() {
     const canvas = document.getElementById("tetris-canvas");
     const game = new TetrisGame(canvas);
     setHashAutoFocus(canvas);
-    startLoop(canvas, () => game.init(), () => game.clear(), () => game.nextFrame(), { resetOnClick: true, resetOnResize: true, fps: 20 });
+    startLoop(canvas, () => game.init(), () => game.clear(), () => game.nextFrame(), { resetOnClick: true, resetOnResize: true, fps: 60 });
 }
 
