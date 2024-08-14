@@ -124,15 +124,15 @@ function init() {
 }
 
 function clear() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = "rgba(0, 0, 0, 0.1)";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
+    ctx.fillStyle = "black";
+    ctx.fillRect(0, 0, canvas.width, canvas.height)
 }
 
 function nextFrame() {
     ctx.globalCompositeOperation = "lighter";
 
-    if (randomInt(0, 200) == 0) {
+    if (randomInt(0, 150) == 0) {
         allBalls.push(new Ball())
         console.log(allBalls.length);
     }
@@ -140,8 +140,9 @@ function nextFrame() {
     for (const ball of allBalls) {
         canvas.globalAlpha = 0.01;
         ball.draw()
-        ball.update();
         canvas.globalAlpha = 1;
+
+        ball.update();
         ball.draw();
     }
 }
