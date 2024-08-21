@@ -10,7 +10,7 @@ import matrix from "./matrix.js";
 import particle from "./particle.js";
 import mondrian from "./mondrian.js";
 import balls from "./balls.js";
-// import lightSpeed from "./lightSpeed.js";
+import dvd from "./dvd.js";
 
 makeFollowMouse(document.getElementById("blob"));
 
@@ -31,4 +31,4 @@ matrix();
 particle();
 mondrian();
 balls();
-// lightSpeed();
+dvd()
