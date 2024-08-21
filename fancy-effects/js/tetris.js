@@ -325,7 +325,7 @@ class Grid {
 }
 
 // TetrisGame class
-const deepExploreMovePossibilities = getPermutations(Object.values(MOVES), 4)
+const deepExploreMovePossibilities = getPermutations(Object.values(MOVES), 3)
 const baseMovesPossibilities = Array.from(
     {length: TETRIS_GAME_ROWS + 1},
     (_, x) => Array.from(
@@ -369,7 +369,7 @@ class TetrisGame {
 
         this.currentTetromino.setMoves([]);
 
-        this.trailLen = Math.floor(this.rows * 3.5)
+        this.trailLen = Math.floor(this.rows * 10)
         this.trail = Array.from({ length: this.trailLen })
     }
 
@@ -499,7 +499,7 @@ class TetrisGame {
         for (let i = 0; i < this.trail.length; i++) {
             const tetromino = this.trail[i];
             if (tetromino) {
-                tetromino.draw(this.ctx, this.gridSize, (((i + 1) / this.trailLen)) * 0.32)
+                tetromino.draw(this.ctx, this.gridSize, Math.pow((((i + 1) / this.trailLen)), 2) * 0.32)
             }
         }
         
