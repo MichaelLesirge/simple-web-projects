@@ -161,6 +161,8 @@ class Board {
 	}
 
 	undoMove() {
+		if (this.undoData.length == 0) return;
+
 		const [oldSquare, newSquareData, newSquare] = this.undoData.pop();
 
 		const movedPiece = newSquare.get();
@@ -383,22 +385,44 @@ function switchCurrentPlayer() {
 			board.htmlTable.classList.add("fade-in");
 		}, 1000 * 0.25)
 	}
+
+	let hasNoMoves = true;
+	let isInCheck = false;
+	board.forEach((square) => {
+		const piece = square.get();
+		if (piece != null) {
+			if (piece.color == currentColor) {
+				if (hasNoMoves && piece.getPossibleMoves(board, square).length > 0) {
+					hasNoMoves = false;
+				}
+			}
+			else {
+				if (piece.getPossibleMoves(board, square).includes(board.kings[currentColor])) {
+					isInCheck = true;
+				}
+			}
+		}
+	})
+
+	console.log(hasNoMoves, isInCheck);
+	
+
+	if (hasNoMoves && !isInCheck) {
+		whoToMoveMessage.innerText = `Game Over. It's a tie!`
+	}
+	else if (hasNoMoves && isInCheck) {
+		whoToMoveMessage.innerText = `Game Over. ${toCapitalized(PlayerColors.WHITE == currentColor ? PlayerColors.BLACK : PlayerColors.WHITE)} has won!`
+	}
 }
 
 const playerTurn = (square, board) => {
+
 	if (!square.isEmpty() && currentColor === square.get().color) {
 		board.setSelected(square);
 	} else if (board.selected != null) {
-		const hasWon = square.get()?.type === "king";
 		if (board.selected.get().getPossibleMoves(board, board.selected).includes(square)) {
 			board.move(board.selected, square);
-			if (hasWon) {
-				whoToMoveMessage.innerText = toCapitalized(currentColor) + " has won the game!"
-				currentColor = startingColor;
-			}
-			else {
-				switchCurrentPlayer();
-			}
+			switchCurrentPlayer();
 		}
 		board.setSelected(null);
 	}
