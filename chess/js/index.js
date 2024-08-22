@@ -78,13 +78,15 @@ class Board {
 		this.selected = null;
 		this.marked = [];
 
+		this.kings = {}
+		this.kings[PlayerColors.WHITE] = null;
+		this.kings[PlayerColors.BLACK] = null;
+
 		this.boardArray = Array(this.height);
 
 		this.htmlTable = htmlTable;
 
-		this.pieces = [];
-
-		const listener = (square) =>  {
+		const listener = (square) => {
 			console.log(square)
 			playerMove(square, this);
 		}
@@ -97,11 +99,15 @@ class Board {
 					this.height - row - 1, col,
 					(col + row) % 2 === 0 ? SquareColors.LIGHT : SquareColors.DARK,
 					tableRow.insertCell(),
-					listener, () => {}
+					listener, () => { }
 				);
 				this.boardArray[row][col] = square;
 			}
 		}
+
+		this.undoData = [];
+
+		this.isFlipped = false;
 	}
 
 	setSelected(selectedSquare) {
@@ -115,7 +121,7 @@ class Board {
 		if (this.selected) {
 			this.selected.select();
 
-			this.marked = this.selected.get().getPossibleMoves();
+			this.marked = this.selected.get().getPossibleMoves(this, selectedSquare);
 			this.marked.forEach((square) => square.mark());
 		} else {
 			this.marked = [];
@@ -123,11 +129,9 @@ class Board {
 	}
 
 	reset() {
+		this.kings[PlayerColors.WHITE] = null;
+		this.kings[PlayerColors.BLACK] = null;
 		this.forEach((square) => square.reset());
-	}
-
-	generatePieceMoves() {
-		this.forEach((square) => { if (!square.isEmpty()) square.get().generatePossibleMoves(this, square) })
 	}
 
 	isInBoard(row, col) {
@@ -138,20 +142,45 @@ class Board {
 		if (!this.isInBoard(row, col)) throw `Tried to get location (${row}, ${col}) not in board.`
 		return this.boardArray[this.height - row - 1][col];
 	}
-	
+
 	move(oldSquare, newSquare) {
 		if (oldSquare.isEmpty()) throw "tried to move form empty square";
 
-		newSquare.set(oldSquare.get());
-		newSquare.get().timesMoved++;
+		this.undoData.push([oldSquare, newSquare.get(), newSquare]);
+
+		const movedPiece = oldSquare.get()
+
+		if (movedPiece?.type == "king") {
+			this.kings[movedPiece.color] = newSquare;
+		}
+
+		movedPiece.timesMoved++;
+
+		newSquare.set(movedPiece);
 		oldSquare.set(null)
-		board.generatePieceMoves();
+	}
+
+	undoMove() {
+		const [oldSquare, newSquareData, newSquare] = this.undoData.pop();
+
+		const movedPiece = newSquare.get();
+
+		movedPiece.timesMoved--;
+		oldSquare.set(movedPiece);
+		newSquare.set(newSquareData);
+
+		if (movedPiece?.type == "king") {
+			this.kings[movedPiece.color] = oldSquare;
+		}
+
 	}
 
 	add(row, col, piece) {
-		this.pieces.push(this.pieces);
-		this.get(row, col).set(piece);
-		this.generatePieceMoves();
+		const square = this.get(row, col)
+		if (piece?.type == "king") {
+			this.kings[piece.color] = square;
+		}
+		square.set(piece);
 	}
 
 	forEach(func) {
@@ -163,9 +192,10 @@ class Board {
 	}
 
 	flip() {
-		const rows = Array.from(this.htmlTable.getElementsByTagName('tr')); 
-        rows.forEach(row => this.htmlTable.deleteRow(-1));
-        rows.reverse().forEach(row => this.htmlTable.appendChild(row));
+		this.isFlipped = !this.isFlipped;
+		const rows = Array.from(this.htmlTable.getElementsByTagName('tr'));
+		rows.forEach(row => this.htmlTable.deleteRow(-1));
+		rows.reverse().forEach(row => this.htmlTable.appendChild(row));
 	}
 }
 
@@ -238,14 +268,32 @@ class Piece {
 		this.moves = moves;
 	}
 
-	getPossibleMoves() {
-		return this.currentMoves;
+	getPossibleMovesUnsafe(board, curSquare) {
+		return this.moves
+			.flatMap((move) => move.generateMoves(board, this, curSquare))
 	}
-	
-	generatePossibleMoves(board, curSquare) {
-		this.currentMoves = this.moves.flatMap((move) => move.generateMoves(board, this, curSquare));	
+
+	getPossibleMoves(board, curSquare) {
+		return this.getPossibleMovesUnsafe(board, curSquare)
+			.filter((square) => this.isMoveSafe(board, square, curSquare));
 	}
-	
+
+	isMoveSafe(board, targetSquare, curSquare) {
+		let safe = true;
+		board.move(curSquare, targetSquare);
+		board.forEach((square) => {
+			const piece = square.get();
+			if (
+				(piece != null) &&
+				(piece.color != this.color && piece.getPossibleMovesUnsafe(board, square).includes(board.kings[this.color]))
+			) {
+				safe = false;
+			}
+		})
+		board.undoMove()
+		return safe;
+	}
+
 	toString() {
 		return this.svg.outerHTML;
 	}
@@ -297,15 +345,36 @@ const Queen = createPieceSubclass("queen", "Q", 9, [
 
 const whoToMoveMessage = document.getElementById("who-to-move");
 const shouldFlipBoard = document.getElementById("flip")
+shouldFlipBoard.addEventListener("click", ensureCorrectNearPlayer)
 
 let currentColor = startingColor;
+
+const resetButton = document.getElementById("reset");
+resetButton.addEventListener("click", () => { board.reset(); placeStartingPieces();  ensureCorrectNearPlayer(); })
+
+const undoButton = document.getElementById("undo");
+undoButton.addEventListener("click", () => { board.undoMove(); this.switchCurrentPlayer(); })
+
+
+function ensureCorrectNearPlayer() {
+	if (
+		(
+			shouldFlipBoard.checked &&
+			(currentColor == nearSideColor && board.isFlipped) ||
+			(currentColor != nearSideColor && !board.isFlipped)
+		) || (
+			!shouldFlipBoard.checked &&
+			board.isFlipped
+		)
+	) {
+		board.flip();
+	}
+}
 
 function switchCurrentPlayer() {
 	currentColor = PlayerColors.WHITE == currentColor ? PlayerColors.BLACK : PlayerColors.WHITE;
 	whoToMoveMessage.innerText = toCapitalized(currentColor) + " to move";
 	if (shouldFlipBoard.checked) {
-		console.log(board.htmlTable.classList);
-		
 		board.htmlTable.classList.remove("fade-in");
 		board.htmlTable.classList.add("fade-out");
 		setTimeout(() => {
@@ -321,7 +390,7 @@ const playerTurn = (square, board) => {
 		board.setSelected(square);
 	} else if (board.selected != null) {
 		const hasWon = square.get()?.type === "king";
-		if (board.selected.get().getPossibleMoves().includes(square)) {
+		if (board.selected.get().getPossibleMoves(board, board.selected).includes(square)) {
 			board.move(board.selected, square);
 			if (hasWon) {
 				whoToMoveMessage.innerText = toCapitalized(currentColor) + " has won the game!"
@@ -343,12 +412,12 @@ function placeStartingPieces() {
 
 	const piecesLayout = [Rook, Knight, Bishop, Queen, King, Bishop, Knight, Rook];
 	const pieces = new Map();
-	
+
 	piecesLayout.forEach((type, i) => pieces.set([0, i], new type(PlayerColors.WHITE)));
 	piecesLayout.forEach((type, i) => pieces.set([1, i], new Pawn(PlayerColors.WHITE)));
 	piecesLayout.forEach((type, i) => pieces.set([7, i], new type(PlayerColors.BLACK)));
 	piecesLayout.forEach((type, i) => pieces.set([6, i], new Pawn(PlayerColors.BLACK)));
-	
+
 	board.reset()
 	pieces.forEach((piece, location) => board.add(...location, piece))
 }
