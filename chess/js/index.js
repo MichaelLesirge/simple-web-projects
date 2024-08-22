@@ -80,7 +80,7 @@ class Board {
 
 		this.boardArray = Array(this.height);
 
-		this.boardTable = htmlTable;
+		this.htmlTable = htmlTable;
 
 		this.pieces = [];
 
@@ -91,7 +91,7 @@ class Board {
 
 		for (let row = 0; row < this.height; row++) {
 			this.boardArray[row] = Array(width);
-			const tableRow = this.boardTable.insertRow();
+			const tableRow = this.htmlTable.insertRow();
 			for (let col = 0; col < this.width; col++) {
 				const square = new Square(
 					this.height - row - 1, col,
@@ -160,6 +160,12 @@ class Board {
 				func(this.get(row, col));
 			}
 		}
+	}
+
+	flip() {
+		const rows = Array.from(this.htmlTable.getElementsByTagName('tr')); 
+        rows.forEach(row => this.htmlTable.deleteRow(-1));
+        rows.reverse().forEach(row => this.htmlTable.appendChild(row));
 	}
 }
 
@@ -289,13 +295,25 @@ const Queen = createPieceSubclass("queen", "Q", 9, [
 	...makeMoveVariations(1, 0, true),
 ]);
 
-const whoToMoveMessage = document.querySelector(".who-to-move");
+const whoToMoveMessage = document.getElementById("who-to-move");
+const shouldFlipBoard = document.getElementById("flip")
 
 let currentColor = startingColor;
 
 function switchCurrentPlayer() {
 	currentColor = PlayerColors.WHITE == currentColor ? PlayerColors.BLACK : PlayerColors.WHITE;
 	whoToMoveMessage.innerText = toCapitalized(currentColor) + " to move";
+	if (shouldFlipBoard.checked) {
+		console.log(board.htmlTable.classList);
+		
+		board.htmlTable.classList.remove("fade-in");
+		board.htmlTable.classList.add("fade-out");
+		setTimeout(() => {
+			board.flip();
+			board.htmlTable.classList.remove("fade-out");
+			board.htmlTable.classList.add("fade-in");
+		}, 1000 * 0.25)
+	}
 }
 
 const playerTurn = (square, board) => {
@@ -306,8 +324,8 @@ const playerTurn = (square, board) => {
 		if (board.selected.get().getPossibleMoves().includes(square)) {
 			board.move(board.selected, square);
 			if (hasWon) {
-				alert(`${currentColor.toUpperCase()} Has Won The Game!`)
-				setTimeout(placeStartingPieces, 1000);
+				whoToMoveMessage.innerText = toCapitalized(currentColor) + " has won the game!"
+				currentColor = startingColor;
 			}
 			else {
 				switchCurrentPlayer();
@@ -321,7 +339,7 @@ const board = new Board(boardWidth, boardHeight, document.querySelector("table.b
 
 function placeStartingPieces() {
 
-	currentColor = PlayerColors.WHITE;
+	currentColor = startingColor;
 
 	const piecesLayout = [Rook, Knight, Bishop, Queen, King, Bishop, Knight, Rook];
 	const pieces = new Map();

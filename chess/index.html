@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -7,22 +8,29 @@
 
     <script defer src="js/index.js"></script>
     <link rel="stylesheet" href="css/style.css">
-    
-	<meta name="description" content="Simple chess game, but you have to take the king" />
-	<meta name="keywords" content="Take the King Chess. The only chess where you can blunder the king!" />
-    
+
+    <meta name="description" content="Simple chess game" />
+    <meta name="keywords" content="chess" />
+
     <title>Take the King Chess!</title>
 </head>
+
 <body>
     <div class="container">
-        <h1 class="title">Take the King Chess<h4>The only chess where you can blunder the king!</h4></h1>
+        <h1 class="title">Simple Chess</h1>
         <main class="game">
-            
+
             <table class="board">
 
             </table>
             <aside class="game-info">
-                <h3 class="who-to-move">White to move</h3>
+                <h3 id="who-to-move">White to move</h3>
+                <div class="game-info-item">
+                    <label title="Flip board so current player is at bottom" for="flip">
+                        Flip Board
+                        <input type="checkbox" name="flip" id="flip" checked=1>
+                    </label>
+                </div>
                 <div class="move-history">
 
                 </div>
@@ -30,4 +38,5 @@
         </main>
     </div>
 </body>
+
 </html>

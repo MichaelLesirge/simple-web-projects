@@ -14,6 +14,10 @@ body {
 	height: 100vh;
 }
 
+.title {
+	padding-top: 1rem;
+}
+
 .container {
 	width: 100%;
 	height: 100%;
@@ -46,7 +50,7 @@ body {
 
 .board .tile {
 	position: relative;
-    text-align: center;
+	text-align: center;
 
 	width: var(--tile-size);
 	height: var(--tile-size);
@@ -63,19 +67,19 @@ body {
 }
 
 .tile.marked::after {
-    position: absolute;
-    display: block;
+	position: absolute;
+	display: block;
 
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
 
 	content: " ";
 	width: 2vmin;
-    aspect-ratio: 1;
-    border-radius: 50%;
+	aspect-ratio: 1;
+	border-radius: 50%;
 
-    background-color: rgba(0, 0, 0, 0.2);
+	background-color: rgba(0, 0, 0, 0.2);
 
 }
 
@@ -84,9 +88,9 @@ body {
 } */
 
 .tile.marked.enemy-marked::after {
-    width: 80%;
-    background-color: transparent;
-    border: 0.8vmin solid rgba(0, 0, 0, 0.2);
+	width: 80%;
+	background-color: transparent;
+	border: 0.8vmin solid rgba(0, 0, 0, 0.2);
 }
 
 .tile.selected {
@@ -106,6 +110,14 @@ body {
 }
 
 .game-info {
+	display: flex;
+	flex-direction: column;
+
+	align-items: baseline;
+	justify-content: baseline;
+
+	gap: 1rem;
+
 	box-sizing: border-box;
 	padding: 2rem;
 
@@ -115,9 +127,18 @@ body {
 	background-color: #272522;
 }
 
-.who-to-move {
-	width: 14rem;
-	text-align: left;
+.game-info-item label {
+	display: flex;
+	align-items: center;
+	gap: 0.3rem;
+	border-radius: 3px;
+	padding: 0.3em;
+	user-select: none;
+}
+
+.game-info-item label:hover {
+	background-color: rgba(255, 255, 255, 0.05);
+	cursor: pointer;
 }
 
 @media only screen and (max-width: 700px) {
@@ -128,4 +149,16 @@ body {
 	.game-info {
 		height: 10rem;
 	}
+}
+
+.fade-out {
+	visibility: hidden;
+	opacity: 0;
+	transition: visibility 0.25s ease, opacity 0.25s ease;
+}
+
+.fade-in {
+	visibility: visible;
+	opacity: 1;
+	transition: opacity 0.25s ease;
 }
