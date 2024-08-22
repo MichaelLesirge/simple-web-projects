@@ -44,10 +44,25 @@ class Logo {
     constructor(image) {
         this.image = image;
 
-        this.x = randomInt(image.width, canvas.width - image.width * 2);
-        this.y = randomInt(image.height, canvas.height - image.height * 2);
-        this.dx = randomChoice([-1, 1]);
-        this.dy = randomChoice([-1, 1]);
+        const corners = [
+            { x: 0, y: 0, dx: 1, dy: 1 },
+            { x: 0, y: canvas.height - image.height, dx: 1, dy: -1 },
+            { x: canvas.width - image.width, y: 0, dx: -1, dy: 1 },
+            { x: canvas.width - image.width, y: canvas.height - image.height, dx: -1, dy: -1 },
+        ];
+
+        const randomCorner = randomChoice(corners);
+
+        const numBounces = randomInt(3, 15);
+
+        console.log(numBounces, randomCorner);
+
+        const result = this.simulateMovement(randomCorner, numBounces);
+
+        this.x = result.x;
+        this.y = result.y;
+        this.dx = -result.dx;
+        this.dy = -result.dy;
 
         this.speed = 5;
 
@@ -55,6 +70,51 @@ class Logo {
         ctx.filter = `hue-rotate(${this.hue}deg)`;
 
         this.confettiParticles = [];
+    }
+
+    simulateMovement(corner, bounces) {
+
+        let {x, y, dx, dy} = corner;
+
+        let speed = 5;
+        let bounceCount = 0;
+
+        while (bounceCount < bounces) {
+            x += dx * speed;
+            y += dy * speed;
+
+            let bounced = false;
+
+            if (x <= 0 || x + this.image.width >= canvas.width) {
+                dx *= -1;
+                bounced = true;
+            }
+
+            if (y <= 0 || y + this.image.height >= canvas.height) {
+                dy *= -1;
+                bounced = true;
+            }
+
+            if (bounced) {
+                bounceCount += 1;
+            }
+        }
+
+        const extraSteps = randomInt(50, 100);
+        for (let i = 0; i < extraSteps; i++) {
+            x += dx * speed;
+            y += dy * speed;
+
+            if (x <= 0 || x + this.image.width >= canvas.width) {
+                dx *= -1;
+            }
+
+            if (y <= 0 || y + this.image.height >= canvas.height) {
+                dy *= -1;
+            }
+        }
+
+        return { x, y, dx, dy };
     }
 
     update() {
@@ -78,7 +138,7 @@ class Logo {
             ctx.filter = `hue-rotate(${this.hue}deg)`;
 
             // Check if it's a corner and generate confetti
-            if ((this.x <= 0 || this.x + this.image.width >= canvas.width) && 
+            if ((this.x <= 0 || this.x + this.image.width >= canvas.width) &&
                 (this.y <= 0 || this.y + this.image.height >= canvas.height)) {
                 this.createConfetti();
             }
