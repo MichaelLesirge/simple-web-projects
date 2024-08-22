@@ -58,9 +58,6 @@
 							</div>
 						</div>
 					</form>
-					<div>
-						test
-					</div>
 				</section>
 			</main>
 			
@@ -75,19 +72,16 @@
 							<h4>
 								For
 								<select class="inline-input value-title">
-									<option value="sum" title="sum of">sum of</option>
-									<option value="individual" title="individual">individual</option>
+									<option value="sum" title="Sum Of All Dice">sum of</option>
+									<option value="individual" title="Any individual Dice">individual</option>
 								</select>
 								Dice
 							</h4>
 							<div class="genral-stats">
-								<div title="Minimum possible sum of dice">Min: <output class="stat" id="min">0</output></div>
-								<div title="Maximum possible sum of dice">Max: <output class="stat" id="max">0</output></div>
-								<div title="Average sum of dice">Average: <output class="stat" id="avg-sum">0</output></div>
-								<!-- <div title="Minimum possible value of any dice">Min: <output class="stat" id="min">0</output></div>
-								<div title="Maximum possible value of dice">Max: <output class="stat" id="max">0</output></div>
-								<div title="Average value of dice">Average: <output class="stat" id="avg-sum">0</output></div> -->
-								<div title="How many total dice">Count: <output class="stat" id="avg-sum">0</output></div>
+								<div title="Minimum possible sum of all dice">Min: <output class="stat" id="gen-min">0</output></div>
+								<div title="Maximum possible sum of all dice">Max: <output class="stat" id="gen-max">0</output></div>
+								<div title="Average sum of all dice">Average: <output class="stat" id="gen-avg">0</output></div>
+								<div title="How many total dice">Count: <output class="stat" id="gen-count">0</output></div>
 							</div>
 						</div>
 					</div>
@@ -103,9 +97,9 @@
 							<h4>
 								Chance of the sum being
 								<select class="inline-input value-title" id="num-sum-stat-rle">
-									<option title="greater than" value="gt">&gt;</option>
+									<option title="greater than" value="gt" selected>&gt;</option>
 									<option title="less than" value="ls">&lt;</option>
-									<option title="greater than or equal to" value="gte" selected>&ge;</option>
+									<option title="greater than or equal to" value="gte">&ge;</option>
 									<option title="less than or equal to" value="lte">&le;</option>
 									<option title="equal to" value="et">=</option>
 								</select>
@@ -117,9 +111,9 @@
 							<h4>
 								How many dice will be
 								<select class="inline-input value-title" id="num-stat-rle">
-									<option title="greater than" value="gt">&gt;</option>
+									<option title="greater than" value="gt" selected>&gt;</option>
 									<option title="less than" value="ls">&lt;</option>
-									<option title="greater than or equal to" value="gte" selected>&ge;</option>
+									<option title="greater than or equal to" value="gte">&ge;</option>
 									<option title="less than or equal to" value="lte">&le;</option>
 									<option title="equal to" value="et">=</option>
 								</select>
