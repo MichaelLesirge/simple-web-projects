@@ -29,10 +29,43 @@ class Dice {
 class DiceSet {
     constructor() {
         this.dice = [];
+		this.diceElements = [];
     }
 
     rollAll() {
-        return this.dice.map(die => die.roll());
+        const rolls = this.dice.map(die => die.roll());
+        this.diceElements.forEach((diceElement, index) => {
+            diceElement.valueElement.textContent = rolls[index];
+        });
+        return rolls;
+    }
+	
+	createDiceDisplay(die, color) {
+        const diceElement = document.createElement('div');
+        diceElement.className = 'dice-display';
+        diceElement.style.backgroundColor = color;
+        
+        const valueElement = document.createElement('div');
+        valueElement.textContent = '?';
+        diceElement.appendChild(valueElement);
+        
+        const rangeElement = document.createElement('div');
+        rangeElement.className = 'dice-range';
+        rangeElement.textContent = `${die.min}-${die.max}`;
+        diceElement.appendChild(rangeElement);
+        
+        document.querySelector('.dice-container').appendChild(diceElement);
+        this.diceElements.push({ element: diceElement, valueElement });
+    }
+
+    rollAll() {
+        const rolls = this.dice.map(die => die.roll());
+        this.diceElements.forEach((diceElement, index) => setTimeout(() => {
+			diceElement.element.classList.add("rolling");
+            setTimeout(() => diceElement.valueElement.textContent = rolls[index], 1000 * 0.5);
+			setTimeout(() => diceElement.element.classList.remove("rolling"), 1000 * 0.7);
+        }, index * 3));
+        return rolls;
     }
 
     get minSum() {
@@ -185,21 +218,28 @@ function updateDiceCountStats() {
     }
 }
 
+
 document.querySelector('.create-dice').addEventListener('submit', (e) => {
     e.preventDefault();
     const min = parseInt(document.getElementById('dice-create-min').value, 10);
     const max = parseInt(document.getElementById('dice-create-max').value, 10);
     const amount = parseInt(document.getElementById('dice-create-amount').value, 10);
+    const color = document.getElementById('dice-color').value;
 
     if (!isNaN(min) && !isNaN(max) && !isNaN(amount) && min <= max) {
         for (let i = 0; i < amount; i++) {
-            diceSet.dice.push(new Dice(min, max));
+            const die = new Dice(min, max);
+            diceSet.dice.push(die);
+            diceSet.createDiceDisplay(die, color);
         }
         updateGeneralStats();
         updateNumberStats();
         updateDiceCountStats();
     }
 });
+
+const rollButton = document.getElementById("roll-dice")
+rollButton.addEventListener('click', () => diceSet.rollAll());
 
 document.querySelector('.value-title').addEventListener('change', updateGeneralStats)
 

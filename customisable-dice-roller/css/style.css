@@ -16,6 +16,59 @@ body {
 	font-size: 0.9rem;
 }
 
+.dice-container {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 1rem;
+	padding: 1rem;
+}
+
+.dice-display {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	width: 5rem;
+	height: 5rem;
+	border: 1px solid black;
+	border-radius: 0.7rem;
+	font-size: 1.5rem;
+	font-weight: bold;
+	text-shadow:
+        0.07em 0 black,
+        0 0.07em black,
+        -0.07em 0 black,
+        0 -0.07em black;
+	transition: transform 0.1s ease-out;
+}
+
+.rolling {
+	animation: roll 0.7s infinite;
+}
+
+@keyframes roll {
+	0% {
+		transform: rotateX(0deg) rotateY(0deg);
+	}
+	25% {
+		transform: rotateX(180deg) rotateY(0deg);
+	}
+	50% {
+		transform: rotateX(180deg) rotateY(180deg);
+	}
+	75% {
+		transform: rotateX(360deg) rotateY(180deg);
+	}
+	100% {
+		transform: rotateX(360deg) rotateY(360deg);
+	}
+}
+
+.dice-range {
+	font-size: 0.8rem;
+	margin-top: 0.5rem;
+}
+
 .row {
 	display: flex;
 	flex-direction: row;
@@ -188,7 +241,7 @@ body {
 	background-color: var(--color);
 }
 
-.create-dice {	
+.create-dice {
 	width: max(50%, max-content);
 	height: min-content;
 
@@ -278,7 +331,7 @@ body {
 
 .submit-button:active {
 	filter: brightness(80%);
-	padding: 0.3rem 0.48rem;
+	scale: 1.02 1;
 }
 
 input[type="number"]::-webkit-inner-spin-button,
