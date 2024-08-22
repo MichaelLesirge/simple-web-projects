@@ -2,6 +2,9 @@ function random(max) {
     return Math.floor(Math.random() * max);
 }
 
+const music = new Audio('sounds/tetris.mp3');
+music.volume = 0.5;
+
 const MAX_NUM_OF_STATES = 4;
 class TetrisPiece {
     constructor(type, { x = 0, y = 0, rotation = 0 } = {}) {
@@ -145,6 +148,10 @@ export default class Tetris {
 
                 this.lines += fullLines.length;
                 this.score += scoring[fullLines.length];
+
+                if (fullLines.length >= 4 && music.paused) {
+                    music.play();
+                }
 
                 this.level = Math.floor(this.lines / 10)
                 
