@@ -101,7 +101,15 @@ class Logo {
         }
 
         const extraSteps = randomInt(50, 100);
-        for (let i = 0; i < extraSteps; i++) {
+        let i = 0;
+        while (
+            i < extraSteps
+            || (x < image.width || x > canvas.width - image.width)
+            || (y < image.height || y > canvas.height - image.height)
+        ) {
+
+            i++;
+
             x += dx * speed;
             y += dy * speed;
 
