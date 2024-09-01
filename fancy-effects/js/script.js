@@ -11,6 +11,7 @@ import particle from "./particle.js";
 import mondrian from "./mondrian.js";
 import balls from "./balls.js";
 import dvd from "./dvd.js";
+import orbital from "./orbitals.js";
 
 makeFollowMouse(document.getElementById("blob"));
 
@@ -32,3 +33,4 @@ particle();
 mondrian();
 balls();
 dvd()
+orbital();
