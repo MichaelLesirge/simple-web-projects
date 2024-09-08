@@ -56,14 +56,51 @@ const converters = {
 		"Pascal Case": (text) => convertString(text, (word) => word.toCapitalized(), " ", ""),
 		"Kebab Case": (text) => text.replaceAll(" ", "-").toLowerCase(),
 	},
-	"Binary Encoding": {
-		"ASCII": (text) => formatBinary(Array.from(text, (char) => char.charCodeAt().toString(2))),
-		"Unicode UTF-8": (text) => formatBinary(Array.from(new TextEncoder().encode(text)).map((byte) => byte.toString(2))),
-		"Unicode UTF-8": (text) => formatBinary(Array.from(new TextEncoder().encode(text)).map((byte) => byte.toString(2))),
+	"UTF-8 Encodings": {
+		"Code": (text) => convertString(text, (char) => "U+" + char.charCodeAt().toString(16).toUpperCase().padStart(4, "0"), "", " "),
+		"HTML Code": (text) => convertString(text, (char) => "&#" + char.charCodeAt() + ";", "", ""),
+		"Decimal": (text) => convertString(text, (char) => parseInt(Array.from(new TextEncoder().encode(char)).map((byte) => byte.toString(2).padStart(8, '0')).join(""), 2), "", " "),
+		"Decimal (bytes)": (text) => new TextEncoder().encode(text).join(" "),
+		"Hexadecimal": (text) => Array.from(new TextEncoder().encode(text)).map((byte) => byte.toString(16).toUpperCase()).join(" ")
 	},
-	"Unicode": {
-		"Decimal": (text) => convertString(text, (char) => char.charCodeAt().toString(10), "", " "),
-		"Code": (text) => convertString(text, (char) => "U+" + char.charCodeAt().toString(16).toUpperCase().padStart(4, "0"), "", " ")
+	"Binary Encoding": {
+		"UTF-8": (text) => {
+			const encoder = new TextEncoder()
+			const encoded = encoder.encode(text)
+			return Array.from(encoded).map((byte) => byte.toString(2).padStart(8, '0')).join(" ")
+		},
+		"UTF-16BE": (text) => {
+			const buffer = new ArrayBuffer(text.length * 2)
+			const view = new DataView(buffer)
+			for (let i = 0; i < text.length; i++) {
+				view.setUint16(i * 2, text.charCodeAt(i), false) // big-endian
+			}
+			return Array.from(new Uint16Array(buffer)).map((byte) => byte.toString(2).padStart(16, '0')).join(" ")
+		},
+		"UTF-16LE": (text) => {
+			const buffer = new ArrayBuffer(text.length * 2)
+			const view = new DataView(buffer)
+			for (let i = 0; i < text.length; i++) {
+				view.setUint16(i * 2, text.charCodeAt(i), true) // little-endian
+			}
+			return Array.from(new Uint16Array(buffer)).map((byte) => byte.toString(2).padStart(16, '0')).join(" ")
+		},
+		"UTF-32BE": (text) => {
+			const buffer = new ArrayBuffer(text.length * 4)
+			const view = new DataView(buffer)
+			for (let i = 0; i < text.length; i++) {
+				view.setUint32(i * 4, text.codePointAt(i), false) // big-endian
+			}
+			return Array.from(new Uint32Array(buffer)).map((byte) => byte.toString(2).padStart(32, '0')).join(" ")
+		},
+		"UTF-32LE": (text) => {
+			const buffer = new ArrayBuffer(text.length * 4)
+			const view = new DataView(buffer)
+			for (let i = 0; i < text.length; i++) {
+				view.setUint32(i * 4, text.codePointAt(i), true) // little-endian
+			}
+			return Array.from(new Uint32Array(buffer)).map((byte) => byte.toString(2).padStart(32, '0')).join(" ")
+		},
 	},
 	"Glitched": {
 		"Slightly Cursed": (text) => curseText(text, 5),
