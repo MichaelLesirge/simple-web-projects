@@ -111,9 +111,10 @@ const converters = {
 		"CSS Code": (text) => convertString(text, (char) => "\\" + char.charCodeAt().toString(16).toUpperCase().padStart(4, "0"), "", " "),
 	},
 	"Glitch": {
-		"Slightly Cursed": (text) => curseText(text, 5),
-		"Medium Cursed": (text) => curseText(text, 25),
-		"Very Cursed": (text) => curseText(text, 50),
+		"Level One": (text) => curseText(text, 3),
+		"Level Two": (text) => curseText(text, 10),
+		"Level Three": (text) => curseText(text, 17),
+		"Level Four": (text) => curseText(text, 24),
 	},
 	"Reverse": {
 		"Everything": (text) => Array.from(text).reverse().join(""),
