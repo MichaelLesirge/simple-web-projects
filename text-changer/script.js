@@ -19,8 +19,30 @@ function matchCase(string, case_template_string) {
 	return stringArray.join("")
 }
 
+function isAlphaNumeric(str) {
+  var code, i, len;
+
+  for (i = 0, len = str.length; i < len; i++) {
+    code = str.charCodeAt(i);
+    if (!(code > 47 && code < 58) && // numeric (0-9)
+        !(code > 64 && code < 91) && // upper alpha (A-Z)
+        !(code > 96 && code < 123)) { // lower alpha (a-z)
+      return false;
+    }
+  }
+  return true;
+};
+
+function randomFloat(min, max) {
+    return Math.random() * (max - min) + min;
+}
+
+function randomInt(min, max) {
+    return Math.floor(randomFloat(min, max))
+}
+
 function randChar(startCharCode, stopCharCode) {
-	return String.fromCharCode(Math.floor(Math.random() * (stopCharCode - startCharCode)) + startCharCode)
+	return String.fromCharCode(randomInt(startCharCode, stopCharCode))
 }
 
 function curseText(text, amount) {
@@ -132,12 +154,11 @@ const converters = {
 		"Words": (text) => text.split(" ").shuffle().join(" "),
 	},
 	"Meme": {
-		"Leet Speak": (text) => {
-			const leetConverter = { "e": "3", "t": "7", "i": "1", "o": "0", "a": "4", "s": "5", "g": "9", "l": "1", "z": "2", "b": "8" }
-			return matchCase(convertString(text.toLowerCase().replaceAll("leet", "1337"), (char) => char in leetConverter && Math.random() < 0.75 ? leetConverter[char] : char), text)
-		},
-		"Cow": (text) => matchCase(convertString(text, (word) => convertString(word, (char, i) => i ? "o" : "m"), " "), text),
-		"Among Us": (text) => convertString(text, (char) => [" ", "\n"].includes(char) ? char : Math.random() < 0.01 ? "ඞ්" : "ඞ"),
+		"Leet Speak": (text) => matchCase(convertString(text.toLowerCase().replaceAll("leet", "1337"), (char) => Math.random() < 0.65 ? {"e": "3", "t": "7", "i": "1", "o": "0", "a": "4", "s": "5", "g": "9", "l": "1", "z": "2", "b": "8"}[char] ?? char : char), text),
+		"Cow": (text) => matchCase(convertString(text, (word) => convertString(word, (char, i) => isAlphaNumeric(char) ? i ? "o" : "m" : char), " "), text),
+		"Among Us": (text) => convertString(text, (char) => isAlphaNumeric(char) ? (char == char.toUpperCase() ? "ඞ්" : "ඞ") : char),
+		"Vowel Doubler": (text) => convertString(text, (char) => ["a", "e", "i", "o", "u"].includes(char.toLowerCase()) ? char.repeat(2) : char),
+		"Stretcher": (text) => convertString(text, (char) => isAlphaNumeric(char) ? char.repeat(1 + Math.pow(randomFloat(0, 0.7), 2) * 10) : char),
 	},
 	"Fancy": {
 		"Circled": (text) => convertString(text, (char) => {
