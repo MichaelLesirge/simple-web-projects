@@ -49,7 +49,7 @@ const converters = {
 		"Title Case": (text) => convertString(text, (word) => word.toCapitalized(), " "),
 		"Random Case": (text) => convertString(text, (char) => Math.random() > 0.5 ? char.toUpperCase() : char.toLowerCase()),
 	},
-	"Code Style": {
+	"Naming Convention": {
 		"Snake Case": (text) => text.replaceAll(" ", "_").toLowerCase(),
 		"Screaming Snake Case": (text) => text.replaceAll(" ", "_").toUpperCase(),
 		"Camel Case": (text) => convertString(text, (word, index) => (index === 0 ? word.toLowerCase() : word.toCapitalized()), " ", ""),
@@ -57,11 +57,14 @@ const converters = {
 		"Kebab Case": (text) => text.replaceAll(" ", "-").toLowerCase(),
 	},
 	"UTF-8 Encodings": {
-		"Code": (text) => convertString(text, (char) => "U+" + char.charCodeAt().toString(16).toUpperCase().padStart(4, "0"), "", " "),
-		"HTML Code": (text) => convertString(text, (char) => "&#" + char.charCodeAt() + ";", "", ""),
+		"Hexadecimal": (text) => Array.from(new TextEncoder().encode(text)).map((byte) => byte.toString(16).toUpperCase()).join(" "),
 		"Decimal": (text) => convertString(text, (char) => parseInt(Array.from(new TextEncoder().encode(char)).map((byte) => byte.toString(2).padStart(8, '0')).join(""), 2), "", " "),
 		"Decimal (bytes)": (text) => new TextEncoder().encode(text).join(" "),
-		"Hexadecimal": (text) => Array.from(new TextEncoder().encode(text)).map((byte) => byte.toString(16).toUpperCase()).join(" ")
+		"Binary": (text) => {
+			const encoder = new TextEncoder()
+			const encoded = encoder.encode(text)
+			return Array.from(encoded).map((byte) => byte.toString(2).padStart(8, '0')).join(" ")
+		},
 	},
 	"Binary Encoding": {
 		"UTF-8": (text) => {
@@ -102,7 +105,12 @@ const converters = {
 			return Array.from(new Uint32Array(buffer)).map((byte) => byte.toString(2).padStart(32, '0')).join(" ")
 		},
 	},
-	"Glitched": {
+	"Representation": {
+		"Unicode Number": (text) => convertString(text, (char) => "U+" + char.charCodeAt().toString(16).toUpperCase().padStart(4, "0"), "", " "),
+		"HTML Code": (text) => convertString(text, (char) => "&#" + char.charCodeAt() + ";", "", ""),
+		"CSS Code": (text) => convertString(text, (char) => "\\" + char.charCodeAt().toString(16).toUpperCase().padStart(4, "0"), "", " "),
+	},
+	"Glitch": {
 		"Slightly Cursed": (text) => curseText(text, 5),
 		"Medium Cursed": (text) => curseText(text, 25),
 		"Very Cursed": (text) => curseText(text, 50),
