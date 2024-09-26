@@ -12,6 +12,7 @@ import mondrian from "./mondrian.js";
 import balls from "./balls.js";
 import dvd from "./dvd.js";
 import orbital from "./orbitals.js";
+import cube from "./cube.js";
 
 makeFollowMouse(document.getElementById("blob"));
 
@@ -34,3 +35,4 @@ mondrian();
 balls();
 dvd()
 orbital();
+cube()
