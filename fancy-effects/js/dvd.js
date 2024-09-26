@@ -217,6 +217,6 @@ function nextFrame() {
 
 export default function dvd() {
     setHashAutoFocus(canvas)
-    startLoop(canvas, init, clear, nextFrame, { resetOnClick: true, resetOnResize: true, fps: 60 });
+    startLoop(canvas, init, clear, nextFrame, { resetOnClick: true, resetOnResize: true, resetOnScroll: true, fps: 60 });
 }
 
