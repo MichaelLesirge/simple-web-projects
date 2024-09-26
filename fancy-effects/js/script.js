@@ -13,6 +13,7 @@ import balls from "./balls.js";
 import dvd from "./dvd.js";
 import orbital from "./orbitals.js";
 import cube from "./cube.js";
+import unitCircle from "./unitcircle.js";
 
 makeFollowMouse(document.getElementById("blob"));
 
@@ -36,3 +37,4 @@ balls();
 dvd()
 orbital();
 cube()
+unitCircle()
