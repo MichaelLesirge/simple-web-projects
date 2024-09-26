@@ -12,7 +12,7 @@ export function randomFloat(min, max) {
 }
 
 export function randomInt(min, max) {
-    return Math.floor(randomFloat(min, max))
+    return Math.floor(randomFloat(min, max + 1))
 }
 
 export function shuffle(array) {
