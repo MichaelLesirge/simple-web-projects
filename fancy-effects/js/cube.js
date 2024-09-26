@@ -1,23 +1,27 @@
 import { startLoop, updateCanvasSizes, setHashAutoFocus } from "./canvasUtil.js";
+import { randomInt, randomFloat } from "./util.js";
 
 const canvas = document.getElementById("cube-canvas");
 updateCanvasSizes(canvas);
 const ctx = canvas.getContext("2d");
 
-const NUM_OF_CUBES = 4;
-
 class Cube {
-    constructor(centerX, centerY, scale) {
+    constructor(centerX, centerY, scale, {rotationSpeedX = 0, rotationSpeedY = 0, rotationSpeedZ = 0} = {}) {
+        
         this.centerX = centerX;
         this.centerY = centerY;
         this.scale = scale;
+        
         this.points = this.createCube();
-        this.angleX = Math.random() * Math.PI * 2;
-        this.angleY = Math.random() * Math.PI * 2;
-        this.angleZ = Math.random() * Math.PI * 2;
-        this.rotationSpeedX = (Math.random() - 0.5) * 0.04;
-        this.rotationSpeedY = (Math.random() - 0.5) * 0.04;
-        this.rotationSpeedZ = (Math.random() - 0.5) * 0.04;
+        
+        this.angleX = 0;
+        this.angleY = 0;
+        this.angleZ = 0;
+        
+        this.rotationSpeedX = rotationSpeedX;
+        this.rotationSpeedY = rotationSpeedY;
+        this.rotationSpeedZ = rotationSpeedZ;
+        
         this.color = `hsl(${Math.random() * 360}, 100%, 50%)`;
     }
 
@@ -51,7 +55,7 @@ class Cube {
         let scaleFactor = this.scale / (4 + z);
         let projectedX = x * scaleFactor + this.centerX;
         let projectedY = y * scaleFactor + this.centerY;
-        return [projectedX, projectedY];
+        return [projectedX, projectedY, z];
     }
 
     update() {
@@ -64,29 +68,64 @@ class Cube {
         let rotatedPoints = this.points.map(point => this.rotatePoint(point));
         let projectedPoints = rotatedPoints.map(point => this.projectPoint(point));
 
-        // Draw edges
-        ctx.strokeStyle = this.color;
-        ctx.lineWidth = 2;
-        let edges = [
-            [0, 1], [1, 2], [2, 3], [3, 0], // Front face
-            [4, 5], [5, 6], [6, 7], [7, 4], // Back face
-            [0, 4], [1, 5], [2, 6], [3, 7]  // Connecting edges
+        // Define faces (top and bottom are at indices 1 and 4)
+        let faces = [
+            [0, 1, 2, 3], [4, 5, 6, 7], // Front and back
+            [0, 1, 5, 4], [2, 3, 7, 6], // Top and bottom
+            [0, 3, 7, 4], [1, 2, 6, 5]  // Left and right
         ];
 
-        for (let edge of edges) {
-            ctx.beginPath();
-            ctx.moveTo(projectedPoints[edge[0]][0], projectedPoints[edge[0]][1]);
-            ctx.lineTo(projectedPoints[edge[1]][0], projectedPoints[edge[1]][1]);
-            ctx.stroke();
-        }
+        // // Sort faces by depth
+        // faces.sort((a, b) => {
+        //     let avgZA = a.reduce((sum, i) => sum + projectedPoints[i][2], 0) / 4;
+        //     let avgZB = b.reduce((sum, i) => sum + projectedPoints[i][2], 0) / 4;
+        //     return avgZB - avgZA;
+        // });
+
+        // Draw faces
+        faces.forEach((face, index) => {
+            let path = new Path2D();
+            path.moveTo(projectedPoints[face[0]][0], projectedPoints[face[0]][1]);
+            for (let i = 1; i < face.length; i++) {
+                path.lineTo(projectedPoints[face[i]][0], projectedPoints[face[i]][1]);
+            }
+            path.closePath();
+
+            // Shade only top and bottom faces
+            if (index === 1 || index === 0) {
+                let normal = this.calculateNormal(rotatedPoints[face[0]], rotatedPoints[face[1]], rotatedPoints[face[2]]);
+                let shade = Math.abs(normal[1]); // Use y component of normal for top/bottom shading
+                ctx.fillStyle = `hsla(${this.color.match(/\d+/)[0]}, 100%, ${50 + shade * 25}%, 0.7)`;
+                ctx.fill(path);
+            } else {
+                // ctx.fillStyle = `hsla(${this.color.match(/\d+/)[0]}, 100%, 50%, 0.7)`;
+                // ctx.fill(path);
+            }
+
+            ctx.strokeStyle = this.color;
+            ctx.lineWidth = 2;
+            ctx.stroke(path);
+        });
 
         // Draw points
-        ctx.fillStyle = this.color;
+        ctx.fillStyle = "white";
         for (let point of projectedPoints) {
             ctx.beginPath();
             ctx.arc(point[0], point[1], 3, 0, Math.PI * 2);
             ctx.fill();
         }
+    }
+
+    calculateNormal(p1, p2, p3) {
+        let v1 = [p2[0] - p1[0], p2[1] - p1[1], p2[2] - p1[2]];
+        let v2 = [p3[0] - p1[0], p3[1] - p1[1], p3[2] - p1[2]];
+        let normal = [
+            v1[1] * v2[2] - v1[2] * v2[1],
+            v1[2] * v2[0] - v1[0] * v2[2],
+            v1[0] * v2[1] - v1[1] * v2[0]
+        ];
+        let length = Math.sqrt(normal[0] * normal[0] + normal[1] * normal[1] + normal[2] * normal[2]);
+        return normal.map(n => n / length);
     }
 }
 
@@ -95,18 +134,20 @@ let cubes = [];
 function init() {
     cubes = [];
 
-    const totalWidth = canvas.width * 0.8; // Use 80% of canvas width
-    const totalHeight = canvas.height * 0.8; // Use 80% of canvas height
-    const cubeWidth = totalWidth / Math.ceil(Math.sqrt(NUM_OF_CUBES));
-    const cubeHeight = totalHeight / Math.ceil(Math.sqrt(NUM_OF_CUBES));
-    const scale = Math.min(cubeWidth, cubeHeight) * 0.7; // Adjust this factor to change cube size
+    const scale = Math.min(canvas.width, canvas.height) * 0.3;
 
-    for (let i = 0; i < NUM_OF_CUBES; i++) {
-        const row = Math.floor(i / Math.ceil(Math.sqrt(NUM_OF_CUBES)));
-        const col = i % Math.ceil(Math.sqrt(NUM_OF_CUBES));
-        const centerX = (col + 0.5) * cubeWidth + canvas.width * 0.1;
-        const centerY = (row + 0.5) * cubeHeight + canvas.height * 0.1;
-        cubes.push(new Cube(centerX, centerY, scale));
+    const cubesRotations = [
+        {rotationSpeedX: randomFloat(-0.04, 0.04), rotationSpeedY: randomFloat(-0.01, 0.01)},
+        {rotationSpeedY: randomFloat(-0.04, 0.04), rotationSpeedZ: randomFloat(-0.01, 0.01)},
+        {rotationSpeedZ: randomFloat(-0.04, 0.04), rotationSpeedX: randomFloat(-0.01, 0.01)},
+    ]
+
+
+    for (let i = 0; i < cubesRotations.length; i++) {
+
+        const centerX = canvas.width / (cubesRotations.length + 1) * (1 + i);
+        const centerY = canvas.height / 2;
+        cubes.push(new Cube(centerX, centerY, scale, cubesRotations[i]));
     }
 }
 
