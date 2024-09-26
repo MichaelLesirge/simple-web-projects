@@ -19,8 +19,30 @@ function matchCase(string, case_template_string) {
 	return stringArray.join("")
 }
 
+function isAlphaNumeric(str) {
+  var code, i, len;
+
+  for (i = 0, len = str.length; i < len; i++) {
+    code = str.charCodeAt(i);
+    if (!(code > 47 && code < 58) && // numeric (0-9)
+        !(code > 64 && code < 91) && // upper alpha (A-Z)
+        !(code > 96 && code < 123)) { // lower alpha (a-z)
+      return false;
+    }
+  }
+  return true;
+};
+
+function randomFloat(min, max) {
+    return Math.random() * (max - min) + min;
+}
+
+function randomInt(min, max) {
+    return Math.floor(randomFloat(min, max))
+}
+
 function randChar(startCharCode, stopCharCode) {
-	return String.fromCharCode(Math.floor(Math.random() * (stopCharCode - startCharCode)) + startCharCode)
+	return String.fromCharCode(randomInt(startCharCode, stopCharCode))
 }
 
 function curseText(text, amount) {
@@ -49,7 +71,7 @@ const converters = {
 		"Title Case": (text) => convertString(text, (word) => word.toCapitalized(), " "),
 		"Random Case": (text) => convertString(text, (char) => Math.random() > 0.5 ? char.toUpperCase() : char.toLowerCase()),
 	},
-	"Code Style": {
+	"Naming Convention": {
 		"Snake Case": (text) => text.replaceAll(" ", "_").toLowerCase(),
 		"Screaming Snake Case": (text) => text.replaceAll(" ", "_").toUpperCase(),
 		"Camel Case": (text) => convertString(text, (word, index) => (index === 0 ? word.toLowerCase() : word.toCapitalized()), " ", ""),
@@ -57,11 +79,14 @@ const converters = {
 		"Kebab Case": (text) => text.replaceAll(" ", "-").toLowerCase(),
 	},
 	"UTF-8 Encodings": {
-		"Code": (text) => convertString(text, (char) => "U+" + char.charCodeAt().toString(16).toUpperCase().padStart(4, "0"), "", " "),
-		"HTML Code": (text) => convertString(text, (char) => "&#" + char.charCodeAt() + ";", "", ""),
+		"Hexadecimal": (text) => Array.from(new TextEncoder().encode(text)).map((byte) => byte.toString(16).toUpperCase()).join(" "),
 		"Decimal": (text) => convertString(text, (char) => parseInt(Array.from(new TextEncoder().encode(char)).map((byte) => byte.toString(2).padStart(8, '0')).join(""), 2), "", " "),
 		"Decimal (bytes)": (text) => new TextEncoder().encode(text).join(" "),
-		"Hexadecimal": (text) => Array.from(new TextEncoder().encode(text)).map((byte) => byte.toString(16).toUpperCase()).join(" ")
+		"Binary": (text) => {
+			const encoder = new TextEncoder()
+			const encoded = encoder.encode(text)
+			return Array.from(encoded).map((byte) => byte.toString(2).padStart(8, '0')).join(" ")
+		},
 	},
 	"Binary Encoding": {
 		"UTF-8": (text) => {
@@ -102,10 +127,16 @@ const converters = {
 			return Array.from(new Uint32Array(buffer)).map((byte) => byte.toString(2).padStart(32, '0')).join(" ")
 		},
 	},
-	"Glitched": {
-		"Slightly Cursed": (text) => curseText(text, 5),
-		"Medium Cursed": (text) => curseText(text, 25),
-		"Very Cursed": (text) => curseText(text, 50),
+	"Representation": {
+		"Unicode Number": (text) => convertString(text, (char) => "U+" + char.charCodeAt().toString(16).toUpperCase().padStart(4, "0"), "", " "),
+		"HTML Code": (text) => convertString(text, (char) => "&#" + char.charCodeAt() + ";", "", ""),
+		"CSS Code": (text) => convertString(text, (char) => "\\" + char.charCodeAt().toString(16).toUpperCase().padStart(4, "0"), "", " "),
+	},
+	"Glitch": {
+		"Level One": (text) => curseText(text, 3),
+		"Level Two": (text) => curseText(text, 10),
+		"Level Three": (text) => curseText(text, 17),
+		"Level Four": (text) => curseText(text, 24),
 	},
 	"Reverse": {
 		"Everything": (text) => Array.from(text).reverse().join(""),
@@ -123,12 +154,11 @@ const converters = {
 		"Words": (text) => text.split(" ").shuffle().join(" "),
 	},
 	"Meme": {
-		"Leet Speak": (text) => {
-			const leetConverter = { "e": "3", "t": "7", "i": "1", "o": "0", "a": "4", "s": "5", "g": "9", "l": "1", "z": "2", "b": "8" }
-			return matchCase(convertString(text.toLowerCase().replaceAll("leet", "1337"), (char) => char in leetConverter && Math.random() < 0.75 ? leetConverter[char] : char), text)
-		},
-		"Cow": (text) => matchCase(convertString(text, (word) => convertString(word, (char, i) => i ? "o" : "m"), " "), text),
-		"Among Us": (text) => convertString(text, (char) => [" ", "\n"].includes(char) ? char : Math.random() < 0.01 ? "ඞ්" : "ඞ"),
+		"Leet Speak": (text) => matchCase(convertString(text.toLowerCase().replaceAll("leet", "1337"), (char) => Math.random() < 0.65 ? {"e": "3", "t": "7", "i": "1", "o": "0", "a": "4", "s": "5", "g": "9", "l": "1", "z": "2", "b": "8"}[char] ?? char : char), text),
+		"Cow": (text) => matchCase(convertString(text, (word) => convertString(word, (char, i) => isAlphaNumeric(char) ? i ? "o" : "m" : char), " "), text),
+		"Among Us": (text) => convertString(text, (char) => isAlphaNumeric(char) ? (char == char.toUpperCase() ? "ඞ්" : "ඞ") : char),
+		"Vowel Doubler": (text) => convertString(text, (char) => ["a", "e", "i", "o", "u"].includes(char.toLowerCase()) ? char.repeat(2) : char),
+		"Stretcher": (text) => convertString(text, (char) => isAlphaNumeric(char) ? char.repeat(1 + Math.pow(randomFloat(0, 0.7), 2) * 10) : char),
 	},
 	"Fancy": {
 		"Circled": (text) => convertString(text, (char) => {
