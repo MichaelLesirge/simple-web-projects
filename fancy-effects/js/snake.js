@@ -14,7 +14,7 @@ let foodColor, foodParticles;
 const PARTICLE_COUNT = 20;
 const INITIAL_SNAKE_LENGTH = 2;
 
-const COLOR_SHIFT_COEFFICIENT = 0.1;
+const COLOR_SHIFT_COEFFICIENT = 0.05;
 
 function init() {
     gridWidth = Math.floor(canvas.width / GRID_SIZE);
@@ -118,27 +118,51 @@ function updateColorPropagation() {
 
 function aiControl() {
     const head = snake[0];
-    const dx = food.x - head.x;
-    const dy = food.y - head.y;
 
-    if (Math.abs(dx) > Math.abs(dy)) {
-        direction = { x: Math.sign(dx), y: 0 };
-    } else {
-        direction = { x: 0, y: Math.sign(dy) };
+    // Directions the AI can move: right, left, down, up
+    const possibleDirections = [
+        { x: 1, y: 0 },  // Right
+        { x: -1, y: 0 }, // Left
+        { x: 0, y: 1 },  // Down
+        { x: 0, y: -1 }  // Up
+    ];
+
+    // Function to check if a direction is safe
+    function isDirectionSafe(dir) {
+        const newPos = {
+            x: (head.x + dir.x + gridWidth) % gridWidth,
+            y: (head.y + dir.y + gridHeight) % gridHeight,
+        };
+        return !snake.some(segment => segment.x === newPos.x && segment.y === newPos.y);
     }
 
-    // Simple collision avoidance
-    const nextPos = {
-        x: (head.x + direction.x + gridWidth) % gridWidth,
-        y: (head.y + direction.y + gridHeight) % gridHeight
-    };
-    if (snake.some(segment => segment.x === nextPos.x && segment.y === nextPos.y)) {
-        // Try to move perpendicular to current direction
-        if (direction.x !== 0) {
-            direction = { x: 0, y: Math.sign(dy) || 1 };
-        } else {
-            direction = { x: Math.sign(dx) || 1, y: 0 };
-        }
+    // Filter directions based on safety
+    const safeDirections = possibleDirections.filter(isDirectionSafe);
+
+    // If there are safe directions, prioritize one that moves closer to the food
+    if (safeDirections.length > 0) {
+        safeDirections.sort((a, b) => {
+            const distA = Math.abs((food.x - (head.x + a.x + gridWidth) % gridWidth)) + Math.abs((food.y - (head.y + a.y + gridHeight) % gridHeight));
+            const distB = Math.abs((food.x - (head.x + b.x + gridWidth) % gridWidth)) + Math.abs((food.y - (head.y + b.y + gridHeight) % gridHeight));
+            return distA - distB; // Prioritize the direction that moves closer to the food
+        });
+        direction = safeDirections[0];
+    } else {
+        // If no safe directions are available (AI is trapped), keep moving in the current direction
+        // or move in the least dangerous direction (if applicable)
+        const leastDangerousDirection = possibleDirections.reduce((leastDangerous, dir) => {
+            const newPos = {
+                x: (head.x + dir.x + gridWidth) % gridWidth,
+                y: (head.y + dir.y + gridHeight) % gridHeight,
+            };
+            const dangerLevel = snake.reduce((danger, segment) => danger + (segment.x === newPos.x && segment.y === newPos.y ? 1 : 0), 0);
+            if (dangerLevel < leastDangerous.dangerLevel) {
+                return { dir, dangerLevel };
+            }
+            return leastDangerous;
+        }, { dir: direction, dangerLevel: Infinity }).dir;
+
+        direction = leastDangerousDirection;
     }
 }
 
