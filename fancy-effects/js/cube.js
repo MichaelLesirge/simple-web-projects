@@ -167,5 +167,5 @@ function nextFrame() {
 
 export default function cube() {
     setHashAutoFocus(canvas);
-    startLoop(canvas, init, clear, nextFrame, { resetOnClick: true, resetOnResize: false });
+    startLoop(canvas, init, clear, nextFrame, { resetOnClick: true, resetOnResize: true });
 }
