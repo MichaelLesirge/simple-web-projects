@@ -133,10 +133,10 @@ const converters = {
 		"CSS Code": (text) => convertString(text, (char) => "\\" + char.charCodeAt().toString(16).toUpperCase().padStart(4, "0"), "", " "),
 	},
 	"Glitch": {
-		"Level One": (text) => curseText(text, 3),
-		"Level Two": (text) => curseText(text, 10),
-		"Level Three": (text) => curseText(text, 17),
-		"Level Four": (text) => curseText(text, 24),
+		"Glitch One": (text) => curseText(text, 3),
+		"Glitch Two": (text) => curseText(text, 10),
+		"Glitch Three": (text) => curseText(text, 17),
+		"Glitch Four": (text) => curseText(text, 24),
 	},
 	"Reverse": {
 		"Everything": (text) => Array.from(text).reverse().join(""),
@@ -160,15 +160,35 @@ const converters = {
 		"Vowel Doubler": (text) => convertString(text, (char) => ["a", "e", "i", "o", "u"].includes(char.toLowerCase()) ? char.repeat(2) : char),
 		"Stretcher": (text) => convertString(text, (char) => isAlphaNumeric(char) ? char.repeat(1 + Math.pow(randomFloat(0, 0.7), 2) * 10) : char),
 	},
-	"Fancy": {
-		"Circled": (text) => convertString(text, (char) => {
+	"Boxed": {
+		"Circle": (text) => convertString(text, (char) => {
 			let charCode = char.charCodeAt();
-			if (/[1-9]/.test(char)) charCode += "①".charCodeAt() - "1".charCodeAt();
-			if (/[0]/.test(char)) charCode = "⓪".charCodeAt();
-			if (/[a-z]/.test(char)) charCode += "ⓐ".charCodeAt() - ("a".charCodeAt());
-			if (/[A-Z]/.test(char)) charCode += "Ⓐ".charCodeAt() - ("A".charCodeAt());
-			return String.fromCharCode(charCode);
+			if (/[1-9]/.test(char)) charCode += "①".codePointAt(0) - "1".codePointAt(0);
+			if (/[0]/.test(char)) charCode = "⓪".codePointAt(0);
+			if (/[a-z]/.test(char)) charCode += "ⓐ".codePointAt(0) - "a".codePointAt(0);
+			if (/[A-Z]/.test(char)) charCode += "Ⓐ".codePointAt(0) - "A".codePointAt(0);
+			return String.fromCodePoint(charCode);
 		}),
+		"Full Cicle": (text) => convertString(text, (char) => {
+			let charCode = char.codePointAt(0);
+			if (/[1-9]/.test(char)) charCode += "❶".codePointAt(0) - "1".codePointAt(0);
+			if (/[0]/.test(char)) charCode = "⓿".codePointAt(0);
+			if (/[a-z]/.test(char)) charCode += "🅐".codePointAt(0) - "a".codePointAt(0);
+			if (/[A-Z]/.test(char)) charCode += "🅐".codePointAt(0) - "A".codePointAt(0);
+			return String.fromCodePoint(charCode);
+		}),
+		"Box": (text) => convertString(text, (char) => {
+			let charCode = char.codePointAt(0);
+			if (/[a-z]/.test(char)) charCode += "🄰".codePointAt(0) - "a".codePointAt(0);
+			if (/[A-Z]/.test(char)) charCode += "🄰".codePointAt(0) - "A".codePointAt(0);
+			return String.fromCodePoint(charCode);
+		}),
+		"Full Box": (text) => convertString(text, (char) => {
+			let charCode = char.codePointAt(0);
+			if (/[a-z]/.test(char)) charCode += "🅰".codePointAt(0) - "a".codePointAt(0);
+			if (/[A-Z]/.test(char)) charCode += "🅰".codePointAt(0) - "A".codePointAt(0);
+			return String.fromCodePoint(charCode);
+		})
 	},
 	"Script Numbers": {
 		"Superscript": (text) => convertString(text, (char) => {
