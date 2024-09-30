@@ -15,6 +15,7 @@ import orbital from "./orbitals.js";
 import cube from "./cube.js";
 import unitCircle from "./unitcircle.js";
 import aiSnake from "./snake.js";
+import boid from "./boids.js";
 
 makeFollowMouse(document.getElementById("blob"));
 
@@ -40,3 +41,4 @@ orbital();
 cube()
 unitCircle()
 aiSnake()
+boid()
