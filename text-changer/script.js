@@ -56,6 +56,7 @@ const converters = {
 		"Upper Case": (text) => text.toUpperCase(),
 		"Title Case": (text) => convertString(text, (word) => word.toCapitalized(), " "),
 		"Random Case": (text) => convertString(text, (char) => Math.random() > 0.5 ? char.toUpperCase() : char.toLowerCase()),
+		"Opposite Case": (text) => convertString(text, (char) => char == char.toUpperCase() ? char.toLowerCase() : char.toUpperCase()),
 	},
 	"Naming Convention": {
 		"Snake Case": (text) => text.replaceAll(" ", "_").toLowerCase(),
