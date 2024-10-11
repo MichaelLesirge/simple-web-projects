@@ -10,7 +10,7 @@ Array.prototype.shuffle = function () {
 		.map(({ value }) => value)
 };
 
-function matchCase(string, case_template_string) {
+function matchCharCase(string, case_template_string) {
 	if (string.length !== case_template_string.length) throw Error("strings did not match len");
 	const stringArray = Array.from(string);
 	for (let i = 0; i < stringArray.length; i++) {
@@ -19,26 +19,12 @@ function matchCase(string, case_template_string) {
 	return stringArray.join("")
 }
 
-function isAlphaNumeric(str) {
-  var code, i, len;
-
-  for (i = 0, len = str.length; i < len; i++) {
-    code = str.charCodeAt(i);
-    if (!(code > 47 && code < 58) && // numeric (0-9)
-        !(code > 64 && code < 91) && // upper alpha (A-Z)
-        !(code > 96 && code < 123)) { // lower alpha (a-z)
-      return false;
-    }
-  }
-  return true;
-};
-
 function randomFloat(min, max) {
-    return Math.random() * (max - min) + min;
+	return Math.random() * (max - min) + min;
 }
 
 function randomInt(min, max) {
-    return Math.floor(randomFloat(min, max))
+	return Math.floor(randomFloat(min, max))
 }
 
 function randChar(startCharCode, stopCharCode) {
@@ -154,11 +140,11 @@ const converters = {
 		"Words": (text) => text.split(" ").shuffle().join(" "),
 	},
 	"Meme": {
-		"Leet Speak": (text) => matchCase(convertString(text.toLowerCase().replaceAll("leet", "1337"), (char) => Math.random() < 0.65 ? {"e": "3", "t": "7", "i": "1", "o": "0", "a": "4", "s": "5", "g": "9", "l": "1", "z": "2", "b": "8"}[char] ?? char : char), text),
-		"Cow": (text) => matchCase(convertString(text, (word) => convertString(word, (char, i) => isAlphaNumeric(char) ? i ? "o" : "m" : char), " "), text),
-		"Among Us": (text) => convertString(text, (char) => isAlphaNumeric(char) ? (char == char.toUpperCase() ? "ඞ්" : "ඞ") : char),
+		"Leet Speak": (text) => matchCharCase(convertString(text.toLowerCase().replaceAll("leet", "1337"), (char) => Math.random() < 0.65 ? { "e": "3", "t": "7", "i": "1", "o": "0", "a": "4", "s": "5", "g": "9", "l": "1", "z": "2", "b": "8" }[char] ?? char : char), text),
+		"Cow": (text) => matchCharCase(convertString(text, (word) => convertString(word, (char, i) => char.match(/^[0-9A-Za-z]+$/) ? i ? "o" : "m" : char), " "), text),
+		"Among Us": (text) => convertString(text, (char) => char.match(/^[0-9a-zA-Z]+$/) ? (char == char.toUpperCase() ? "ඞ්" : "ඞ") : char),
 		"Vowel Doubler": (text) => convertString(text, (char) => ["a", "e", "i", "o", "u"].includes(char.toLowerCase()) ? char.repeat(2) : char),
-		"Stretcher": (text) => convertString(text, (char) => isAlphaNumeric(char) ? char.repeat(1 + Math.pow(randomFloat(0, 0.7), 2) * 10) : char),
+		"Stretcher": (text) => convertString(text, (char) => char.match(/^[0-9a-zA-Z]+$/) ? char.repeat(1 + Math.pow(randomFloat(0, 0.7), 2) * 10) : char),
 	},
 	"Boxed": {
 		"Circle": (text) => convertString(text, (char) => {
@@ -169,7 +155,7 @@ const converters = {
 			if (/[A-Z]/.test(char)) charCode += "Ⓐ".codePointAt(0) - "A".codePointAt(0);
 			return String.fromCodePoint(charCode);
 		}),
-		"Full Cicle": (text) => convertString(text, (char) => {
+		"Full Circle": (text) => convertString(text, (char) => {
 			let charCode = char.codePointAt(0);
 			if (/[1-9]/.test(char)) charCode += "❶".codePointAt(0) - "1".codePointAt(0);
 			if (/[0]/.test(char)) charCode = "⓿".codePointAt(0);
