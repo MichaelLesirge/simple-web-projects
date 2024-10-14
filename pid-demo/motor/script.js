@@ -306,154 +306,6 @@ class HoverBox extends CanvasDrawer {
 
 }
 
-class PositionSlider extends CanvasDrawer {
-	constructor(canvas, position, size, vertical = false) {
-		super(canvas, position, size)
-
-		this.isSelected = false;
-		this.isHovered = false;
-		this.canvas.addEventListener('mousedown', this.detectClicked);
-		this.canvas.addEventListener('mousemove', this.move);
-		document.body.addEventListener('mouseup', this.cancelSelect);
-		document.body.addEventListener('mouseleave', this.cancelSelect);
-
-		this.isVertical = vertical;
-
-		this.defaultBgColor = "#99ccff";
-		this.hoverBgColor = "#80bfff"
-		this.selectedBgColor = "#b3d9ff"
-
-		this.lineColor = "black";
-
-		this.thumbRadius = (this.isVertical ? this.cWidth : this.cHeight) * 0.4;
-		this.thumbColor = "green";
-
-		this.rect = this.canvas.getBoundingClientRect();
-		this.dpr = Math.ceil(window.devicePixelRatio || 1);
-
-		this.setLocalCenteredPosition(0);
-
-		this.oninput = () => { };
-	}
-
-	toCanvasLocation(x, y) {
-		return [(x - this.rect.x) * this.dpr, (y - this.rect.y) * this.dpr];
-	}
-
-	detectClicked = (event) => {
-		const [x, y] = this.toCanvasLocation(event.x, event.y);
-
-		if (x >= this.cX && x <= this.cX + this.cWidth && y >= this.cY && y <= this.cY + this.cHeight) {
-
-			this.isSelected = true;
-			this.setValue(this.isVertical ? y - this.thumbRadius * 2 : x);
-		}
-	}
-
-	cancelSelect = (event) => {
-		this.isSelected = false;
-	}
-
-	move = (event) => {
-		const [x, y] = this.toCanvasLocation(event.x, event.y);
-
-		if (this.isSelected) this.setValue(this.isVertical ? y - this.thumbRadius * 2 : x);
-
-		this.isHovered = x >= this.cX && x <= this.cX + this.cWidth && y >= this.cY && y <= this.cY + this.cHeight;
-	}
-
-	draw() {
-		this.ctx.save();
-		this.ctx.translate(this.cX, this.cY);
-
-		// draw slider background
-		this.drawRect(0, 0, this.cWidth, this.cHeight, { color: "transparent", fill: this.isSelected ? this.selectedBgColor : (this.isHovered ? this.hoverBgColor : this.defaultBgColor) });
-
-		// draw slider line
-		if (this.isVertical) {
-			this.drawLine(
-				this.cWidth / 2, this.thumbRadius / 2,
-				this.cWidth / 2, this.cHeight - this.thumbRadius / 2,
-				{ color: this.lineColor, fill: "black" });
-		}
-		else {
-			this.drawLine(
-				this.thumbRadius / 2, this.cHeight / 2,
-				this.cWidth - this.thumbRadius / 2, this.cHeight / 2,
-				{ color: this.lineColor });
-		}
-
-		// draw slider thumb
-		if (this.isVertical) {
-			this.drawCircle(
-				this.cWidth / 2, this.value + this.thumbRadius,
-				this.thumbRadius, { fill: this.thumbColor });
-
-			this.drawLine(
-				(this.cWidth - this.thumbRadius) / 2, this.value + this.thumbRadius,
-				(this.cWidth + this.thumbRadius) / 2, this.value + this.thumbRadius,
-				{ color: "white" })
-		}
-		else {
-			this.drawCircle(
-				this.value, this.cHeight / 2,
-				this.thumbRadius, { fill: this.thumbColor });
-
-			this.drawLine(
-				this.value, (this.cHeight - this.thumbRadius) / 2,
-				this.value, (this.cHeight + this.thumbRadius) / 2,
-				{ color: "white" })
-		}
-
-		this.ctx.restore();
-	}
-
-	getPosition() {
-		return this.value + (this.isVertical ? this.cY : this.cX);
-	}
-
-	setPosition(value) {
-		this.value = value - (this.isVertical ? this.cY : this.cX)
-	}
-
-	getLocalPosition() {
-		return this.value;
-	}
-
-	setLocalPosition(value) {
-		this.value = value;
-	}
-
-	getLocalCenteredPosition() {
-		return this.getLocalPosition() - (this.isVertical ? this.cHeight : this.cWidth) / 2;
-	}
-
-	setLocalCenteredPosition(value) {
-		this.setLocalPosition(value + (this.isVertical ? this.cHeight : this.cWidth) / 2);
-	}
-
-	getCenteredPosition() {
-		return this.getPosition() - (this.isVertical ? this.cHeight : this.cWidth) / 2;
-	}
-
-	setCenteredPosition(value) {
-		this.setPosition(value + (this.isVertical ? this.cHeight : this.cWidth) / 2);
-	}
-
-	setValue(value) {
-		if (this.isVertical) {
-			value -= this.cY - this.thumbRadius;
-			this.value = clamp(value, this.thumbRadius, this.cHeight - this.thumbRadius * 2);
-		}
-		else {
-			value -= this.cX;
-			this.value = clamp(value, this.thumbRadius, this.cWidth - this.thumbRadius);
-		}
-		this.oninput();
-	}
-}
-
-
 class PidController {
 	constructor() {
 		this.reset();
@@ -596,6 +448,13 @@ class Motor extends CanvasDrawer {
 		this.lastUpdateTime = performance.now();
 	}
 
+	reset() {
+		this.rotations = 0
+		this.velocity = 0;
+		this.acceleration = 0;
+		this.power = 0;
+	}
+
 	getPosition() { return this.rotations; }
 
 	setPosition(rotations) { this.rotations = rotations; }
@@ -612,6 +471,10 @@ class Motor extends CanvasDrawer {
 		this.power = Math.max(-1, Math.min(1, power));
 	}
 
+	setSetpointLine(value) {
+		this.setpointLineRotations = value;
+	}
+
 	update() {
 		// Calculate the time difference in seconds since the last update
 		const currentTime = performance.now();
@@ -620,7 +483,7 @@ class Motor extends CanvasDrawer {
 
 		// Update acceleration based on power
 		const targetRPM = this.power * motorConfig.maxRPM;
-		this.acceleration = (targetRPM - this.velocity) * 5; // A constant to tune responsiveness
+		this.acceleration = (targetRPM - this.velocity) * 1; // A constant to tune responsiveness
 
 		// Update velocity based on acceleration
 		this.velocity += this.acceleration * deltaTime;
@@ -634,18 +497,24 @@ class Motor extends CanvasDrawer {
 		this.ctx.clearRect(this.cX, this.cY, this.cWidth, this.cHeight);
 		this.ctx.fillRect(this.cX, this.cY, this.cWidth, this.cHeight);
 
+		const centerX = this.cX + this.cWidth / 2;
+		const centerY = this.cY + this.cHeight / 2;
+		
 		const distanceTraveled = (this.rotations * 2 * Math.PI) * motorConfig.radius;
 		const floorHeight = this.cY + Math.min(this.canvas.width, this.canvas.height) / 1.5;
 
+		const mountRadius = Math.min(this.canvas.width, this.canvas.height) / 3;
 		if (motorConfig.isStationary) {
 			this.ctx.fillStyle = "black";
 			this.ctx.lineWidth = 20;
 
-			const mountRadius = Math.min(this.canvas.width, this.canvas.height) / 3;
 
 			this.ctx.beginPath();
-			this.ctx.strokeRect(this.cX + this.cWidth / 2 - mountRadius, this.cY + this.cHeight / 2 - mountRadius, mountRadius * 2, mountRadius * 2)
+			this.ctx.strokeRect(centerX - mountRadius, centerY - mountRadius, mountRadius * 2, mountRadius * 2)
 			this.ctx.stroke();
+			
+			this.ctx.font = "48px serif";
+			this.ctx.fillText(Math.floor(this.rotations), centerX - mountRadius + 10, centerY - mountRadius + 48);
 		}
 		else {
 
@@ -658,14 +527,21 @@ class Motor extends CanvasDrawer {
 		}
 
 		this.ctx.save();
-		this.ctx.translate(this.cX + this.cWidth / 2 + (motorConfig.isStationary ? 0 : distanceTraveled), (motorConfig.isStationary ? this.cY + this.cHeight / 2 : floorHeight -motorConfig.radius));		
-
-		this.ctx.rotate((this.rotations + this.zeroRotations) * Math.PI * 2);
+		this.ctx.translate(centerX + (motorConfig.isStationary ? 0 : distanceTraveled), (motorConfig.isStationary ? centerY : floorHeight -motorConfig.radius));		
+		
+		this.ctx.save();
+		this.ctx.rotate(rotationsToRadians(this.rotations + this.zeroRotations));
 
 		// Draw the circular body of the motor
 		this.ctx.fillStyle = "gray";
 		this.ctx.beginPath();
 		this.ctx.arc(0, 0, motorConfig.radius, 0, Math.PI * 2);
+		this.ctx.fill();
+
+		// Center Dot
+		this.ctx.beginPath();
+		this.ctx.fillStyle = "blue";
+		this.ctx.arc(0, 0, motorConfig.radius / 14 / 2, 0, Math.PI * 2);
 		this.ctx.fill();
 
 		// Draw the line showing which way is up
@@ -690,6 +566,158 @@ class Motor extends CanvasDrawer {
 		}
 
 		this.ctx.restore();
+
+		if (this.setpointLineRotations) {
+			this.ctx.strokeStyle  = "green";
+			this.ctx.fillStyle  = "green";
+			this.ctx.lineWidth = 5;
+			const lineLength = motorConfig.radius * 1.3;
+			this.ctx.beginPath()
+			const setpointLineRadians = rotationsToRadians(this.setpointLineRotations);
+			if (motorConfig.isStationary) {
+				this.ctx.moveTo(0, 0)
+				this.ctx.lineTo(Math.sin(setpointLineRadians) * lineLength, -Math.cos(setpointLineRadians) * lineLength);
+
+				this.ctx.font = "48px serif";
+				this.ctx.fillText(Math.floor(this.setpointLineRotations), -mountRadius + 10, mountRadius - 15);
+			}
+			else {
+				const setpointLineDistance = setpointLineRadians * motorConfig.radius;
+				this.ctx.moveTo(setpointLineDistance - distanceTraveled, 0)
+				this.ctx.lineTo(setpointLineDistance - distanceTraveled, lineLength);
+			}
+			this.ctx.stroke();
+		}
+
+		this.ctx.restore();
+	}
+}
+
+class AngleSelect {
+	constructor(canvasDrawer, center = [undefined, undefined]) {
+
+		this.canvasDrawer = canvasDrawer;
+		this.canvas = canvasDrawer.canvas;
+
+		[this.centerX, this.centerY] = center;
+		this.centerX ??= this.canvasDrawer.cX + this.canvasDrawer.cWidth / 2;
+		this.centerY ??= this.canvasDrawer.cY + this.canvasDrawer.cHeight / 2;
+
+
+		this.isSelected = false;
+		this.isHovered = false;
+
+		this.value = undefined;
+
+		this.canvas.addEventListener('mousedown', this.detectClicked);
+		this.canvas.addEventListener('mousemove', this.move);
+		document.body.addEventListener('mouseup', this.cancelSelect);
+		document.body.addEventListener('mouseleave', this.cancelSelect);
+
+		this.rect = this.canvas.getBoundingClientRect();
+		this.dpr = Math.ceil(window.devicePixelRatio || 1);
+
+		this.oninput = (value) => {}
+	}
+
+	getValue() {
+		return this.value;
+	}
+
+	_setValue(x, y) {
+		this.value = (radiansToRotations(Math.atan2(this.centerY - y, this.centerX - x) - Math.PI / 2) + 1) % 1;		
+		
+		this.oninput(this.value)
+	}
+
+	toCanvasLocation(x, y) {
+		return [(x - this.rect.x) * this.dpr, (y - this.rect.y) * this.dpr];
+	}
+
+	detectClicked = (event) => {
+		const [x, y] = this.toCanvasLocation(event.x, event.y);
+				
+
+		if (!(x >= this.cX && x <= this.cX + this.cWidth && y >= this.cY && y <= this.cY + this.cHeight)) {
+			this.isSelected = true;
+			this._setValue(x, y)
+		}
+	}
+
+	cancelSelect = (event) => {
+		this.isSelected = false;
+	}
+
+	move = (event) => {
+		const [x, y] = this.toCanvasLocation(event.x, event.y);
+
+		if (this.isSelected) this._setValue(x, y);
+
+		this.isHovered = !(x >= this.cX && x <= this.cX + this.cWidth && y >= this.cY && y <= this.cY + this.cHeight);
+	}
+}
+
+class PositionSelect {
+	constructor(canvasDrawer, center = [undefined, undefined]) {
+
+		this.canvasDrawer = canvasDrawer;
+		this.canvas = canvasDrawer.canvas;
+
+		[this.centerX, this.centerY] = center;
+		this.centerX ??= this.canvasDrawer.cX + this.canvasDrawer.cWidth / 2;
+		this.centerY ??= this.canvasDrawer.cY + this.canvasDrawer.cHeight / 2;
+
+
+		this.isSelected = false;
+		this.isHovered = false;
+
+		this.value = undefined;
+
+		this.canvas.addEventListener('mousedown', this.detectClicked);
+		this.canvas.addEventListener('mousemove', this.move);
+		document.body.addEventListener('mouseup', this.cancelSelect);
+		document.body.addEventListener('mouseleave', this.cancelSelect);
+
+		this.rect = this.canvas.getBoundingClientRect();
+		this.dpr = Math.ceil(window.devicePixelRatio || 1);
+
+		this.oninput = (value) => {}
+	}
+
+	getValue() {
+		return this.value;
+	}
+
+	_setValue(x, y) {
+		this.value = (x - this.centerX) / 2 / Math.PI / motorConfig.radius;		
+		
+		this.oninput(this.value)
+	}
+
+	toCanvasLocation(x, y) {
+		return [(x - this.rect.x) * this.dpr, (y - this.rect.y) * this.dpr];
+	}
+
+	detectClicked = (event) => {
+		const [x, y] = this.toCanvasLocation(event.x, event.y);
+				
+
+		if (!(x >= this.cX && x <= this.cX + this.cWidth && y >= this.cY && y <= this.cY + this.cHeight)) {
+			this.isSelected = true;
+			this._setValue(x, y)
+		}
+	}
+
+	cancelSelect = (event) => {
+		this.isSelected = false;
+	}
+
+	move = (event) => {
+		const [x, y] = this.toCanvasLocation(event.x, event.y);
+
+		if (this.isSelected) this._setValue(x, y);
+
+		this.isHovered = !(x >= this.cX && x <= this.cX + this.cWidth && y >= this.cY && y <= this.cY + this.cHeight);
 	}
 }
 
@@ -751,6 +779,21 @@ measuredRotations.oninput = () => motor.setPosition(Number(measuredRotations.val
 measuredDegrees.oninput = () => motor.setPosition(degreesToRotations(Number(measuredDegrees.value)));
 measuredRadians.oninput = () => motor.setPosition(radiansToRotations(Number(measuredRadians.value)));
 
+resetButton.onclick = () => motor.reset()
+ 
+const angleSelect = new AngleSelect(motor)
+angleSelect.oninput = (value) => {
+	if (motorConfig.isStationary) {
+		setpointRotations.value = value;
+	}
+}
+const positionSelect = new PositionSelect(motor)
+positionSelect.oninput = (value) => {
+	if (!motorConfig.isStationary) {
+		setpointRotations.value = value;
+	}
+}
+
 // main loop
 setInterval(() => {
 	const focusedElement = document.activeElement;
@@ -791,6 +834,12 @@ setInterval(() => {
 		setpointRadians.value = rotationsToRadians(setpointRotations.value);
 	}
 
+	if (focusedElement == setpointRotations || focusedElement == setpointDegrees || focusedElement == setpointRadians || (angleSelect.isSelected && motorConfig.isStationary) || (positionSelect.isSelected && !motorConfig.isStationary)) {
+		motor.setSetpointLine(setpoint)
+	}
+	else {
+		motor.setSetpointLine(undefined);
+	}
 
 	motor.update()
 	motor.draw()
