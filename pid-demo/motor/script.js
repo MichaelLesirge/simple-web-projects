@@ -446,7 +446,14 @@ class Motor extends CanvasDrawer {
 		this.power = 0;
 
 		this.lastUpdateTime = performance.now();
-	}
+        document.addEventListener('visibilitychange', () => this.handleVisibilityChange());
+    }
+
+    handleVisibilityChange() {
+        if (document.visibilityState === 'visible') {
+            this.lastUpdateTime = performance.now();
+        }
+    }		
 
 	reset() {
 		this.rotations = 0
@@ -795,7 +802,7 @@ positionSelect.oninput = (value) => {
 }
 
 // main loop
-setInterval(() => {
+function mainLoop() {
 	const focusedElement = document.activeElement;
 
 	const setpoint = setpointRotations.value;
@@ -853,5 +860,7 @@ setInterval(() => {
 	otherGraph.draw()
 
 	otherGraph.drawLine(otherGraph.cWidth / 2, 0, otherGraph.cWidth / 2, otherGraph.cHeight, { color: "black", thickness: 3 })
+	requestAnimationFrame(mainLoop);
+}
 
-}, Math.floor(1000 / FPS))
+requestAnimationFrame(mainLoop);
