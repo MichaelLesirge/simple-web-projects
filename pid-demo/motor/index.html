@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+
+	<meta name="description" content="PID Simulation and tuning practice. Demo of how P, I, and D term can be used to get motor position to setpoint" />
+	<meta name="keywords" content="pid control, pid demo, pid tuning practice, frc" />
+
+    <title>PID Demo</title>
+</head>
+<body>
+    <header id="header">
+        <h1>
+            PID Demo: Motor
+        </h1>
+        <a href="../">Car</a>
+    </header>
+    <main>
+        <section id="display">
+            <canvas id="display-canvas">
+            </canvas>
+        </section>
+        <section id="settings">
+            <h2 class="section-title">PID Control</h2>
+            <p>Primary Unit: Rotations</p>
+            <form class="settings-menu" id="pid-control-menu">     
+                <fieldset id="settings-buttons" class="controls">
+                    <legend class="header" style="margin: 0;">Reset</legend>
+                    <button type="button" id="reset-button">Reset Car</button>
+                    <button type="reset">Default</button>
+                </fieldset>
+            </form>
+            <h2 class="section-title">Data</h2>
+            <form class="settings-menu" id="settings-menu">
+
+            </form>
+        </section>
+        <section id="extra-graph">
+            <canvas id="secondary-graph">
+                This Program Requires HTML5 Canvas. Please use a more modern browser.
+            </canvas>
+            <div id="secondary-graph-options">
+            </div>
+        </section>
+    </main>
+
+</body>
+</html>

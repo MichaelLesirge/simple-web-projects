@@ -1,0 +1,167 @@
+* {
+	box-sizing: border-box;
+
+	margin: 0;
+	padding: 0;
+}
+
+li {
+    margin-left: 1rem;
+}
+
+html {
+	width: 100%;
+	height: 100%;
+}
+
+body {
+	width: 100%;
+	height: 100%;
+
+	background-color: darkgray;
+}
+
+main {
+	display: grid;
+
+
+	height: 100%;
+
+	grid-template-columns: 1.618fr 1fr;
+	grid-template-rows: 1.618fr 1fr;
+
+	grid-template-areas:
+	"display settings"
+	"display graph";
+}
+
+@media only screen and (max-width: 600px){
+	main {
+		display: flex;
+		flex-direction: column;
+	}
+
+	#display {
+		height: 100vh;
+	}
+
+	#settings {
+		height: min-content;
+	}
+}
+
+#header {
+	position: absolute;
+	width: 100%;
+	padding: 0.1rem;
+
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+
+	color: white;
+
+	background: rgb(84,147,158);
+	background: linear-gradient(90deg, rgba(84,147,158,1) 0%, rgba(252,176,69,1) 100%);
+	border-bottom: 3px solid black;
+
+}
+
+#display {
+	display: flex;
+	grid-area: display;
+}
+
+#display canvas {
+	width: 100%;
+	flex-grow: 1;
+}
+
+#settings {
+	grid-area: settings;
+	margin-left: 1rem;	
+}
+
+.settings-menu {
+	display: flex;
+
+	flex-direction: row;
+	flex-wrap: wrap;
+		
+	gap: 0.6rem;
+}
+
+#settings .section-title {
+	text-decoration: underline;
+	margin: auto;
+	margin-block-start: 0.5em;
+    margin-block-end: 0.5em;
+}
+
+.settings-menu .header {
+	margin-left: 1em;
+}
+
+.settings-menu .controls {
+	font-family: 'Courier New', Courier, monospace;
+
+	padding: 0.3rem;
+}
+
+.settings-menu #settings-buttons {
+	display: flex;
+	flex-direction: column;
+}
+
+.settings-menu .controls .item {
+	text-align: end;
+}
+
+.settings-menu .controls .item input {
+	width: 4rem;
+}
+
+#extra-graph {
+	position: relative;
+
+	overflow: hidden;
+
+	grid-area: graph;
+}
+ 
+#secondary-graph {
+	height: 100%;
+	width: 100%;
+}
+
+#secondary-graph-options {
+	position: absolute;
+	user-select: none;
+	top: 0.5rem;
+	left: 0.5rem;
+}
+
+#secondary-graph-options input {
+	height: 0.9rem;
+	width: 0.9rem;
+	margin-left: 0.1rem;
+}
+
+#secondary-graph-options input:after {
+	position: absolute;
+	content: attr(instant-title);
+
+	background-color: attr(color);
+	padding: 0.1rem 0.5rem;
+	border-radius: 1rem;
+
+	bottom: -100%;
+	left: 0;
+
+	width: max-content;
+	opacity: 0;
+}
+
+#secondary-graph-options input:hover:after {
+	opacity: 1;
+}
