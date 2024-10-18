@@ -3,18 +3,8 @@ const ctx = canvas.getContext("2d");
 
 const LEFT = 159;
 const RIGHT = 485;
+const rows = [21, 60, 94, 292, 318, 345, 376];
 
-const rows = [
-    21,
-    60,
-    94,
-    292,
-    318,
-    345,
-    376,
-]
-
-// https://support.xbox.com/en-US/help/hardware-network/controller/xbox-one-wireless-controller
 const buttonPositions = {
     "View": [LEFT, rows[0]],
     "Menu": [RIGHT, rows[0]],
@@ -38,78 +28,195 @@ const buttonPositions = {
     "Right Stick Button": [RIGHT, rows[6]],
 };
 
-const labels = {};
+let title = "";
+let labels = {};
+
 const controllerImage = new Image();
 controllerImage.src = "controller-diagram.png";
 
-const DEBUG = false;
-
-let title = "";
-
-function drawController() {    
-
+function drawController() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(controllerImage, 0, 0, canvas.width, canvas.height);
 
-    ctx.textBaseline = "middle"
-
+    ctx.textBaseline = "middle";
     ctx.direction = "ltr";
-    ctx.font = "32px Arial"; 
+    ctx.font = "32px Arial";
     ctx.fillText(title, 5, 18);
-    
 
-    if (DEBUG) {
-        for (const [button, position] of Object.entries(buttonPositions)) {
-            if (position) {
-    
-                ctx.fillStyle = "#000";
-                ctx.font = "16px Arial";
-                ctx.direction = position[0] === LEFT ? "rtl" : "ltr";
-                ctx.fillText(button, position[0], position[1]);
-            }
-        }
-    }
-    
     for (const [button, label] of Object.entries(labels)) {
         const position = buttonPositions[button];
-        if (position) {
+        if (position && label) {
             ctx.fillStyle = "#000";
             ctx.font = "16px Arial";
             ctx.direction = position[0] === LEFT ? "rtl" : "ltr";
-            ctx.fillText(label, position[0], position[1]);
+            ctx.fillText(label, position[0], position[1] + 16/3);
         }
     }
 
-    requestAnimationFrame(() => drawController())
+    requestAnimationFrame(drawController);
 }
 
-const selector = document.getElementById("buttonSelect");
-Object.keys(buttonPositions).forEach(button => {
-    const option = document.createElement("option");
-    option.setAttribute("value", button);
-    option.innerText = button;
-    selector.appendChild(option);
-});
+function createLabelInputs() {
+    const leftLabels = document.getElementById("left-labels");
+    const rightLabels = document.getElementById("right-labels");
 
-// Add label button click event
-document.getElementById("addLabelButton").addEventListener("click", (e) => {
-    const button = document.getElementById("buttonSelect").value;
-    const label = document.getElementById("labelInput").value.trim();
-    if (label) {
-        labels[button] = label;
-        drawController();
+    for (const [button, position] of Object.entries(buttonPositions)) {
+        const input = document.createElement("input");
+        input.type = "text";
+        input.title = input.placeholder = button;
+        input.addEventListener("input", (e) => {
+            labels[button] = e.target.value.trim();
+            saveState();
+        });
+
+        if (position[0] === LEFT) {
+            leftLabels.appendChild(input);
+        } else {
+            rightLabels.appendChild(input);
+        }
     }
-});
+}
 
-document.getElementById("downloadButton").addEventListener("click", (e) => {
+function saveState() {
+    const state = { title, labels };
+    localStorage.setItem("controllerState", JSON.stringify(state));
+}
+
+function loadState() {
+    const savedState = localStorage.getItem("controllerState");
+    if (savedState) {
+        const state = JSON.parse(savedState);
+        updateState(state);
+    }
+}
+
+function updateState(state) {
+    title = state.title || "";
+    labels = state.labels || {};
+
+    document.getElementById("title-input").value = title;
+
+    for (const [button, label] of Object.entries(labels)) {
+        const input = document.querySelector(`input[placeholder="${button}"]`);
+        if (input) {
+            input.value = label;
+        }
+    }
+
+    drawController();
+}
+
+function downloadJSON() {
+    const data = { title, labels };
+    const jsonString = JSON.stringify(data, null, 2);
+    const blob = new Blob([jsonString], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    
     const link = document.createElement("a");
-    link.download = `${title || "default"}-controller-labeled.png`;
+    link.href = url;
+    link.download = getPageName() + ".json";
+    link.click();
+    
+    URL.revokeObjectURL(url);
+}
+
+function loadJSON(event) {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const data = JSON.parse(e.target.result);
+                setTimeout(() => event.target.value = null, 1000)
+                updateState(data, false);
+                saveState();
+            } catch (error) {
+                console.error("Error parsing JSON:", error);
+                alert("Error loading JSON file. Please make sure it\"s a valid JSON file.");
+            }
+        };
+        reader.readAsText(file);
+
+    }
+}
+
+function getPageName() {
+    return `${title || "default"}-controller-labeled`
+}
+
+function downloadImage() {
+    const link = document.createElement("a");
+    link.download = getPageName() + ".png";
     link.href = canvas.toDataURL();
     link.click();
-});
+}
+
+function printImage() {
+    const dataUrl = canvas.toDataURL();
+    const windowContent = `
+        <!DOCTYPE html>
+        <html>
+        <head><title>${title || "Default"} Controller Labeled</title></head>
+        <body>
+            <img src="${dataUrl}" style="width: 100%;">
+        </body>
+        </html>
+    `;
+    const printWindow = window.open(", ", "height=600,width=800");
+    printWindow.document.write(windowContent);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+    printWindow.close();
+}
+
+function resetState() {
+    title = "";
+    labels = {};
+    document.getElementById('title-input').value = "";
+    
+    document.querySelectorAll('#left-labels input, #right-labels input').forEach(input => {
+        input.value = "";
+    });
+
+    localStorage.removeItem('controllerState');
+}
+
+
+function updateState(state) {
+
+    title = state.title || '';
+    labels = state.labels || {};
+
+    document.getElementById('title-input').value = title;
+
+    document.querySelectorAll('#left-labels input, #right-labels input').forEach(input => {
+        const button = input.placeholder;
+        input.value = labels[button] || '';
+    });
+
+    drawController();
+}
 
 document.getElementById("title-input").addEventListener("input", (e) => {
     title = e.target.value;
+    saveState();
 });
 
-drawController();
+document.getElementById('reset-button').addEventListener('click', () => {
+    if (confirm('Are you sure you want to reset? This will clear all labels and the title.')) {
+        resetState();
+    }
+});
+
+document.getElementById("download-button").addEventListener("click", downloadImage);
+document.getElementById("print-button").addEventListener("click", printImage);
+document.getElementById("download-json").addEventListener("click", downloadJSON);
+document.getElementById("upload-json").addEventListener("change", loadJSON);
+
+// Initialize
+window.addEventListener("load", () => {
+    createLabelInputs();
+    loadState();
+    drawController();
+});

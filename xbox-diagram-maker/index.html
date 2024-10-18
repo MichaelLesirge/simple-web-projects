@@ -3,22 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="script.js" defer></script>
     <title>Xbox Controller Labeling Tool</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <h1>Xbox Controller Labeling Tool</h1>
-    <input type="text" id="title-input" placeholder="Enter title">
-    <canvas id="controllerCanvas" width="640" height="397">
-        Please update to a browser supporting HTML Canvas
-    </canvas>
-    <div id="ui">
-        <label for="buttonSelect">Select Button:</label>
-        <select id="buttonSelect"></select>
-        <input type="text" id="labelInput" placeholder="Enter label">
-        <button id="addLabelButton">Add Label</button>
-        <button id="downloadButton">Download Image</button>
+    <div id="main-container">
+        <div id="left-labels"></div>
+        <canvas id="controllerCanvas" width="644" height="406"></canvas>
+        <div id="right-labels"></div>
     </div>
-    <script src="script.js"></script>
+    <div id="ui">
+        <input type="text" id="title-input" placeholder="Enter title">
+        <div>
+            <button id="download-button">Download Image</button>
+            <button id="print-button">Print Image</button>
+        </div>
+        <div>
+            <button id="download-json">Download Json</button>
+            <input itemid="upload-json" type="file" accept=".json" id="upload-json"></input>
+        </div>
+        <div>
+            <button style="background-color: red;" id="reset-button">Reset</button>
+        </div>
+    </div>
 </body>
 </html>
