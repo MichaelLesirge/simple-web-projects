@@ -15,6 +15,7 @@ Visit the project list here: https://michaellesirge.github.io/simple-web-project
 0. [roman-numerals](https://michaellesirge.github.io/simple-web-projects/roman-numerals)🔢🏛️
 0. [customisable-dice-roller](https://michaellesirge.github.io/simple-web-projects/customisable-dice-roller)🎲🛠️ (incomplete)
 0. [happy-holiday-eve](https://michaellesirge.github.io/simple-web-projects/happy-holiday-eve)🎉🎄
+0. [xbox-diagram-maker](https://michaellesirge.github.io/simple-web-projects/xbox-diagram-maker)🎮🖨️
 0. [dont-leave](https://michaellesirge.github.io/simple-web-projects/dont-leave)🚪😅
    
 Also: [tic-tac-toe](https://rawcdn.githack.com/MichaelLesirge/tic-tac-toe/7d96fd7f23d97e7e10e891aaffbb45ec3ec6f473/HTML-CSS-JS/index.html)❌⭕ from https://github.com/michael-lesirge/tic-tac-toe.
