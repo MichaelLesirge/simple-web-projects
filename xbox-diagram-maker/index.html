@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xbox Controller Labeling Tool</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>Xbox Controller Labeling Tool</h1>
+    <input type="text" id="title-input" placeholder="Enter title">
+    <canvas id="controllerCanvas" width="640" height="397">
+        Please update to a browser supporting HTML Canvas
+    </canvas>
+    <div id="ui">
+        <label for="buttonSelect">Select Button:</label>
+        <select id="buttonSelect"></select>
+        <input type="text" id="labelInput" placeholder="Enter label">
+        <button id="addLabelButton">Add Label</button>
+        <button id="downloadButton">Download Image</button>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
