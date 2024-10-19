@@ -52,7 +52,9 @@ input[type="text"], input[type="file"] {
     font-size: 14px;
 }
 
-button {
+button, .button {
+    flex: 1;
+    text-align: center;
     padding: 8px 16px;
     background-color: #4CAF50;
     color: white;
@@ -67,16 +69,8 @@ button:hover {
     background-color: #45a049;
 }
 
-#download-button, #print-button {
-    flex: 1;
-}
-
-#download-json {
-    flex: 1;
-}
-
 #upload-json {
-    flex: 2;
+    display: none;
 }
 
 @media print {
@@ -90,7 +84,7 @@ button:hover {
     }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1000px) {
     #main-container {
         flex-direction: column;
         align-items: center;

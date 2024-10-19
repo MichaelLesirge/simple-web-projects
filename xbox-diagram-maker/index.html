@@ -17,12 +17,13 @@
     <div id="ui">
         <input type="text" id="title-input" placeholder="Enter title">
         <div>
-            <button id="download-button">Download Image</button>
+            <button id="download-button">Save As Image</button>
             <button id="print-button">Print Image</button>
         </div>
         <div>
-            <button id="download-json">Download Json</button>
-            <input itemid="upload-json" type="file" accept=".json" id="upload-json"></input>
+            <button id="download-json">Save Labels JSON</button>
+            <label class="button" for="upload-json">Load Labels JSON</label>
+            <input itemid="upload-json" type="file" accept=".json" id="upload-json">
         </div>
         <div>
             <button style="background-color: red;" id="reset-button">Reset</button>
