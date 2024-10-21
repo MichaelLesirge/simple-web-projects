@@ -72,6 +72,8 @@ function createLabelInputs() {
         const input = document.createElement("input");
         input.type = "text";
         input.title = input.placeholder = button;
+        input.spellcheck = "true";
+
         input.addEventListener("input", (e) => {
             labels[button] = e.target.value.trim();
             saveState();
