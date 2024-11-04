@@ -106,7 +106,6 @@ body {
 
 .options {
 	display: flex;
-	justify-content: space-between;
 	gap: 1rem;
 
 	position: fixed;
@@ -243,7 +242,6 @@ body {
 
 .create-dice {
 	width: max(50%, max-content);
-	height: min-content;
 
 	margin: 0px 1rem;
 	padding: 1rem;
@@ -342,4 +340,60 @@ input[type="number"]::-webkit-outer-spin-button {
 input[type="number"].clear-input::-webkit-inner-spin-button,
 input[type="number"].clear-input::-webkit-outer-spin-button {
 	display: none;
+}
+
+
+.option-box-result {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+
+	width: max-content;
+
+	margin: 0px 1rem;
+	padding: 1rem;
+
+	border: 1px dotted gray;
+	border-radius: 1rem;
+}
+
+.option-box-result.distribution {
+	width: max(40%, 10rem);
+}
+
+.distribution-container {
+    display: flex;
+    align-items: flex-end;
+    height: 100px;
+    gap: 2px;
+    margin-top: 0.5rem;
+    border-bottom: 2px solid white;
+}
+
+.distribution-bar {
+    flex: 1;
+    background: linear-gradient(to bottom, #4a90e2, #357abd);
+    min-width: 20px;
+    position: relative;
+	height: auto;
+    transition: height 0.3s ease;
+}
+
+.distribution-bar::after {
+    content: attr(data-value);
+    position: absolute;
+    bottom: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.8rem;
+}
+
+.distribution-bar::before {
+    content: attr(data-count);
+	font-size: 10px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 0.8rem;
 }

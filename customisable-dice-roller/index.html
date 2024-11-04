@@ -1,140 +1,187 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-		<link rel="stylesheet" href="css/style.css" />
-		<script src="js/script.js" defer></script>
+<head>
+	<meta charset="UTF-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-		<!-- <meta name="description" content="Simple dice roller that you can customize to whatever you need. Good for WarHammer or any other game that uses lots of dice." /> -->
-		<!-- <meta name="keywords" content="dice, Magic, WarHammer, customizable" /> -->
+	<link rel="stylesheet" href="css/style.css" />
+	<script src="js/script.js" defer></script>
 
-		<title>Simple Dice Roller</title>
-	</head>
+	<!-- <meta name="description" content="Simple dice roller that you can customize to whatever you need. Good for WarHammer or any other game that uses lots of dice." /> -->
+	<!-- <meta name="keywords" content="dice, Magic, WarHammer, customizable" /> -->
 
-	<body>
-		<div class="container">
-			<main class="main">
-				<section class="dice-container">
-					
-				</section>
+	<title>Simple Dice Roller</title>
+</head>
 
-				<section class="options">
-					<form action="get" class="create-dice">
-						<div class="create-dice-body col gap1 center">
-							<div class="create-dice-body-inputs row gap1">
-								<div class="dice" id="input-dice" style="--color: #edefec;">
-									<div class="dice-range-inputs row center-y">
-										<input class="clear-input num-only" type="number" name="dice-create-min" id="dice-create-min" title="select minimum value of dice" value="1">
-										<span>-</span>
-										<input class="clear-input num-only" type="number" name="dice-create-max" id="dice-create-max" title="select maximum value of dice" value="6">
-									</div>
-									<div>
-										<input type="color" name="dice-color" id="dice-color" title="select color of dice" value="#edefec" list="colors">
-										<datalist id="colors">
-											<option value="#edefec">White</option>
-											<option value="#e5e200">Yellow</option>
-											<option value="#16c16a">Green</option>
-											<option value="#3b77e9">Blue</option>
-											<option value="#d3b2eb">Pink</option>
-											<option value="#f5f3ca">Cream</option>
-											<option value="#fb7012">Orange</option>
-											<option value="#652582">Purple</option>
-											<option value="#d12203">Red</option>
-											<option value="#00AAFF">Light blue</option>
-										</datalist>
-									</div>
+<body>
+	<div class="container">
+		<main class="main">
+			<section class="dice-container">
+
+			</section>
+
+			<section class="options">
+				<form action="get" class="create-dice">
+					<div class="create-dice-body col gap1 center">
+						<div class="create-dice-body-inputs row gap1">
+							<div class="dice" id="input-dice" style="--color: #edefec;">
+								<div class="dice-range-inputs row center-y">
+									<input class="clear-input num-only" type="number" name="dice-create-min"
+										id="dice-create-min" title="select minimum value of dice" value="1">
+									<span>-</span>
+									<input class="clear-input num-only" type="number" name="dice-create-max"
+										id="dice-create-max" title="select maximum value of dice" value="6">
 								</div>
-								<!-- Make amount feild disapear when there is not room -->
-								<div class="dice-amount-input create-dice-body row center">
-									<div>×</div>
-									<div><input class="clear-input num-only" type="number" name="dice-create-amount" id="dice-create-amount" value="1" title="select how many dice to add on submit"></div>
-								</div>				
+								<div>
+									<input type="color" name="dice-color" id="dice-color" title="select color of dice"
+										value="#edefec" list="colors">
+									<datalist id="colors">
+										<option value="#edefec">White</option>
+										<option value="#e5e200">Yellow</option>
+										<option value="#16c16a">Green</option>
+										<option value="#3b77e9">Blue</option>
+										<option value="#d3b2eb">Pink</option>
+										<option value="#f5f3ca">Cream</option>
+										<option value="#fb7012">Orange</option>
+										<option value="#652582">Purple</option>
+										<option value="#d12203">Red</option>
+										<option value="#00AAFF">Light blue</option>
+									</datalist>
+								</div>
 							</div>
-							<div class="row center gap1">
-								<button class="submit-button" type="submit">Add Dice</button>
-								<button class="submit-button" type="reset">Reset</button>
+							<!-- Make amount feild disapear when there is not room -->
+							<div class="dice-amount-input create-dice-body row center">
+								<div>×</div>
+								<div><input class="clear-input num-only" type="number" name="dice-create-amount"
+										id="dice-create-amount" value="1" title="select how many dice to add on submit">
+								</div>
 							</div>
 						</div>
-					</form>
-					<div>
-						<button id="roll-dice" class="submit-button big-button">Roll Dice</button>
+						<div class="row center gap1">
+							<button class="submit-button" type="submit">Add Dice</button>
+							<button class="submit-button" type="reset">Reset</button>
+						</div>
 					</div>
-					<div>
+				</form>
+
+				<div class="option-box-result">
+					<button id="roll-dice" class="submit-button big-button">Roll Dice</button>
+					<button id="clear-dice" class="submit-button big-button">Clear Dice</button>
+					<button id="pop-dice" class="submit-button big-button">Remove Last</button>
+				</div>
+
+				<div class="option-box-result">
+					<h3>Roll Results:</h3>
+
+					<div class="results-content">
+						<div class="roll-summary">
+							<div title="Sum of all dice rolled">
+								Total Sum:
+								<span id="roll-sum">-</span>
+							</div>
+
+							<div title="Average value rolled">
+								Average:
+								<span id="roll-avg">-</span>
+							</div>
+
+							<div title="Highest value rolled">
+								Highest:
+								<span id="roll-max">-</span>
+							</div>
+
+							<div title="Lowest value rolled">
+								Lowest:
+								<span id="roll-min">-</span>
+							</div>
+						</div>
 
 					</div>
-				</section>
-			</main>
-			
-			<aside class="info-containers">
-				<div class="info-container" id="info-1" style="top: 18%">
-					<label for="info-1" class="info-container-toggle">></label>
-					<div class="info">
-						<div class="genral-stats-container">
-							<u>
-								<h3 class="stat-section-title">General Stats:</h3>
-							</u>
-							<h4>
-								For
-								<select class="inline-input value-title">
-									<option value="sum" title="Sum Of All Dice">sum of</option>
-									<option value="individual" title="Any individual Dice">individual</option>
-								</select>
-								Dice
-							</h4>
-							<div class="genral-stats">
-								<div title="Minimum possible sum of all dice">Min: <output class="stat" id="gen-min">0</output></div>
-								<div title="Maximum possible sum of all dice">Max: <output class="stat" id="gen-max">0</output></div>
-								<div title="Average sum of all dice">Average: <output class="stat" id="gen-avg">0</output></div>
-								<div title="How many total dice">Count: <output class="stat" id="gen-count">0</output></div>
+				</div>
+
+				<div class="option-box-result distribution">
+					<h3>Distribution:</h3>
+					<div id="distribution-bars" class="distribution-container"></div>
+				</div>
+
+			</section>
+		</main>
+
+		<aside class="info-containers">
+			<div class="info-container" id="info-1" style="top: 18%">
+				<label for="info-1" class="info-container-toggle">></label>
+				<div class="info">
+					<div class="genral-stats-container">
+						<u>
+							<h3 class="stat-section-title">General Stats:</h3>
+						</u>
+						<h4>
+							For
+							<select class="inline-input value-title">
+								<option value="sum" title="Sum Of All Dice">sum of</option>
+								<option value="individual" title="Any individual Dice">individual</option>
+							</select>
+							Dice
+						</h4>
+						<div class="genral-stats">
+							<div title="Minimum possible sum of all dice">Min: <output class="stat"
+									id="gen-min">0</output></div>
+							<div title="Maximum possible sum of all dice">Max: <output class="stat"
+									id="gen-max">0</output></div>
+							<div title="Average sum of all dice">Average: <output class="stat" id="gen-avg">0</output>
+							</div>
+							<div title="How many total dice">Count: <output class="stat" id="gen-count">0</output></div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="info-container" id="info-2" style="top: 40%">
+				<label for="info-2" class="info-container-toggle">></label>
+				<div class="info">
+					<div class="number-stats">
+						<u>
+							<h3 class="stat-section-title">Stats For Number:</h3>
+						</u>
+						<h4>
+							Chance of the sum being
+							<select class="inline-input value-title" id="num-sum-stat-rle">
+								<option title="greater than" value="gt" selected>&gt;</option>
+								<option title="less than" value="lt">&lt;</option>
+								<option title="greater than or equal to" value="gte">&ge;</option>
+								<option title="less than or equal to" value="lte">&le;</option>
+								<option title="equal to" value="eq">=</option>
+							</select>
+							<input class="inline-input num-only" id="num-sum-stat-num" type="number" name="" />
+						</h4>
+						<div class="genral-stats">
+							<div title="Chance of getting above condition">Chance: <output class="stat"
+									id="num-sum-avg">?</output>%</div>
+						</div>
+						<h4>
+							How many dice will be
+							<select class="inline-input value-title" id="num-stat-rle">
+								<option title="greater than" value="gt" selected>&gt;</option>
+								<option title="less than" value="lt">&lt;</option>
+								<option title="greater than or equal to" value="gte">&ge;</option>
+								<option title="less than or equal to" value="lte">&le;</option>
+								<option title="equal to" value="eq">=</option>
+							</select>
+							<input class="inline-input num-only" id="num-stat-num" type="number" name="" />
+						</h4>
+						<div class="genral-stats">
+							<div title="Average number of dice that meet above condition">
+								Average Amount: <output class="stat" id="avg">?</output> (<output class="stat"
+									id="avg-percent">?</output>%)
 							</div>
 						</div>
 					</div>
 				</div>
+			</div>
+		</aside>
+	</div>
+</body>
 
-				<div class="info-container" id="info-2" style="top: 40%">
-					<label for="info-2" class="info-container-toggle">></label>
-					<div class="info">
-						<div class="number-stats">
-							<u>
-								<h3 class="stat-section-title">Stats For Number:</h3>
-							</u>
-							<h4>
-								Chance of the sum being
-								<select class="inline-input value-title" id="num-sum-stat-rle">
-									<option title="greater than" value="gt" selected>&gt;</option>
-									<option title="less than" value="lt">&lt;</option>
-									<option title="greater than or equal to" value="gte">&ge;</option>
-									<option title="less than or equal to" value="lte">&le;</option>
-									<option title="equal to" value="eq">=</option>
-								</select>
-								<input class="inline-input num-only" id="num-sum-stat-num" type="number" name="" />
-							</h4>
-							<div class="genral-stats">
-								<div title="Chance of getting above condition">Chance: <output class="stat" id="num-sum-avg">?</output>%</div>
-							</div>
-							<h4>
-								How many dice will be
-								<select class="inline-input value-title" id="num-stat-rle">
-									<option title="greater than" value="gt" selected>&gt;</option>
-									<option title="less than" value="lt">&lt;</option>
-									<option title="greater than or equal to" value="gte">&ge;</option>
-									<option title="less than or equal to" value="lte">&le;</option>
-									<option title="equal to" value="eq">=</option>
-								</select>
-								<input class="inline-input num-only" id="num-stat-num" type="number" name="" />
-							</h4>
-							<div class="genral-stats">
-								<div title="Average number of dice that meet above condition">
-									Average Amount: <output class="stat" id="avg">?</output> (<output class="stat" id="avg-percent">?</output>%)
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</aside>
-		</div>
-	</body>
 </html>

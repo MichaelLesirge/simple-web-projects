@@ -58,14 +58,71 @@ class DiceSet {
         this.diceElements.push({ element: diceElement, valueElement });
     }
 
+    updateRollStats(rolls) {
+        // Update summary statistics
+        const sum = rolls.reduce((a, b) => a + b, 0);
+        const avg = sum / rolls.length;
+        const max = Math.max(...rolls);
+        const min = Math.min(...rolls);
+
+        document.getElementById('roll-sum').textContent = sum;
+        document.getElementById('roll-avg').textContent = avg.toFixed(1);
+        document.getElementById('roll-max').textContent = max;
+        document.getElementById('roll-min').textContent = min;
+
+        // Update distribution
+        this.updateDistribution(rolls);
+    }
+
+    updateDistribution(rolls) {
+        const distribution = {};
+        let maxCount = 0;
+
+        rolls.forEach(roll => {
+            distribution[roll] = (distribution[roll] || 0) + 1;
+            maxCount = Math.max(maxCount, distribution[roll]);
+        });
+
+        const container = document.getElementById('distribution-bars');
+        container.innerHTML = '';
+
+        const values = Object.keys(distribution).sort((a, b) => Number(a) - Number(b));
+        values.forEach(value => {
+            const count = distribution[value];
+            const bar = document.createElement('div');
+            bar.className = 'distribution-bar';
+            const heightPercentage = (count / maxCount) * 100;
+            bar.style.height = `${heightPercentage}%`;
+            bar.setAttribute('data-value', value);
+            bar.setAttribute('data-count', `${count} (${Math.round(count / this.dice.length * 10000) / 100}%)`);
+            container.appendChild(bar);
+        });
+    }
+
     rollAll() {
         const rolls = this.dice.map(die => die.roll());
         this.diceElements.forEach((diceElement, index) => setTimeout(() => {
-			diceElement.element.classList.add("rolling");
+            diceElement.element.classList.add("rolling");
             setTimeout(() => diceElement.valueElement.textContent = rolls[index], 1000 * 0.5);
-			setTimeout(() => diceElement.element.classList.remove("rolling"), 1000 * 0.7);
+            setTimeout(() => diceElement.element.classList.remove("rolling"), 1000 * 0.7);
         }, index * 3));
+        
+        setTimeout(() => this.updateRollStats(rolls), (this.dice.length * 3) + 500);
+        
         return rolls;
+    }
+
+    clearAll() {
+        this.dice = [];
+        this.diceElements.forEach((element) => element.element.remove() );
+        this.diceElements = [];
+    }
+
+    popDice() {
+        if (this.dice.length > 0) {
+            this.dice.pop();
+            this.diceElements.pop().element.remove();
+        }
     }
 
     get minSum() {
@@ -240,6 +297,12 @@ document.querySelector('.create-dice').addEventListener('submit', (e) => {
 
 const rollButton = document.getElementById("roll-dice")
 rollButton.addEventListener('click', () => diceSet.rollAll());
+
+const clearButton = document.getElementById("clear-dice")
+clearButton.addEventListener('click', () => diceSet.clearAll());
+
+const popButton = document.getElementById("pop-dice")
+popButton.addEventListener('click', () => diceSet.popDice());
 
 document.querySelector('.value-title').addEventListener('change', updateGeneralStats)
 
