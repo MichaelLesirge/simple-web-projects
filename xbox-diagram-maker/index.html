@@ -15,7 +15,15 @@
         <div id="right-labels"></div>
     </div>
     <div id="ui">
-        <input type="text" id="title-input" placeholder="Enter title">
+        <div>
+            <input type="text" id="title-input" placeholder="Enter title" title="Enter Title" list="title-suggestions">
+            <datalist id="title-suggestions">
+                <option value="Drive">
+                <option value="Operate">
+                <option value="Demo">
+            </datalist>
+            <input type="color" id="title-color" title="Pick Title Color">
+        </div>
         <div>
             <button id="download-button">Save As Image</button>
             <button id="print-button">Print Image</button>

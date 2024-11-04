@@ -3,8 +3,11 @@ const ctx = canvas.getContext("2d");
 
 const DEBUG = false;
 
-const LEFT = 157+2;
-const RIGHT = 485-2;
+// const LEFT = canvas.width / 2;
+// const RIGHT = canvas.width / 2;
+const distanceFromCenter = 165
+const LEFT = canvas.width / 2 - distanceFromCenter;
+const RIGHT = canvas.width / 2 + distanceFromCenter - 6;
 
 const buttonPositions = {
     "View": [LEFT, 17],
@@ -30,6 +33,7 @@ const buttonPositions = {
 };
 
 let title = "";
+let titleColor = ""
 let labels = {};
 
 const controllerImage = new Image();
@@ -37,18 +41,31 @@ controllerImage.src = "controller-diagram.png";
 
 function drawController() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.drawImage(controllerImage, 0, 0, canvas.width, canvas.height);
+    ctx.drawImage(controllerImage, 0, 0, canvas.width-6, canvas.height);
 
     ctx.textBaseline = "middle";
     ctx.direction = "ltr";
     ctx.font = "32px Arial";
+    ctx.fillStyle = titleColor;
     ctx.fillText(title, 5, 18);
 
-    for (const [button, position] of Object.entries(DEBUG ? buttonPositions : {})) {
-        ctx.fillStyle = "red";
-        ctx.font = "16px Arial";
-        ctx.direction = position[0] === LEFT ? "rtl" : "ltr";
-        ctx.fillText(`-------{${button}}------`, position[0], position[1] + 16/3);
+    if (DEBUG) {
+        for (const [button, position] of Object.entries(buttonPositions)) {
+            ctx.fillStyle = "red";
+            ctx.font = "16px Arial";
+            ctx.direction = position[0] === LEFT ? "rtl" : "ltr";
+            ctx.fillText(`-------{${button}}------`, position[0], position[1] + 16/3);
+        }
+
+        ctx.beginPath();
+        ctx.moveTo(0, canvas.height / 2);
+        ctx.lineTo(canvas.width, canvas.height / 2);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(canvas.width / 2, 0);
+        ctx.lineTo(canvas.width / 2, canvas.height);
+        ctx.stroke();
     }
 
     for (const [button, label] of Object.entries(labels)) {
@@ -88,7 +105,7 @@ function createLabelInputs() {
 }
 
 function saveState() {
-    const state = { title, labels };
+    const state = { title, titleColor, labels };
     localStorage.setItem("controllerState", JSON.stringify(state));
 }
 
@@ -102,9 +119,11 @@ function loadState() {
 
 function updateState(state) {
     title = state.title || "";
+    titleColor = state.titleColor || "";
     labels = state.labels || {};
 
     document.getElementById("title-input").value = title;
+    document.getElementById("title-color").value = titleColor;
 
     for (const [button, label] of Object.entries(labels)) {
         const input = document.querySelector(`input[placeholder="${button}"]`);
@@ -117,7 +136,7 @@ function updateState(state) {
 }
 
 function downloadJSON() {
-    const data = { title, labels };
+    const data = { title, titleColor, labels };
     const jsonString = JSON.stringify(data, null, 2);
     const blob = new Blob([jsonString], { type: "application/json" });
     const url = URL.createObjectURL(blob);
@@ -162,28 +181,32 @@ function downloadImage() {
 }
 
 function printImage() {
-    const dataUrl = canvas.toDataURL();
-    const windowContent = `
-        <!DOCTYPE html>
-        <html>
-        <head><title>${title || "Default"} Controller Labeled</title></head>
-        <body>
-            <img src="${dataUrl}" style="width: 100%;">
-        </body>
-        </html>
-    `;
-    const printWindow = window.open(", ", "height=600,width=800");
-    printWindow.document.write(windowContent);
-    printWindow.document.close();
-    printWindow.focus();
-    printWindow.print();
-    printWindow.close();
+    // const dataUrl = canvas.toDataURL();
+    // const windowContent = `
+    //     <!DOCTYPE html>
+    //     <html>
+    //     <head><title>${title || "Default"} Controller Labeled</title></head>
+    //     <body>
+    //         <img src="${dataUrl}" style="width: 100%;">
+    //     </body>
+    //     </html>
+    // `;
+    // const printWindow = window.open(", ", "height=600,width=800");
+    // printWindow.document.write(windowContent);
+    // printWindow.document.close();
+    // printWindow.focus();
+    // printWindow.print();
+    // printWindow.close();
+    print()
 }
 
 function resetState() {
     title = "";
+    titleColor = ""
     labels = {};
+    
     document.getElementById('title-input').value = "";
+    document.getElementById('title-color').value = "";
     
     document.querySelectorAll('#left-labels input, #right-labels input').forEach(input => {
         input.value = "";
@@ -196,9 +219,11 @@ function resetState() {
 function updateState(state) {
 
     title = state.title || '';
+    titleColor = state.titleColor || '';
     labels = state.labels || {};
 
     document.getElementById('title-input').value = title;
+    document.getElementById('title-color').value = titleColor;
 
     document.querySelectorAll('#left-labels input, #right-labels input').forEach(input => {
         const button = input.placeholder;
@@ -210,6 +235,11 @@ function updateState(state) {
 
 document.getElementById("title-input").addEventListener("input", (e) => {
     title = e.target.value;
+    saveState();
+});
+
+document.getElementById("title-color").addEventListener("input", (e) => {
+    titleColor = e.target.value;
     saveState();
 });
 

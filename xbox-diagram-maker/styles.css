@@ -41,10 +41,12 @@ canvas {
 #ui > div {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     gap: 10px;
 }
 
 input[type="text"], input[type="file"] {
+    box-sizing: border-box;
     width: 100%;
     padding: 8px;
     border: 1px solid #ccc;
@@ -74,8 +76,13 @@ button:hover {
 }
 
 @media print {
-    #ui, #left-labels, #right-labels {
+    h1, #ui, #left-labels, #right-labels {
         display: none;
+    }
+
+    body, #main-container, canvas {
+        width: 100%;
+        height: 100%;
     }
 
     canvas {
