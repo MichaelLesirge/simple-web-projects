@@ -1,11 +1,13 @@
 const canvas = document.getElementById("controllerCanvas");
 const ctx = canvas.getContext("2d");
 
+const controllerImage = new Image();
+controllerImage.src = "controller-diagram.png";
+
 const DEBUG = false;
 
-// const LEFT = canvas.width / 2;
-// const RIGHT = canvas.width / 2;
-const distanceFromCenter = 165
+const distanceFromCenter = 165;
+
 const LEFT = canvas.width / 2 - distanceFromCenter;
 const RIGHT = canvas.width / 2 + distanceFromCenter - 6;
 
@@ -32,12 +34,13 @@ const buttonPositions = {
     "Right Stick Button": [RIGHT, 376],
 };
 
-let title = "";
-let titleColor = ""
-let labels = {};
+const defaultState = {
+    title: "",
+    titleColor: "#000000",
+    labels: {}
+}
 
-const controllerImage = new Image();
-controllerImage.src = "controller-diagram.png";
+let state = structuredClone(defaultState);
 
 function drawController() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -46,8 +49,8 @@ function drawController() {
     ctx.textBaseline = "middle";
     ctx.direction = "ltr";
     ctx.font = "32px Arial";
-    ctx.fillStyle = titleColor;
-    ctx.fillText(title, 5, 18);
+    ctx.fillStyle = state.titleColor;
+    ctx.fillText(state.title, 5, 18);
 
     if (DEBUG) {
         for (const [button, position] of Object.entries(buttonPositions)) {
@@ -68,7 +71,7 @@ function drawController() {
         ctx.stroke();
     }
 
-    for (const [button, label] of Object.entries(labels)) {
+    for (const [button, label] of Object.entries(state.labels)) {
         const position = buttonPositions[button];
         if (position && label) {
             ctx.fillStyle = "#000";
@@ -85,14 +88,16 @@ function createLabelInputs() {
     const leftLabels = document.getElementById("left-labels");
     const rightLabels = document.getElementById("right-labels");
 
-    for (const [button, position] of Object.entries(buttonPositions)) {
+    for (const [buttonName, position] of Object.entries(buttonPositions)) {
         const input = document.createElement("input");
+
         input.type = "text";
-        input.title = input.placeholder = button;
         input.spellcheck = "true";
 
+        input.id = input.title = input.placeholder = buttonName;
+
         input.addEventListener("input", (e) => {
-            labels[button] = e.target.value.trim();
+            labels[buttonName] = e.target.value.trim();
             saveState();
         });
 
@@ -105,22 +110,22 @@ function createLabelInputs() {
 }
 
 function saveState() {
-    const state = { title, titleColor, labels };
     localStorage.setItem("controllerState", JSON.stringify(state));
 }
 
 function loadState() {
     const savedState = localStorage.getItem("controllerState");
+    
     if (savedState) {
         const state = JSON.parse(savedState);
         updateState(state);
     }
 }
 
-function updateState(state) {
-    title = state.title || "";
-    titleColor = state.titleColor || "";
-    labels = state.labels || {};
+function updateState(newState) {
+    const title = newState.title || "";
+    const titleColor = newState.titleColor || "";
+    const labels = newState.labels || {};
 
     document.getElementById("title-input").value = title;
     document.getElementById("title-color").value = titleColor;
@@ -136,8 +141,7 @@ function updateState(state) {
 }
 
 function downloadJSON() {
-    const data = { title, titleColor, labels };
-    const jsonString = JSON.stringify(data, null, 2);
+    const jsonString = JSON.stringify(state, null, 2);
     const blob = new Blob([jsonString], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     
@@ -155,9 +159,9 @@ function loadJSON(event) {
         const reader = new FileReader();
         reader.onload = function(e) {
             try {
-                const data = JSON.parse(e.target.result);
+                const newState = JSON.parse(e.target.result);
                 setTimeout(() => event.target.value = null, 1000)
-                updateState(data, false);
+                updateState(newState, false);
                 saveState();
             } catch (error) {
                 console.error("Error parsing JSON:", error);
@@ -170,7 +174,7 @@ function loadJSON(event) {
 }
 
 function getPageName() {
-    return `${title || "default"}-controller-labeled`
+    return `${state.title || "default"}-controller-labeled`
 }
 
 function downloadImage() {
@@ -201,26 +205,15 @@ function printImage() {
 }
 
 function resetState() {
-    title = "";
-    titleColor = ""
-    labels = {};
-    
-    document.getElementById('title-input').value = "";
-    document.getElementById('title-color').value = "";
-    
-    document.querySelectorAll('#left-labels input, #right-labels input').forEach(input => {
-        input.value = "";
-    });
-
-    localStorage.removeItem('controllerState');
+    updateState(defaultState)
 }
 
 
-function updateState(state) {
+function updateState(newState) {
 
-    title = state.title || '';
-    titleColor = state.titleColor || '';
-    labels = state.labels || {};
+    title = newState.title || '';
+    titleColor = newState.titleColor || '';
+    labels = newState.labels || {};
 
     document.getElementById('title-input').value = title;
     document.getElementById('title-color').value = titleColor;
@@ -230,20 +223,24 @@ function updateState(state) {
         input.value = labels[button] || '';
     });
 
+    state = {title, titleColor, labels}
+
     drawController();
+
+    saveState()
 }
 
 document.getElementById("title-input").addEventListener("input", (e) => {
-    title = e.target.value;
+    state.title = e.target.value;
     saveState();
 });
 
 document.getElementById("title-color").addEventListener("input", (e) => {
-    titleColor = e.target.value;
+    state.titleColor = e.target.value;
     saveState();
 });
 
-document.getElementById('reset-button').addEventListener('click', () => {
+document.getElementById('reset-button').addEventListener('click', async () => {
     if (confirm('Are you sure you want to reset? This will clear all labels and the title.')) {
         resetState();
     }

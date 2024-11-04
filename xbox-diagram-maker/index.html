@@ -16,21 +16,28 @@
     </div>
     <div id="ui">
         <div>
-            <input type="text" id="title-input" placeholder="Enter title" title="Enter Title" list="title-suggestions">
+            <input type="text" id="title-input" placeholder="Enter title" title="Enter Title" list="title-suggestions" spellcheck="true">
             <datalist id="title-suggestions">
-                <option value="Drive">
-                <option value="Operate">
-                <option value="Demo">
+                <option>Drive</option>
+                <option>Operate</option>
+                <option>Demo</option>
             </datalist>
-            <input type="color" id="title-color" title="Pick Title Color">
+            <input type="color" id="title-color" title="Pick Title Color" list="color-suggestions">
+            <datalist id="color-suggestions">
+                <option>#000000</option>
+                <option>#1E458A</option>
+                <option>#18c735</option>
+                <option>#e60017</option>
+                <option>#540c5c</option>
+            </datalist>
         </div>
         <div>
-            <button id="download-button">Save As Image</button>
-            <button id="print-button">Print Image</button>
+            <button id="download-button" title="Download diagram as PNG">Save As Image</button>
+            <button id="print-button" title="Open print dialog for diagram">Print Image</button>
         </div>
         <div>
-            <button id="download-json">Save Labels JSON</button>
-            <label class="button" for="upload-json">Load Labels JSON</label>
+            <button id="download-json" title="Save file containing labels">Save Labels JSON</button>
+            <label class="button" for="upload-json" title="Load file containing labels">Load Labels JSON</label>
             <input itemid="upload-json" type="file" accept=".json" id="upload-json">
         </div>
         <div>
