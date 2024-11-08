@@ -16,6 +16,7 @@ import cube from "./cube.js";
 import unitCircle from "./unitcircle.js";
 import aiSnake from "./snake.js";
 import boid from "./boids.js";
+import lorenz from "./lorenz.js";
 
 makeFollowMouse(document.getElementById("blob"));
 
@@ -27,18 +28,19 @@ makeHackerText(
     document.querySelectorAll(".hacker-text"),
     charRange("a", "z") + charRange("A", "Z") + charRange("0", "9") + "`-=[]\\;',./~_+{}|:\"<>?".repeat(2),
     {timeout: 100, addBlanksAfter: 400}
-)
+);
 
-spiral()
-conway()
+spiral();
+conway();
 tetris();
 matrix();
 particle();
 mondrian();
 balls();
-dvd()
+dvd();
 orbital();
-cube()
-unitCircle()
-aiSnake()
-boid()
+cube();
+unitCircle();
+aiSnake();
+boid();
+lorenz();
