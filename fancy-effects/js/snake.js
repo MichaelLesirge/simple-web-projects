@@ -99,7 +99,6 @@ function moveSnake() {
 }
 
 function updateColorPropagation() {
-    // Gradually propagate the color from the head to the tail
     for (let i = 1; i < snakeHues.length; i++) {
         const prevHue = snakeHues[i - 1];
         const currentHue = snakeHues[i];
@@ -119,7 +118,6 @@ function updateColorPropagation() {
 function aiControl() {
     const head = snake[0];
 
-    // Directions the AI can move: right, left, down, up
     const possibleDirections = [
         { x: 1, y: 0 },  // Right
         { x: -1, y: 0 }, // Left
@@ -127,7 +125,6 @@ function aiControl() {
         { x: 0, y: -1 }  // Up
     ];
 
-    // Function to check if a direction is safe
     function isDirectionSafe(dir) {
         const newPos = {
             x: (head.x + dir.x + gridWidth) % gridWidth,
@@ -136,10 +133,8 @@ function aiControl() {
         return !snake.some(segment => segment.x === newPos.x && segment.y === newPos.y);
     }
 
-    // Filter directions based on safety
     const safeDirections = possibleDirections.filter(isDirectionSafe);
 
-    // If there are safe directions, prioritize one that moves closer to the food
     if (safeDirections.length > 0) {
         safeDirections.sort((a, b) => {
             const distA = Math.abs((food.x - (head.x + a.x + gridWidth) % gridWidth)) + Math.abs((food.y - (head.y + a.y + gridHeight) % gridHeight));
@@ -148,8 +143,6 @@ function aiControl() {
         });
         direction = safeDirections[0];
     } else {
-        // If no safe directions are available (AI is trapped), keep moving in the current direction
-        // or move in the least dangerous direction (if applicable)
         const leastDangerousDirection = possibleDirections.reduce((leastDangerous, dir) => {
             const newPos = {
                 x: (head.x + dir.x + gridWidth) % gridWidth,
@@ -181,17 +174,14 @@ function updateFoodParticles() {
 }
 
 function draw() {
-    // Draw snake with color wave effect
 
     snake.forEach((segment, index) => {
-        // Draw the snake segment with a smooth color transition        
         ctx.fillStyle = `hsl(${snakeHues[index]}, 100%, 50%)`;
         ctx.beginPath();
         ctx.arc(segment.x * GRID_SIZE + GRID_SIZE / 2, segment.y * GRID_SIZE + GRID_SIZE / 2, GRID_SIZE / 2, 0, Math.PI * 2);
         ctx.fill();
     });
 
-    // Draw food particles (unchanged)
     ctx.fillStyle = `hsl(${foodColor}, 100%, 50%)`;
     foodParticles.forEach(particle => {
         ctx.beginPath();
@@ -199,7 +189,6 @@ function draw() {
         ctx.fill();
     });
 
-    // // Draw score with glow effect (unchanged)
     // ctx.fillStyle = "white";
     // ctx.font = "bold 24px Arial";
     // ctx.shadowColor = "rgba(255, 255, 255, 0.5)";
