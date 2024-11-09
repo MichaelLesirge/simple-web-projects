@@ -1,139 +1,207 @@
+class FlashcardApp {
+    constructor() {
+        this.currentIndex = 0;
+        this.flashcards = [
+            { term: "HTML", definition: "A standard markup language used to create web pages. 🏠" },
+            { term: "CSS", definition: "A style sheet language used to describe the presentation of a document. 🎨" },
+            { term: "JavaScript", definition: "A programming language used for web development. ⚙️" },
+        ];
+        this.shuffleMode = false;
+        this.frontIsTerm = true;
 
-let currentIndex = 0;
-let flashcards = [
-    { term: "HTML", definition: "A standard markup language used to create web pages" },
-    { term: "CSS", definition: "A style sheet language used to describe the presentation of a document" },
-    { term: "JavaScript", definition: "A programming language used for web development" },
-];
+        this.initializeElements();
+        this.attachEventListeners();
+        this.updateCard();
+        this.updateEditableCards();
+    }
 
-const termsList = document.getElementById("terms-list");
+    initializeElements() {
+        // Store DOM elements
+        this.elements = {
+            termsList: document.getElementById("terms-list"),
+            card: document.getElementById("flashcard"),
+            term: document.getElementById("term"),
+            definition: document.getElementById("definition"),
+            cardNumber: document.getElementById("card-number"),
+            viewMode: document.getElementById("view-mode"),
+            shuffleButton: document.getElementById("shuffle-button"),
+            viewButton: document.getElementById("view-button")
+        };
+    }
 
-function updateEditableCards() {
-    termsList.innerHTML = "";
-    flashcards.forEach((flashcard, index) => {
+    attachEventListeners() {
+        document.getElementById("prev-card-btn").addEventListener("click", () => this.prevCard());
+        document.getElementById("next-card-btn").addEventListener("click", () => this.nextCard());
+        this.elements.card.addEventListener("click", () => this.flipCard());
+
+        this.elements.shuffleButton.addEventListener("click", () => this.toggleShuffleMode());
+        this.elements.viewButton.addEventListener("click", () => this.toggleViewMode());
+        document.getElementById("add-term-btn").addEventListener("click", () => this.addTerm());
+
+        document.addEventListener("keydown", (event) => this.handleKeyPress(event));
+
+        window.addEventListener("keydown", (event) => {
+            if (event.target.tagName === "INPUT") return;
+            if (event.key === " ") event.preventDefault();
+        });
+
+        document.querySelectorAll("button").forEach((button) => {
+            button.addEventListener("mousedown", (event) => {
+                event.preventDefault();
+            });
+        });
+    }
+
+    handleKeyPress(event) {
+        if (event.target.tagName === "INPUT") return;
+
+        const keyActions = {
+            "Space": () => this.flipCard(),
+            "ArrowLeft": () => this.prevCard(),
+            "ArrowRight": () => this.nextCard()
+        };
+
+        const action = keyActions[event.code];
+        if (action) action();
+    }
+
+    updateEditableCards() {
+        this.elements.termsList.innerHTML = "";
+        this.flashcards.forEach((flashcard, index) => {
+            const editableCard = this.createEditableCard(flashcard, index);
+            this.elements.termsList.appendChild(editableCard);
+        });
+    }
+
+    createEditableCard(flashcard, index) {
         const editableCard = document.createElement("div");
         editableCard.classList.add("editable-card");
-        const term = document.createElement("input")
-        const definition = document.createElement("input")
-        term.value = flashcard.term;
-        term.classList.add("editable-term");
-        term.title = "Click to edit title";
-        definition.value = flashcard.definition;
-        definition.classList.add("editable-definition");
-        definition.title = "Click to edit definition";
+
+        const term = this.createInput("term", flashcard.term, index);
+        const definition = this.createInput("definition", flashcard.definition, index);
+        const deleteButton = this.createDeleteButton(index);
+
+        editableCard.append(term, definition, deleteButton);
+        return editableCard;
+    }
+
+    createInput(type, value, index) {
+        const input = document.createElement("input");
+        input.value = value;
+        input.classList.add(`editable-${type}`);
+        input.title = `Click to edit ${type}`;
+
+        input.addEventListener("input", (event) => {
+            this.flashcards[index][type] = event.target.value;
+            this.updateCard(false);
+        });
+
+        return input;
+    }
+
+    createDeleteButton(index) {
         const deleteButton = document.createElement("button");
         deleteButton.textContent = "❌";
-        term.addEventListener("input", (event) => {
-            flashcards[index].term = event.target.value;
-            updateCard();
-        });
-        definition.addEventListener("input", (event) => {
-            flashcards[index].definition = event.target.value;
-            updateCard();
-        });
-        editableCard.appendChild(term);
-        editableCard.appendChild(definition);
-        editableCard.appendChild(deleteButton);
         deleteButton.addEventListener("click", () => {
-            flashcards.splice(index, 1);
-            currentIndex = Math.min(currentIndex, flashcards.length - 1);
-            updateCard(false);
-            updateEditableCards();
+            this.flashcards.splice(index, 1);
+            this.currentIndex = Math.min(this.currentIndex, this.flashcards.length - 1);
+            this.updateCard(false);
+            this.updateEditableCards();
         });
-        termsList.appendChild(editableCard);
-    });
+        return deleteButton;
+    }
+
+    addTerm() {
+        const newIndex = this.flashcards.length + 1;
+        this.flashcards.push({
+            term: `New Term #${newIndex}`,
+            definition: `New Definition #${newIndex}`
+        });
+        this.updateCard(false);
+        this.updateEditableCards();
+        this.elements.termsList.lastElementChild.querySelector(".editable-term").focus();
+    }
+
+    flipCard() {
+        this.elements.card.classList.toggle("flipped");
+    }
+
+    prevCard() {
+        if (this.shuffleMode) {
+            const currentIndex = this.currentIndex;
+            while (this.currentIndex === currentIndex && this.flashcards.length > 1) {
+                this.currentIndex = Math.floor(Math.random() * this.flashcards.length);
+            }
+        }
+        else {
+            this.currentIndex = (this.currentIndex - 1 + this.flashcards.length) % this.flashcards.length;
+        }
+        this.updateCard();
+
+        this.elements.card.animate([
+            { transform: "translateX(-5%)" },
+            { transform: "translateX(0)" }
+        ], { duration: 300, easing: "ease-out" })
+    }
+
+    nextCard() {
+        if (this.shuffleMode) {
+            const currentIndex = this.currentIndex;
+            while (this.currentIndex === currentIndex && this.flashcards.length > 1) {
+                this.currentIndex = Math.floor(Math.random() * this.flashcards.length);
+            }
+        }
+        else {
+            this.currentIndex = (this.currentIndex + 1) % this.flashcards.length;
+        }
+        this.updateCard();
+
+        this.elements.card.animate([
+            { transform: "translateX(5%)" },
+            { transform: "translateX(0)" }
+        ], { duration: 300, easing: "ease-out" })
+    }
+
+    toggleShuffleMode() {
+        this.shuffleMode = !this.shuffleMode;
+        this.elements.shuffleButton.textContent = `Shuffle: ${this.shuffleMode ? "On" : "Off"}`;
+    }
+
+    toggleViewMode() {
+        this.frontIsTerm = !this.frontIsTerm;
+        this.elements.viewButton.textContent = `Front: ${this.frontIsTerm ? "Term" : "Definition"}`;
+        this.updateCard();
+    }
+
+    updateCard(unFlip = true) {
+        if (unFlip) {
+            this.elements.card.classList.remove("flipped");
+        }
+
+        if (this.flashcards.length < 1) {
+            this.updateEmptyState();
+        } else {
+            this.updateCardContent();
+        }
+    }
+
+    updateEmptyState() {
+        this.currentIndex = 0;
+        this.elements.term.textContent = "No term.";
+        this.elements.definition.textContent = "Add a term in list below.";
+        this.elements.cardNumber.textContent = "No cards";
+        this.elements.viewMode.textContent = this.frontIsTerm ? "Term" : "Definition";
+    }
+
+    updateCardContent() {
+        const currentCard = this.flashcards[this.currentIndex];
+        this.elements.term.textContent = this.frontIsTerm ? currentCard.term : currentCard.definition;
+        this.elements.definition.textContent = this.frontIsTerm ? currentCard.definition : currentCard.term;
+        this.elements.cardNumber.textContent = `${this.currentIndex + 1}/${this.flashcards.length}`;
+        this.elements.viewMode.textContent = this.frontIsTerm ? "Term" : "Definition";
+    }
 }
 
-function addTerm() {
-    flashcards.push({ term: `New Term #${flashcards.length + 1}`, definition: `New Definition #${flashcards.length + 1}` });
-    updateEditableCards();
-}
-
-updateEditableCards();
-
-document.querySelectorAll("button").forEach((button) => {
-    button.addEventListener("mousedown", (event) => {
-        event.preventDefault();
-    });
+document.addEventListener("DOMContentLoaded", () => {
+    new FlashcardApp();
 });
-
-window.addEventListener('keydown', (e) => {
-    if (e.keyCode == 32 && e.target == document.body) {
-        e.preventDefault();
-    }
-});
-
-let shuffleMode = false;
-let frontIsTerm = true;
-
-function flipCard() {
-    document.querySelector(".card").classList.toggle("flipped");
-}
-
-function prevCard() {
-    currentIndex = (currentIndex - 1 + flashcards.length) % flashcards.length;
-    updateCard();
-}
-
-function nextCard() {
-    currentIndex = (currentIndex + 1) % flashcards.length;
-    updateCard();
-}
-
-function toggleShuffleMode() {
-    // TODO: revert to not shuffled when unshuffled 
-    shuffleMode = !shuffleMode;
-    document.getElementById("shuffle-button").textContent = `Shuffle: ${shuffleMode ? "On" : "Off"}`;
-    if (shuffleMode) {
-        shuffleCards();
-    } else {
-        currentIndex = 0;
-        updateCard();
-    }
-}
-
-function toggleViewMode() {
-    frontIsTerm = !frontIsTerm;
-    document.getElementById("view-button").textContent = `Front: ${frontIsTerm ? "Term" : "Definition"}`;
-    updateCard();
-}
-
-function shuffleCards() {
-    for (let i = flashcards.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [flashcards[i], flashcards[j]] = [flashcards[j], flashcards[i]];
-    }
-    currentIndex = 0;
-    updateCard();
-}
-
-function updateCard(unFlip = true) {
-    if (unFlip) {
-        document.querySelector(".card").classList.remove("flipped");
-    }
-    if (flashcards.length < 1) {
-        currentIndex = 0;
-        document.getElementById("term").textContent = "No term.";
-        document.getElementById("definition").textContent = "Add a term in list below.";
-        document.getElementById("card-number").textContent = `No cards`;
-        document.getElementById("view-mode").textContent = frontIsTerm ? "Term" : "Definition";
-    }
-    else {
-        document.getElementById("term").textContent = frontIsTerm ? flashcards[currentIndex].term : flashcards[currentIndex].definition;
-        document.getElementById("definition").textContent = frontIsTerm ? flashcards[currentIndex].definition : flashcards[currentIndex].term;
-        document.getElementById("card-number").textContent = `${currentIndex + 1}/${flashcards.length}`;
-        document.getElementById("view-mode").textContent = frontIsTerm ? "Term" : "Definition";
-    }
-}
-
-document.addEventListener("keydown", (event) => {
-    if (event.code === "Space") {
-        flipCard();
-    } else if (event.code === "ArrowLeft") {
-        prevCard();
-    } else if (event.code === "ArrowRight") {
-        nextCard();
-    }
-});
-
-updateCard();

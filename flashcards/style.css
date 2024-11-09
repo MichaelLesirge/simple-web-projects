@@ -3,6 +3,7 @@
 }
 
 body {
+     margin-top: 12px;
     font-family: Arial, sans-serif;
     background-color: #f0f0f0;
     display: flex;
@@ -38,7 +39,7 @@ body {
 }
 
 .card.flipped .card-inner {
-    transform: rotateY(180deg);
+    transform: rotateX(180deg);
 }
 
 .card-front,
@@ -61,7 +62,7 @@ body {
 .card-back {
     background-color: #333;
     color: #fff;
-    transform: rotateY(180deg);
+    transform: rotateX(180deg);
 }
 
 .buttons {

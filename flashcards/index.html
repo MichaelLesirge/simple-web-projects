@@ -1,52 +1,38 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="style.css">
-  <script src="script.js" defer></script>
-  <title>Flashcard App</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+    <title>Flashcards App</title>
 </head>
-
 <body>
-  <div class="card-info">
-    <span id="card-number">1/3</span> - <span id="view-mode">Term</span>
-  </div>
-  <div class="card-container">
-    <button onclick="prevCard()">◄</button>
-    <div class="card" onclick="flipCard()">
-      <div class="card-inner">
-        <div class="card-front">
-          <h2 id="term">Term</h2>
-        </div>
-        <div class="card-back">
-          <p id="definition">Definition</p>
-        </div>
-      </div>
+    <div class="card-info">
+        <span id="card-number">1/3</span> - <span id="view-mode">Term</span>
     </div>
-    <button onclick="nextCard()">►</button>
-  </div>
-
-  <div class="action-buttons">
-    <button id="shuffle-button" onclick="toggleShuffleMode()">Shuffle: Off</button>
-    <button id="view-button" onclick="toggleViewMode()">Front: Term</button>
-  </div>
-
-  <div class="card-list-container">
-    <h2>Terms</h2>
-    <div id="terms-list">
+    <div class="card-container">
+        <button id="prev-card-btn" title="Previous Card">◄</button>
+        <div class="card" id="flashcard">
+            <div class="card-inner">
+                <div class="card-front">
+                    <h2 id="term">Term</h2>
+                </div>
+                <div class="card-back">
+                    <p id="definition">Definition</p>
+                </div>
+            </div>
+        </div>
+        <button id="next-card-btn" title="Next Card">►</button>
     </div>
-    <button onclick="addTerm()">Add Term</button>
-  </div>
-
-  <!-- Pay wall popup -->
-   <div id="popup">
-    <h2>Unlock Premium Features</h2>
-    <p>Upgrade to premium to unlock more features.</p>
-    <button>Upgrade to Premium</button>
-    <p>FUCK YOU. -From Quizlet</p>
-   </div>
+    <div class="action-buttons">
+        <button id="shuffle-button" title="Enable Random Next Card">Random Next: Off</button>
+        <button id="view-button" title="Enable Reverse Cards">Front: Term</button>
+    </div>
+    <div class="card-list-container">
+        <h2>Terms</h2>
+        <div id="terms-list"></div>
+        <button id="add-term-btn">Add Term</button>
+    </div>
 </body>
-
 </html>
