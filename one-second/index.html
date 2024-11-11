@@ -7,13 +7,16 @@
     <title>One Second Game</title>
     <style>
         body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
             background-color: #000;
             color: #fff;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
+
             min-height: 100vh;
             margin: 0;
         }
@@ -32,17 +35,26 @@
         }
 
         button {
+            width: 7.6rem;
+            font-size: 18px;
+
             padding: 15px 40px;
             border-radius: 25px;
             border: none;
-            font-size: 18px;
+            
             cursor: pointer;
-            transition: all 0.3s;
+
+            /* transition: all 0.3s; */
         }
 
-        body button:hover {
+        button:hover {
             transform: scale(1.01);
             filter: brightness(0.9);
+        }
+
+        button:active {
+            transform: scale(0.99);
+            filter: brightness(1.1);
         }
 
         #start {
@@ -80,6 +92,8 @@
 </head>
 
 <body>
+    <h1>One Second</h1>
+    
     <div id="timer">00:00:00</div>
     <div class="buttons">
         <button id="reset">Reset</button>
@@ -140,7 +154,6 @@
         }
 
         function checkWin() {
-            console.log(timerDisplay.textContent);
             if (timerDisplay.textContent === '00:01.00') {
                 
                 localStorage.setItem('wins', (parseInt(localStorage.getItem('wins')) || 0) + 1);
@@ -173,14 +186,6 @@
                 event.preventDefault();
                 reset();
             }
-        });
-
-        startButton.addEventListener('mousedown', (event) => {
-            event.preventDefault();
-        });
-
-        resetButton.addEventListener('mousedown', (event) => {
-            event.preventDefault();
         });
 
         updateDisplay();
