@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>One Second Game</title>
+    <style>
+        body {
+            background-color: #000;
+            color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        #timer {
+            font-size: 72px;
+            font-weight: 300;
+            margin: 40px 0;
+
+            font-variant-numeric: tabular-nums;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 20px;
+        }
+
+        button {
+            padding: 15px 40px;
+            border-radius: 25px;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        body button:hover {
+            transform: scale(1.01);
+            filter: brightness(0.9);
+        }
+
+        #start {
+            background-color: #34c759;
+            color: white;
+        }
+
+        #start.stop {
+            background-color: #ff3b30;
+        }
+
+        #reset {
+            background-color: #3a3a3c;
+            color: white;
+        }
+
+        #score {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            pointer-events: none;
+        }
+
+        @keyframes fall {
+            to {
+                transform: translateY(200vh) rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="timer">00:00:00</div>
+    <div class="buttons">
+        <button id="reset">Reset</button>
+        <button id="start">Start</button>
+    </div>
+    <div id="score">Wins: 0</div>
+
+    <script>
+        let runStartTime = null;
+        let pastTime = 0;
+        
+        const timerDisplay = document.getElementById('timer');
+        const startButton = document.getElementById('start');
+        const resetButton = document.getElementById('reset');
+        const scoreDisplay = document.getElementById('score');
+
+        function updateDisplay() {
+            const milliseconds = (runStartTime === null ? 0 : Date.now() - runStartTime) + pastTime;
+
+            const centiseconds = Math.floor(milliseconds / 10) % 100;
+            const seconds = Math.floor(milliseconds / 1000) % 60;
+            const minutes = Math.floor(milliseconds / 60000);
+
+            timerDisplay.textContent =
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}.${centiseconds.toString().padStart(2, '0')}`;
+
+            requestAnimationFrame(updateDisplay);
+        }
+
+        function createConfetti() {
+            for (let i = 0; i < 100; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.backgroundColor = `hsl(${Math.random() * 360}deg, 100%, 50%)`;
+                confetti.style.top = `${Math.random() * 50}vw`;
+                confetti.style.left = `${Math.random() * 100}vw`;
+                confetti.style.animation = `fall ${Math.random() * 3 + 2}s linear`;
+                document.body.appendChild(confetti);
+
+                setTimeout(() => confetti.remove(), 2000);
+            }
+        }
+
+        function toggleStart() {
+            if (runStartTime === null) {
+                runStartTime = Date.now();
+                startButton.textContent = 'Stop';
+                startButton.classList.add('stop');
+            } else {
+                pastTime += Date.now() - runStartTime
+                runStartTime = null;
+
+                startButton.textContent = 'Start';
+                startButton.classList.remove('stop');
+
+                setTimeout(checkWin, 100);
+            }
+        }
+
+        function checkWin() {
+            console.log(timerDisplay.textContent);
+            if (timerDisplay.textContent === '00:01.00') {
+                
+                localStorage.setItem('wins', (parseInt(localStorage.getItem('wins')) || 0) + 1);
+
+                createConfetti();
+            }
+        }
+
+        function updateWins() {
+            scoreDisplay.textContent = `Wins: ${localStorage.getItem('wins') || 0}`;
+        }
+
+        function reset() {
+            runStartTime = null;
+            pastTime = 0;
+
+            startButton.textContent = 'Start';
+            startButton.classList.remove('stop');
+        }
+
+        startButton.addEventListener('click', toggleStart);
+        resetButton.addEventListener('click', reset);
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === ' ') {
+                event.preventDefault();
+                toggleStart();
+            }
+            if (event.key === 'r' || event.key === "enter") {
+                event.preventDefault();
+                reset();
+            }
+        });
+
+        startButton.addEventListener('mousedown', (event) => {
+            event.preventDefault();
+        });
+
+        resetButton.addEventListener('mousedown', (event) => {
+            event.preventDefault();
+        });
+
+        updateDisplay();
+
+    </script>
+</body>
+
+</html>
