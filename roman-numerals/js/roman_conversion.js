@@ -63,7 +63,7 @@ export function numToRoman(num, rules) {
     }
     
     if (rules.clock && num <= 12) {
-        result = [clockGlyphs[num-1]];
+        result = [toRules(clockGlyphs[num-1], rules)];
         num = 0;
     }
 

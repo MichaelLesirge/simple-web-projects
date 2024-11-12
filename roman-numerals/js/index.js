@@ -110,13 +110,14 @@ function updateNumeral(event) {
             setInfoDisplay([]);
         }
         else {
-            numeralCorrect.innerText = "Valid Numeral";
-            if (number) {
+            numeralCorrect.innerText = "Valid Numeral";            
+            if (number !== null) {
                 decimalInput.value = number;
                 wordDisplay.innerText = numToWord(number, true);
                 
                 const [numeral, numeralsPlace] = numToRoman(number, rules);
-                if (numeral == numeralInput.value) {
+                
+                if (numeral === numeralInput.value) {
                     setInfoDisplay(numeralsPlace, number.toString())
                 }
                 else {
