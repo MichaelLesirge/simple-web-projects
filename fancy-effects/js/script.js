@@ -18,17 +18,20 @@ import aiSnake from "./snake.js";
 import boid from "./boids.js";
 import lorenz from "./lorenz.js";
 
-makeFollowMouse(document.getElementById("blob"));
 
 document.querySelectorAll(".title-section").forEach(element => {
     setHashAutoFocus(element, "", {offScreenRatio: 0.5})
 });
 
-makeHackerText(
-    document.querySelectorAll(".hacker-text"),
-    charRange("a", "z") + charRange("A", "Z") + charRange("0", "9") + "`-=[]\\;',./~_+{}|:\"<>?".repeat(2),
-    {timeout: 100, addBlanksAfter: 400}
-);
+if (window.innerWidth > 800) {
+    makeFollowMouse(document.getElementById("blob"));
+    
+    makeHackerText(
+        document.querySelectorAll(".hacker-text"),
+        charRange("a", "z") + charRange("A", "Z") + charRange("0", "9") + "`-=[]\\;',./~_+{}|:\"<>?".repeat(2),
+        {timeout: 100, addBlanksAfter: 400}
+    );
+}
 
 spiral();
 conway();

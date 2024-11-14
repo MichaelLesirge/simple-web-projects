@@ -24,6 +24,8 @@ canvas {
     border: 1px solid #000;
     background-color: white;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+
+    overflow-x: scroll;
 }
 
 #ui {
@@ -101,9 +103,6 @@ button:hover {
         flex-direction: row;
         flex-wrap: wrap;
         justify-content: center;
-    }
-
-    #ui {
-        max-width: 100%;
+        width: 75%;
     }
 }

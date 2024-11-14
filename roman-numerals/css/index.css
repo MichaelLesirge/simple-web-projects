@@ -57,7 +57,7 @@ body {
 
     text-align: center;
 
-    /* font-family: Arial, Helvetica, sans-serif; */
+    font-family: Arial, Helvetica, sans-serif;
 }
 
 .explanation {
@@ -105,6 +105,8 @@ body {
     align-items: center;
     justify-content: center;
 
+    padding: 4px;
+
     outline: 1px solid black;
     border-radius: 5px;
 }
@@ -125,7 +127,9 @@ body {
     display: flex;
     flex-direction: row;
     align-items: center;
-    justify-content: center;
+    /* justify-content: center; */
+
+    text-align: center;
     
     gap: 0.3rem;
 
