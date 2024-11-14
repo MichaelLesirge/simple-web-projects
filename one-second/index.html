@@ -157,6 +157,7 @@
             if (timerDisplay.textContent === '00:01.00') {
                 
                 localStorage.setItem('wins', (parseInt(localStorage.getItem('wins')) || 0) + 1);
+                updateWins();
 
                 createConfetti();
             }
