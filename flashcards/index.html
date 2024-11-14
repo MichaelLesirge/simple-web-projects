@@ -37,7 +37,16 @@
     <div class="card-list-container">
         <h2>Terms</h2>
         <div id="terms-list"></div>
-        <button id="add-term-btn">Add Term</button>
+        <div class="terms-list-buttons">
+            <div>
+                <button id="add-term-btn">Add Term</button>
+            </div>
+            <div>
+                <button id="download-json" title="Save file containing labels">Save File</button>
+                <label class="button" for="upload-json" title="Load file containing labels">Load File</label>
+                <input style="display: none;" itemid="upload-json" type="file" accept=".json" id="upload-json">
+            </div>
+        </div>
     </div>
 </body>
 </html>

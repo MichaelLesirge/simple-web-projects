@@ -2,9 +2,9 @@ class FlashcardApp {
     constructor() {
         this.currentIndex = 0;
         this.flashcards = [
-            { term: "HTML", definition: "A standard markup language used to create web pages. 🏠" },
-            { term: "CSS", definition: "A style sheet language used to describe the presentation of a document. 🎨" },
-            { term: "JavaScript", definition: "A programming language used for web development. ⚙️" },
+            { term: "HTML", definition: "A standard markup language used to create web pages." },
+            { term: "CSS", definition: "A style sheet language used to describe the presentation of a document." },
+            { term: "JavaScript", definition: "A programming language used for web development." },
         ];
         this.shuffleMode = false;
         this.frontIsTerm = true;
@@ -13,6 +13,8 @@ class FlashcardApp {
         this.attachEventListeners();
         this.updateCard();
         this.updateEditableCards();
+        
+        this.loadFromLocalStorage();
     }
 
     initializeElements() {
@@ -65,7 +67,7 @@ class FlashcardApp {
         if (action) action();
     }
 
-    updateEditableCards() {
+    updateEditableCards() {        
         this.elements.termsList.innerHTML = "";
         this.flashcards.forEach((flashcard, index) => {
             const editableCard = this.createEditableCard(flashcard, index);
@@ -85,6 +87,29 @@ class FlashcardApp {
         return editableCard;
     }
 
+    getAsJson() {
+        return JSON.stringify(this.flashcards, null, 2);
+    }
+
+    loadFromJson(json) {
+        try {
+            this.flashcards = JSON.parse(json);
+            this.currentIndex = 0;
+        } catch (error) {
+            alert("Invalid JSON format.");
+        }
+        this.updateCard(true);
+        this.updateEditableCards();
+    }
+
+    saveToLocalStorage() {
+        localStorage.setItem("flashcards", this.getAsJson());
+    }
+
+    loadFromLocalStorage() {
+        this.loadFromJson(localStorage.getItem("flashcards") || "[]");
+    }
+
     createInput(type, value, index) {
         const input = document.createElement("input");
         input.value = value;
@@ -93,6 +118,7 @@ class FlashcardApp {
 
         input.addEventListener("input", (event) => {
             this.flashcards[index][type] = event.target.value;
+            this.saveToLocalStorage();
             this.updateCard(false);
         });
 
@@ -105,6 +131,7 @@ class FlashcardApp {
         deleteButton.addEventListener("click", () => {
             this.flashcards.splice(index, 1);
             this.currentIndex = Math.min(this.currentIndex, this.flashcards.length - 1);
+            this.saveToLocalStorage();
             this.updateCard(false);
             this.updateEditableCards();
         });
@@ -117,6 +144,7 @@ class FlashcardApp {
             term: `New Term #${newIndex}`,
             definition: `New Definition #${newIndex}`
         });
+        this.saveToLocalStorage();
         this.updateCard(false);
         this.updateEditableCards();
         this.elements.termsList.lastElementChild.querySelector(".editable-term").focus();
