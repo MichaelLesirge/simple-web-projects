@@ -153,7 +153,6 @@ body {
 }
 
 .check-mark input {
-    scale: 1.2;
     border-color: #07f;
 }
 
@@ -166,10 +165,6 @@ body {
     .under-text {
         flex-direction: column;
         width: max-content;
-    }
-
-    .explanation .card-numeral {
-        font-size: 300%;
     }
 
     .under-text.settings {

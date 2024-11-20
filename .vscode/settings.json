@@ -8,4 +8,5 @@
         "tetromino",
         "tetrominos"
     ],
+    "liveServer.settings.useLocalIp": true
 }

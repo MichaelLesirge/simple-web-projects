@@ -1,12 +1,15 @@
 * {
+	box-sizing: border-box;
 	margin: 0;
 	padding: 0;
 }
 
-body {
+html, body, .container, main {
 	width: 100%;
 	height: 100%;
+}
 
+body {
 	color: white;
 	background: black;
 
@@ -16,11 +19,18 @@ body {
 	font-size: 0.9rem;
 }
 
+.main {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
 .dice-container {
 	display: flex;
 	flex-wrap: wrap;
 	gap: 1rem;
 	padding: 1rem;
+	overflow-y: auto;
 }
 
 .dice-display {
@@ -107,10 +117,6 @@ body {
 .options {
 	display: flex;
 	gap: 1rem;
-
-	position: fixed;
-	bottom: 0;
-	left: 0;
 
 	padding: 0.4rem 0.5rem;
 
@@ -364,7 +370,7 @@ input[type="number"].clear-input::-webkit-outer-spin-button {
 .distribution-container {
     display: flex;
     align-items: flex-end;
-    height: 100px;
+    height: 9rem;
     gap: 2px;
     margin-top: 0.5rem;
     border-bottom: 2px solid white;
@@ -401,5 +407,19 @@ input[type="number"].clear-input::-webkit-outer-spin-button {
 @media screen and (max-width: 600px) {
 	.options {
 		flex-direction: column;
+		align-items: center;
+		overflow-y: auto;
+		overflow-x: hidden;
+	}
+
+	.options > div {
+		width: 99%;
+	}
+
+	.options .distribution {
+		width: 100%;
+		max-width: none;
+		min-width: none;
+		margin: 0;
 	}
 }

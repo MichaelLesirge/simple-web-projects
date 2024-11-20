@@ -90,14 +90,18 @@ function createLabelInputs() {
 
     for (const [buttonName, position] of Object.entries(buttonPositions)) {
         const input = document.createElement("input");
+        const label = document.createElement("label");
 
         input.type = "text";
         input.spellcheck = "true";
 
         input.id = input.title = input.placeholder = buttonName;
 
+        label.for = input.id;
+        label.textContent = buttonName;
+
         input.addEventListener("input", (e) => {
-            labels[buttonName] = e.target.value.trim();
+            state.labels[buttonName] = e.target.value.trim();
             saveState();
         });
 

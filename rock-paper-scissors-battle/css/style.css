@@ -159,16 +159,13 @@ body {
 }
 
 .btn {
-    height: 2rem;
-
     cursor: pointer;
 
-    padding: 0 1rem;
+    padding: 0.1rem 1rem;
 
     border: 1px solid gray;
     border-radius: 1rem;
-    
-    
+        
     font-size: 1.1rem;
 }
 

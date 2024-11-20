@@ -3,6 +3,7 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
+    text-align: center;
     margin: 20px;
     background-color: #f0f0f0;
 }
@@ -11,7 +12,7 @@ body {
     display: flex;
     justify-content: center;
     gap: 20px;
-    margin-bottom: 20px;
+    margin-bottom: 1rem;
 }
 
 #left-labels, #right-labels {
@@ -24,7 +25,6 @@ canvas {
     border: 1px solid #000;
     background-color: white;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-
     overflow-x: scroll;
 }
 
@@ -32,7 +32,6 @@ canvas {
     display: flex;
     flex-direction: column;
     gap: 15px;
-    width: 100%;
     max-width: 400px;
     padding: 20px;
     background-color: white;
@@ -96,13 +95,14 @@ button:hover {
 @media (max-width: 1000px) {
     #main-container {
         flex-direction: column;
-        align-items: center;
     }
 
-    #left-labels, #right-labels {
-        flex-direction: row;
-        flex-wrap: wrap;
-        justify-content: center;
-        width: 75%;
+    canvas, #left-labels, #right-labels {
+        width: 98vw;
+    }
+
+    #ui {
+        width: 80vw;
+        max-width: none;
     }
 }
