@@ -1,4 +1,4 @@
-import { numToRoman, romanToNum, toRules } from "./roman_conversion.js";
+import { numToRoman, romanToNum, toRulesWriting } from "./roman_conversion.js";
 import { numToWord } from "./english_conversion.js";
 
 setAllowedChars("decimal-input", /\d/)
@@ -100,7 +100,7 @@ function updateNumeral(event) {
     }
 
     const inputValue = numeralInput.value;
-    numeralInput.value = toRules(inputValue, rules);
+    numeralInput.value = toRulesWriting(inputValue, rules);
 
     if (inputValue) {
         const [number, valid] = romanToNum(inputValue);

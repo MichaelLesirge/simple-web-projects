@@ -41,15 +41,27 @@ const apostrophusReducedGlyphs = {
 }
 
 export function toRules(glyphs, rules) {
+
+    glyphs = glyphs.split("").map((glyph) => (rules.specialCharters ? specialGlyphsMap : standardGlyphsMap).get(glyph) ?? glyph).join("");
+    
+    if (rules.lowercase) glyphs = glyphs.toLowerCase();
+    else glyphs = glyphs.toUpperCase();
+    
+    return glyphs;
+}
+
+export function toRulesWriting(glyphs, rules) {
+    
     if (rules.lowercase) glyphs = glyphs.toLowerCase();
     else glyphs = glyphs.toUpperCase();
 
     glyphs = glyphs.split("").map((glyph) => (rules.specialCharters ? specialGlyphsMap : standardGlyphsMap).get(glyph) ?? glyph).join("");
+    
     return glyphs;
 }
 
 export function toStandard(glyphs) {
-    glyphs = glyphs.toUpperCase();;
+    glyphs = glyphs.toUpperCase();
     glyphs = glyphs.split("").map((glyph) => standardGlyphsMap.get(glyph) ?? glyph).join("");
     return glyphs;
 }
