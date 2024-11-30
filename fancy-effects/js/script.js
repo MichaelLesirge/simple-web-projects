@@ -17,6 +17,7 @@ import unitCircle from "./unitcircle.js";
 import aiSnake from "./snake.js";
 import boid from "./boids.js";
 import lorenz from "./lorenz.js";
+import pong from "./pong.js";
 
 
 document.querySelectorAll(".title-section").forEach(element => {
@@ -47,3 +48,4 @@ unitCircle();
 aiSnake();
 boid();
 lorenz();
+pong();
