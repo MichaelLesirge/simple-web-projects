@@ -70,6 +70,8 @@ class Logo {
         ctx.filter = `hue-rotate(${this.hue}deg)`;
 
         this.confettiParticles = [];
+
+        this.timesBounced = 0;
     }
 
     simulateMovement(corner, bounces) {
@@ -145,11 +147,13 @@ class Logo {
             this.hue = (this.hue + 30) % 360;
             ctx.filter = `hue-rotate(${this.hue}deg)`;
 
+            console.log(this.timesBounced++);
+
             // Check if it's a corner and generate confetti
             if ((this.x <= 0 || this.x + this.image.width >= canvas.width) &&
                 (this.y <= 0 || this.y + this.image.height >= canvas.height)) {
                 this.createConfetti();
-            }
+            }            
         }
     }
 

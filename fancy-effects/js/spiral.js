@@ -118,6 +118,10 @@ function init() {
         clearance: baseLength * 0.03,
     };
     base.spacing = (base.length - base.initialRadius - base.clearance) / 2 / colors.length;
+
+    console.log("Start: " + new Date(settings.startTime))
+    console.log("End: " + new Date(settings.startTime + settings.durationSeconds));
+    
 }
 
 function drawArc(x, y, radius, start, end, fill = false) {

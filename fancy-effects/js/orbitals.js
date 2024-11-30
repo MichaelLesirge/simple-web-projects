@@ -99,9 +99,7 @@ function nextFrame() {
     lastTime = currentTime;
 
     const alphaPercent = 1 - Math.pow((1 + Math.sin(currentTime * osculateSettings.osculateScale - 1)) / 2, 2)
-    settings.clearAlpha = osculateSettings.clearAlphaMin + (alphaPercent * (osculateSettings.clearAlphaMax - osculateSettings.clearAlphaMin))
-    console.log(settings.clearAlpha);
-    
+    settings.clearAlpha = osculateSettings.clearAlphaMin + (alphaPercent * (osculateSettings.clearAlphaMax - osculateSettings.clearAlphaMin)) 
 
     ctx.save();
     ctx.translate(center.x, center.y);

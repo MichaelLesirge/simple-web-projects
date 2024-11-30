@@ -61,6 +61,9 @@ function init() {
     const y = randomFloat(-0.1, 0.1);
     const z = randomFloat(-0.1, 0.1);
 
+    console.log({ rho, sigma, beta }, { x, y, z });
+    
+
     objects = [
         new LorenzPoint(x, y, z, '#FFD700'),
 
