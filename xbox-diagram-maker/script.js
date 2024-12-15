@@ -255,9 +255,34 @@ document.getElementById("print-button").addEventListener("click", printImage);
 document.getElementById("download-json").addEventListener("click", downloadJSON);
 document.getElementById("upload-json").addEventListener("change", loadJSON);
 
-// Initialize
 window.addEventListener("load", () => {
     createLabelInputs();
     loadState();
     drawController();
 });
+
+
+function updateTheme() {
+    let value = localStorage.getItem("theme");
+
+    if (value === "system") {
+        value = window.matchMedia('(prefers-color-scheme: dark)').matches ? "dark" : "light";
+    }
+
+    if (value === "dark") {
+        document.body.classList.add("dark");
+    }
+    else {
+        document.body.classList.remove("dark");
+    }
+}
+
+document.getElementById("theme").addEventListener("input", (e) => {
+    localStorage.setItem("theme", e.target.value);
+    updateTheme();
+});
+
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener("change", updateTheme)
+
+document.getElementById("theme").value = localStorage.getItem("theme") || "system";
+updateTheme();
