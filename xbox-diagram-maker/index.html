@@ -34,19 +34,19 @@
                 <option>#540c5c</option>
             </datalist>
         </div>
-        <div>
-            <button id="download-button" title="Download diagram as PNG">Save As Image 🖼️</button>
+        <div class="button-row">
+            <button id="download-button" title="Download diagram as PNG">Save Image 🖼️</button>
             <button id="print-button" title="Open print dialog for diagram">Print Image 🖨️</button>
         </div>
-        <div>
-            <button id="download-json" title="Save config file containing labels">Save Labels JSON 💾</button>
-            <label class="button" for="upload-json" title="Load config file containing labels">Load Labels JSON 💾</label>
+        <div class="button-row no-phone">
+            <button style="background-color: #32aa66;" id="download-json" title="Save JSON config file containing labels">Export Labels JSON 💾</button>
+            <label style="background-color: #32aa66;" class="button" for="upload-json" title="Load JSON config file containing labels">Import Labels JSON 💾</label>
             <input itemid="upload-json" type="file" accept=".json" id="upload-json">
         </div>
-        <div>
+        <div class="button-row no-phone">
             <button id="download-java" title="Download Java file to use as reference for creating this control map using WPILib for FRC robotics">Download WPILib Java Reference (FRC 🤖)</button>
         </div>
-        <div>
+        <div class="button-row">
             <button style="background-color: red;" id="reset-button">Reset 🗑️</button>
         </div>
     </div>

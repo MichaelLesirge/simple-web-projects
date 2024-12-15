@@ -44,7 +44,7 @@ let state = structuredClone(defaultState);
 
 function drawController() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.drawImage(controllerImage, 0, 0, canvas.width-6, canvas.height);
+    ctx.drawImage(controllerImage, 0, 0, canvas.width - 6, canvas.height);
 
     ctx.textBaseline = "middle";
     ctx.direction = "ltr";
@@ -57,7 +57,7 @@ function drawController() {
             ctx.fillStyle = "red";
             ctx.font = "16px Arial";
             ctx.direction = position[0] === LEFT ? "rtl" : "ltr";
-            ctx.fillText(`-------{${button}}------`, position[0], position[1] + 16/3);
+            ctx.fillText(`-------{${button}}------`, position[0], position[1] + 16 / 3);
         }
 
         ctx.beginPath();
@@ -77,7 +77,7 @@ function drawController() {
             ctx.fillStyle = "#000";
             ctx.font = "16px Arial";
             ctx.direction = position[0] === LEFT ? "rtl" : "ltr";
-            ctx.fillText(label, position[0], position[1] + 16/2.8);
+            ctx.fillText(label, position[0], position[1] + 16 / 2.8);
         }
     }
 
@@ -94,6 +94,7 @@ function createLabelInputs() {
 
         input.type = "text";
         input.spellcheck = "true";
+        input.lang = "en";
 
         input.id = input.title = input.placeholder = buttonName;
 
@@ -119,7 +120,7 @@ function saveState() {
 
 function loadState() {
     const savedState = localStorage.getItem("controllerState");
-    
+
     if (savedState) {
         const state = JSON.parse(savedState);
         updateState(state);
@@ -148,12 +149,12 @@ function downloadJSON() {
     const jsonString = JSON.stringify(state, null, 2);
     const blob = new Blob([jsonString], { type: "application/json" });
     const url = URL.createObjectURL(blob);
-    
+
     const link = document.createElement("a");
     link.href = url;
     link.download = getPageName() + ".json";
     link.click();
-    
+
     URL.revokeObjectURL(url);
 }
 
@@ -161,7 +162,7 @@ function loadJSON(event) {
     const file = event.target.files[0];
     if (file) {
         const reader = new FileReader();
-        reader.onload = function(e) {
+        reader.onload = function (e) {
             try {
                 const newState = JSON.parse(e.target.result);
                 setTimeout(() => event.target.value = null, 1000)
@@ -178,7 +179,7 @@ function loadJSON(event) {
 }
 
 function getPageName() {
-    return `${state.title || "default"}-controller-labeled`
+    return toKebabCase(`${(state.title || "xbox").trim()} controller labeled`)
 }
 
 function downloadImage() {
@@ -227,7 +228,7 @@ function updateState(newState) {
         input.value = labels[button] || '';
     });
 
-    state = {title, titleColor, labels}
+    state = { title, titleColor, labels }
 
     drawController();
 
@@ -263,7 +264,7 @@ window.addEventListener("load", () => {
 
 
 function updateTheme() {
-    let value = localStorage.getItem("theme");
+    let value = localStorage.getItem("theme") ?? "system";
 
     if (value === "system") {
         value = window.matchMedia('(prefers-color-scheme: dark)').matches ? "dark" : "light";
@@ -284,5 +285,120 @@ document.getElementById("theme").addEventListener("input", (e) => {
 
 window.matchMedia('(prefers-color-scheme: dark)').addEventListener("change", updateTheme)
 
-document.getElementById("theme").value = localStorage.getItem("theme") || "system";
+document.getElementById("theme").value = localStorage.getItem("theme") ?? "system";
 updateTheme();
+
+const buttonCode = {
+    "View": "start()",
+    "Menu": "back()",
+    "Left Bumper": "leftBumper()",
+    "Right Bumper": "rightBumper()",
+    "Left Trigger": "leftTrigger()",
+    "Right Trigger": "rightTrigger()",
+    "Left Stick Y Axis": "getLeftY()",
+    "Left Stick X Axis": "getLeftX()",
+    "Left Stick Button": "leftStick()",
+    "Y": "y()",
+    "B": "b()",
+    "X": "x()",
+    "A": "a()",
+    "D-pad Up": "povUp()",
+    "D-pad Left": "povLeft()",
+    "D-pad Down": "povDown()",
+    "D-pad Right": "povRight()",
+    "Right Stick Y Axis": "getRightY()",
+    "Right Stick X Axis": "getLeftX()",
+    "Right Stick Button": "rightStick()",
+};
+
+String.prototype.toCapitalized = function () {
+	return this.charAt(0).toUpperCase() + this.slice(1).toLowerCase();
+};
+
+function convertString(text, func, split_separator = "", join_separator = undefined) {
+	return text.split(split_separator).map(func).join(join_separator ?? split_separator)
+}
+
+function toPascalCase(text) {
+    return convertString(text, (word) => word.toCapitalized(), " ", "");
+}
+
+function toCamelCase(text) {
+    return convertString(text, (word, index) => (index === 0 ? word.toLowerCase() : word.toCapitalized()), " ", "");
+}
+
+function toKebabCase(text) {
+    return convertString(text, (word, index) => word.toLowerCase(), " ", "-");
+}
+
+function toSentence(text) {
+    return convertString(text, (word, index) => (index === 0 ? word.toCapitalized() : word.toLowerCase()), " ", " ");
+}
+
+function createJavaReference() {
+
+    const controllerName = toCamelCase((state.title || "xbox") + " controller");
+
+    const lines = []
+
+    for (const [type, comment] of Object.entries(state.labels)) {
+
+        if (comment.trim().length < 1) {
+            continue;
+        }
+
+        lines.push({
+            comment: `${toSentence(comment)} ${type.includes("Axis") ? "axis" : "button"}`,
+            code: controllerName + "." + buttonCode[type] + ";",
+        })
+    }
+
+    let text = "";
+
+    const tabs = 2;
+
+    for (const line of lines) {
+        text += `${'\t'.repeat(tabs)}// ${line.comment}\n`
+        text += `${'\t'.repeat(tabs)}${line.code}\n`
+        text += "\n"
+    }
+   
+    return  `package frc.robot;
+
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+
+
+public class RobotContainer {
+
+\tprivate final CommandXboxController ${controllerName} =
+\t\tnew CommandXboxController(0);
+
+\tpublic RobotContainer() {
+\t\tconfigureBindings();
+\t}
+
+\tprivate void configureBindings() {
+\t\t${text.trim()}
+\t}
+
+\tpublic Command getAutonomousCommand() {
+\t\treturn Commands.none();
+\t}
+}`
+}
+
+function createJavaReferenceObject() {
+    const fileContent = createJavaReference();
+    const file = new Blob([fileContent], {type: 'text/plain'});
+
+    return (window.URL || window.webkitURL).createObjectURL(file)
+}
+
+document.getElementById("download-java").addEventListener("click", () => {
+    const link = document.createElement("a");
+    link.setAttribute("href", createJavaReferenceObject());
+    link.setAttribute("download", toPascalCase((state.title || "xbox") + " mapping reference") + ".java");
+    link.click();
+});

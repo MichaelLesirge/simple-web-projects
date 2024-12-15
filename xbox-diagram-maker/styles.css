@@ -61,7 +61,9 @@ input[type="text"], input[type="file"] {
 }
 
 button, .button {
+    display: block;
     flex: 1;
+    line-height: 1.5;
     text-align: center;
     padding: 8px 16px;
     background-color: #4CAF50;
@@ -71,9 +73,10 @@ button, .button {
     cursor: pointer;
     font-size: 14px;
     transition: background-color 0.3s;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-button:hover {
+button:hover, .button:hover {
     background-color: #45a049;
 }
 
@@ -82,7 +85,7 @@ button:hover {
 }
 
 @media print {
-    h1, #ui, #left-labels, #right-labels {
+    h1, #ui, #left-labels, #right-labels, .theme-selector {
         display: none;
     }
 
@@ -109,6 +112,15 @@ button:hover {
     #ui {
         width: 80vw;
         max-width: none;
+    }
+
+    .button-row {
+        border: 1px solid #ccc;
+        padding: 0.3rem;
+    }
+    
+    .button-row button, .button-row .button {
+        width: 75%;
     }
 }
 
