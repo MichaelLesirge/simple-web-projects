@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +8,7 @@
     <title>Xbox Controller Labeling Tool</title>
     <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
     <h1>Xbox Controller Labeling Tool</h1>
     <div id="main-container">
@@ -16,7 +18,8 @@
     </div>
     <div id="ui">
         <div>
-            <input type="text" id="title-input" placeholder="Enter title" title="Enter Title" list="title-suggestions" spellcheck="true">
+            <input type="text" id="title-input" placeholder="Enter title" title="Enter Title" list="title-suggestions"
+                spellcheck="true">
             <datalist id="title-suggestions">
                 <option>Drive</option>
                 <option>Operate</option>
@@ -32,16 +35,19 @@
             </datalist>
         </div>
         <div>
-            <button id="download-button" title="Download diagram as PNG">Save As Image</button>
-            <button id="print-button" title="Open print dialog for diagram">Print Image</button>
+            <button id="download-button" title="Download diagram as PNG">Save As Image 🖼️</button>
+            <button id="print-button" title="Open print dialog for diagram">Print Image 🖨️</button>
         </div>
         <div>
-           <button id="download-json" title="Save file containing labels">Save Labels JSON</button>
-            <label class="button" for="upload-json" title="Load file containing labels">Load Labels JSON</label>
+            <button id="download-json" title="Save config file containing labels">Save Labels JSON 💾</button>
+            <label class="button" for="upload-json" title="Load config file containing labels">Load Labels JSON 💾</label>
             <input itemid="upload-json" type="file" accept=".json" id="upload-json">
         </div>
         <div>
-            <button style="background-color: red;" id="reset-button">Reset</button>
+            <button id="download-java" title="Download Java file to use as reference for creating this control map using WPILib for FRC robotics">Download WPILib Java Reference (FRC 🤖)</button>
+        </div>
+        <div>
+            <button style="background-color: red;" id="reset-button">Reset 🗑️</button>
         </div>
     </div>
     <div class="theme-selector">
@@ -49,7 +55,8 @@
             <option value="system">Theme: System ⚙️</option>
             <option value="light">Theme: Light ☀️</option>
             <option value="dark">Theme: Dark 🌒</option>
-        </select>   
+        </select>
     </div>
 </body>
+
 </html>
