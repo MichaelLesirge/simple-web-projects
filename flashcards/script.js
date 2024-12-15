@@ -1,11 +1,7 @@
 class FlashcardApp {
     constructor() {
         this.currentIndex = 0;
-        this.flashcards = [
-            { term: "HTML", definition: "A standard markup language used to create web pages." },
-            { term: "CSS", definition: "A style sheet language used to describe the presentation of a document." },
-            { term: "JavaScript", definition: "A programming language used for web development." },
-        ];
+        this.flashcards = [];
         this.shuffleMode = false;
         this.frontIsTerm = true;
 
@@ -14,7 +10,7 @@ class FlashcardApp {
         this.updateCard();
         this.updateEditableCards();
         
-        this.loadFromLocalStorage();
+        this.loadFrom();
     }
 
     initializeElements() {
@@ -102,12 +98,33 @@ class FlashcardApp {
         this.updateEditableCards();
     }
 
-    saveToLocalStorage() {
+    saveTo() {
+        console.log("Saving to local storage and URL");
+        
+        const url = new URL(window.location);
+        url.search = "";
+        for (let i = 0; i < this.flashcards.length; i++) {
+            url.searchParams.append(this.flashcards[i].term, this.flashcards[i].definition);
+        }
+        window.history.replaceState({}, "", url);
+
         localStorage.setItem("flashcards", this.getAsJson());
     }
 
-    loadFromLocalStorage() {
-        this.loadFromJson(localStorage.getItem("flashcards") || "[]");
+    loadFrom() {
+        
+        if (window.location.search === "") {
+            console.log("No terms in URL, Loading from local storage");
+            this.loadFromJson(localStorage.getItem("flashcards") || "[]");
+        }
+        else {
+            console.log("Loading from URL");
+            for (const [term, definition] of new URLSearchParams(location.search)) {
+                this.flashcards.push({ term, definition });
+            }
+            this.updateCard(true);
+            this.updateEditableCards();
+        }
     }
 
     createInput(type, value, index) {
@@ -118,7 +135,7 @@ class FlashcardApp {
 
         input.addEventListener("input", (event) => {
             this.flashcards[index][type] = event.target.value;
-            this.saveToLocalStorage();
+            this.saveTo();
             this.updateCard(false);
         });
 
@@ -128,10 +145,11 @@ class FlashcardApp {
     createDeleteButton(index) {
         const deleteButton = document.createElement("button");
         deleteButton.textContent = "❌";
+        deleteButton.title = "Delete this term";
         deleteButton.addEventListener("click", () => {
             this.flashcards.splice(index, 1);
             this.currentIndex = Math.min(this.currentIndex, this.flashcards.length - 1);
-            this.saveToLocalStorage();
+            this.saveTo();
             this.updateCard(false);
             this.updateEditableCards();
         });
@@ -144,7 +162,7 @@ class FlashcardApp {
             term: `New Term #${newIndex}`,
             definition: `New Definition #${newIndex}`
         });
-        this.saveToLocalStorage();
+        this.saveTo();
         this.updateCard(false);
         this.updateEditableCards();
         this.elements.termsList.lastElementChild.querySelector(".editable-term").focus();
@@ -232,4 +250,10 @@ class FlashcardApp {
 
 document.addEventListener("DOMContentLoaded", () => {
     new FlashcardApp();
+});
+
+document.getElementById("hide").addEventListener("click", (event) => {
+    const element = document.getElementById("terms-list");
+    element.classList.toggle("hide")
+    event.target.textContent = element.classList.contains("hide") ? "Show List" : "Hide List";
 });
