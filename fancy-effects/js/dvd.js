@@ -138,6 +138,8 @@ class Logo {
             bounced = true;
         }
 
+        console.log(this.image.height);
+        
         if (this.y <= 0 || this.y + this.image.height >= canvas.height) {
             this.dy *= -1;
             bounced = true;
@@ -190,12 +192,14 @@ const svg = `
     </path>
 </svg>
 `
-const image = new Image;
+
+const image = new Image(300, 128.8);
 
 const svgBlob = new Blob([svg], { type: "image/svg+xml" });
 const url = URL.createObjectURL(svgBlob);
 
 image.src = url;
+
 
 function init() {
     logo = new Logo(image, canvas);
@@ -223,4 +227,3 @@ export default function dvd() {
     setHashAutoFocus(canvas)
     startLoop(canvas, init, clear, nextFrame, { resetOnClick: true, resetOnResize: true, resetOnScroll: true, fps: 60 });
 }
-
