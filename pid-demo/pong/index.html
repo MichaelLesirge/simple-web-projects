@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+
+	<meta name="description" content="PID Simulation and tuning practice. Demo of how P, I, and D term can be used to get motor position to setpoint" />
+	<meta name="keywords" content="pid control, pid demo, pid tuning practice, frc" />
+
+    <title>PID Demo</title>
+</head>
+<body>
+    <header id="header">
+        <h1>
+            PID Demo: Pong
+        </h1>
+        <a href="../">Car</a>
+        <a href="../motor">Motor</a>
+    </header>
+    <main id="main">
+        <div class="canvas-container">
+            <canvas class="canvas" id="canvas">
+                    
+            </canvas>
+        </div>   
+
+        <div class="settings">
+            <div class="setting-section left">
+                <div class="pid-setting">
+                    <div class="setting">
+                        <label for="left-p">P:</label>
+                        <input type="number" id="left-p" value="0.3" step="0.1" min="0">
+                    </div>
+                    <div class="setting">
+                        <label for="left-i">I:</label>
+                        <input type="number" id="left-i" value="0" step="0.1" min="0">
+                    </div>
+                    <div class="setting">
+                        <label for="left-d">D:</label>
+                        <input type="number" id="left-d" value="0.1" step="0.1" min="0">
+                    </div>
+                </div>
+                <div>
+                    <select name="left-ai" id="left-ai" value="smart">
+                        <option value="smart" title="Predict ball location">Smart AI</option>
+                        <option value="follow" title="Follow Ball">Follow AI</option>
+                    </select>
+                </div>
+            </div>
+            <div class="setting-section mid">
+                <div class="setting">
+                    <label for="ball-speed">Ball Speed:</label>
+                    <input type="number" id="ball-speed" value="1" step="0.1" min="0">
+                </div>
+                <div class="setting">
+                    <label for="paddle-speed">Max Paddle Speed:</label>
+                    <input type="number" id="paddle-speed" value="1" step="0.1" min="0">
+                </div>
+                <div class="setting">
+                    <label for="paddle-height">Paddle Height:</label>
+                    <input type="number" id="paddle-height" value="1" step="0.1" min="0">
+                </div>
+                <!-- <div class="setting">
+                    <label for="paddle-height">Paddle Friction:</label>
+                    <input type="number" id="paddle-friction" value="0" step="0.1" min="0">
+                </div> -->
+            </div>
+            <div class="setting-section right">
+                <div class="pid-setting">
+                    <div class="setting">
+                        <label for="right-p">P:</label>
+                        <input type="number" id="right-p" value="0.3" step="0.1" min="0">>
+                    </div>
+                    <div class="setting">
+                        <label for="right-i">I:</label>
+                        <input type="number" id="right-i" value="0" step="0.1" min="0">
+                    </div>
+                    <div class="setting">
+                        <label for="right-d">D:</label>
+                        <input type="number" id="right-d" value="0.1" step="0.1" min="0">
+                    </div>
+                </div>
+                <div>
+                    <select name="right-ai" id="right-ai" value="smart">
+                        <option value="smart" title="Predict ball location">Smart AI</option>
+                        <option value="follow" title="Follow Ball">Follow AI</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>
