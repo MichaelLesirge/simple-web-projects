@@ -14,27 +14,23 @@ let ball;
 let leftScore = 0;
 let rightScore = 0;
 
-const leftPidSettings = getSettings("left-", ["p", "i", "d"]);
-const rightPidSettings = getSettings("right-", ["p", "i", "d"]);
+const leftPidSettings = getSettings("left-", ["p", "i", "d"], parseFloat);
+const rightPidSettings = getSettings("right-", ["p", "i", "d"], parseFloat);
 
-// const controlSettings = getSettings("", ["ball-speed", "paddle-speed", "paddle-height", "paddle-friction"]);
-const controlSettings = getSettings("", ["ball-speed", "paddle-speed", "paddle-height"]);
+const controlSettings = getSettings("", ["ball-speed", "paddle-speed", "paddle-height", "paddle-detection-percent"], (x) => parseFloat(x) / 100);
 
 const leftAi = document.getElementById("left-ai");
 const rightAi = document.getElementById("right-ai");
 
-function getSettings(prefix, names) {
+function getSettings(prefix, names, f = (x) => x) {
     const items = {}
     for (const name of names) {
         const element = document.getElementById(prefix + name);
-        element.addEventListener("change", () => {
-            console.log(items);
-            
-            items[name] = parseFloat(element.value);
+        element.addEventListener("input", (event) => {
+            items[name] = f(event.target.value);
         });
-        items[name] = parseFloat(element.value);
+        items[name] = f(element.value);
     }
-    console.log(items);
     return items;
 }
 
@@ -129,12 +125,35 @@ class Ball {
         this.dx = -this.dx;
     }
 
-    update() {
-        this.x += this.dx * (controlSettings["ball-speed"] ?? 1);
-        this.y += this.dy * (controlSettings["ball-speed"] ?? 1);
+    update(leftPaddle, rightPaddle) {
 
-        if (this.y - this.radius < 0 || this.y + this.radius > canvas.height) {
-            this.dy = -this.dy;
+        const dx = this.dx * (controlSettings["ball-speed"] ?? 1)
+        const dy = this.dy * (controlSettings["ball-speed"] ?? 1)
+
+        const steps = Math.max(Math.round(Math.hypot(dy, dx) / 2), 1);
+        
+        for (let i = 0; i < steps; i++) {
+            this.x += (dx / steps) * (controlSettings["ball-speed"] ?? 1);
+            this.y += (dy / steps) * (controlSettings["ball-speed"] ?? 1);
+
+            if (this.y - this.radius < 0) {
+                this.dy = Math.abs(this.dy);
+            }
+            if (this.y + this.radius > canvas.height) {
+                this.dy = -Math.abs(this.dy);
+            }
+
+            if (this.x - this.radius <= leftPaddle.x + leftPaddle.width &&
+                this.x - this.radius >= leftPaddle.x &&
+                this.y + this.radius > leftPaddle.y &&
+                this.y - this.radius < leftPaddle.y + leftPaddle.height) {
+                this.dx = Math.abs(this.dx);
+            } else if (this.x + this.radius >= rightPaddle.x &&
+                this.x + this.radius <= rightPaddle.x + rightPaddle.width &&
+                this.y + this.radius > rightPaddle.y &&
+                this.y - this.radius < rightPaddle.y + rightPaddle.height) {
+                this.dx = -Math.abs(this.dx);
+            }
         }
     }
 }
@@ -158,25 +177,25 @@ class PidController {
     }
 
     calculateWithResults(setPoint, measuredValue) {
+        this.setPoint = setPoint;
+
         const error = setPoint - measuredValue;
 
-        const deltaTime = (Date.now() - this.lastTime) / 1000;
+        const deltaTime = (performance.now() - this.lastTime) / 1000;
 
         let proportional = error;
         let integral = this.integral + error * deltaTime;
         let derivative = (error - this.previousError) / deltaTime;
-
-        // if (settingsITerm.maxAccum) integral = clamp(integral, -settingsITerm.maxAccum, settingsITerm.maxAccum);
-        // if (settingsITerm.zone && Math.abs(error) > settingsITerm.zone) integral = 0;
+        
 
         this.previousError = error;
         this.integral = integral;
 
         const p = this.Kp * proportional;
         const i = this.Ki * integral;
-        const d = this.Kd * derivative;
+        const d = this.Kd * derivative;        
 
-        this.lastTime = Date.now();
+        this.lastTime = performance.now();
 
         return [(p + i + d) * deltaTime, [error, p, i, d]];
     }
@@ -198,7 +217,7 @@ class Graph {
         this.dataColors = {};
     }
 
-    createData(label, color, {thickness = 1, mapfn = null} = {}) {
+    createData(label, color, { thickness = 1, mapfn = null } = {}) {
         this.data[label] = mapfn ? Array.from({ length: this.getWidth() }, mapfn) : [];
         this.dataColors[label] = { color, thickness };
     }
@@ -212,7 +231,7 @@ class Graph {
 
         if (this.data[label].length > this.getWidth()) {
             this.data[label].shift();
-        }        
+        }
     }
 
     draw() {
@@ -252,7 +271,6 @@ function drawScore(score, left) {
 }
 
 function init() {
-
     const color = "white";
 
     const ballStartX = canvas.width / 2;
@@ -260,7 +278,7 @@ function init() {
 
     const ballStartDx = (8 + Math.random()) * (Math.random() < 0.5 ? -1 : 1);
     const ballStartDy = (3 + Math.random()) * (Math.random() < 0.5 ? -1 : 1);
-    
+
     ball = new Ball(
         ballStartX, ballStartY,
         ballStartDx, ballStartDy,
@@ -299,10 +317,10 @@ function init() {
         canvas.width - paddleWallGap * percentGraphArea, 0,
         paddleWallGap * percentGraphArea, canvas.height,
         1
-    )        
+    )
 
     const graphColor = "white";
-    const settings = {mapfn: () => leftPaddle.getCenterY()};
+    const settings = { mapfn: () => leftPaddle.getCenterY() };
 
     leftGraph.createData("Paddle", graphColor, settings);
     rightGraph.createData("Paddle", graphColor, settings);
@@ -316,17 +334,17 @@ function clear() {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 }
 
-function nextFrame() {
 
-    const reactionSection = canvas.width / 2;
+ctx.save();
+function nextFrame() {
+    const reactionSection = Math.abs(leftPaddle.x - rightPaddle.x) * (controlSettings["paddle-detection-percent"] ?? 1);    
 
     let lSetpoint = canvas.height / 2;
-    if (ball.x < reactionSection && ball.dx < 0) {
+    if (ball.x < leftPaddle.x + reactionSection && ball.dx < 0) {
         lSetpoint = leftAi.value == "follow" ? ball.getCenterY() : leftPaddle.predictBallInterceptY(ball);
     }
     if (ball.x < leftPaddle.x) {
-        lSetpoint = leftPaddle.getCenterY();
-        leftPaddle.dy = 0;
+        lSetpoint = leftPaddle.control.setPoint;
     }
     leftPaddle.moveToTargetWithPid(lSetpoint);
 
@@ -334,31 +352,18 @@ function nextFrame() {
     leftGraph.addData("Setpoint", lSetpoint);
 
     let rSetpoint = canvas.height / 2;
-    if (ball.x > canvas.width - reactionSection && ball.dx > 0) {
+    if (ball.x > rightPaddle.x - reactionSection && ball.dx > 0) {
         rSetpoint = rightAi.value == "follow" ? ball.getCenterY() : rightPaddle.predictBallInterceptY(ball);
     }
 
     if (ball.x > rightPaddle.x) {
-        rSetpoint = rightPaddle.getCenterY();
-        rightPaddle.dy = 0;
+        rSetpoint = rightPaddle.control.setPoint;
     }
 
     rightPaddle.moveToTargetWithPid(rSetpoint);
 
     rightGraph.addData("Paddle", rightPaddle.getCenterY());
     rightGraph.addData("Setpoint", rSetpoint);
-
-    if (ball.x - ball.radius <= leftPaddle.x + leftPaddle.width &&
-        ball.x - ball.radius >= leftPaddle.x &&
-        ball.y + ball.radius > leftPaddle.y &&
-        ball.y - ball.radius < leftPaddle.y + leftPaddle.height) {
-        ball.dx = Math.abs(ball.dx);
-    } else if (ball.x + ball.radius >= rightPaddle.x &&
-        ball.x + ball.radius <= rightPaddle.x + rightPaddle.width &&
-        ball.y + ball.radius > rightPaddle.y &&
-        ball.y - ball.radius < rightPaddle.y + rightPaddle.height) {
-        ball.dx = -Math.abs(ball.dx);
-    }
 
     if (ball.x < 0) {
         init();
@@ -369,7 +374,7 @@ function nextFrame() {
     }
 
 
-    ball.update();
+    ball.update(leftPaddle, rightPaddle);
     leftPaddle.update();
     rightPaddle.update();
 
@@ -399,7 +404,7 @@ function fitToContainer(canvas) {
         canvas.width = canvas.offsetWidth;
         canvas.height = canvas.offsetHeight;
     }
-    
+
     window.addEventListener('resize', updateToContainerOnce);
     updateToContainerOnce();
 }
@@ -416,13 +421,13 @@ function updateCanvasSizes(canvas) {
     updateCanvasSizesOnce()
 }
 
-function startLoop(element, init, clear, nextFrame, { resetOnScroll = false, resetOnClick = false, resetOnResize = true, fps = 60} = {}) {
+function startLoop(element, init, clear, nextFrame, { resetOnScroll = false, resetOnClick = false, resetOnResize = true, fps = 60 } = {}) {
     init();
     nextFrame()
 
     const interval = fps ? (1000 / fps) : 0;
     let lastTime = performance.now();
-    
+
     function loop() {
 
         const currentTime = performance.now();
@@ -432,7 +437,7 @@ function startLoop(element, init, clear, nextFrame, { resetOnScroll = false, res
             nextFrame();
             lastTime = currentTime;
         }
-                
+
         requestAnimationFrame(loop);
     }
 

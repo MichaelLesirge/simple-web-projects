@@ -17,8 +17,6 @@ body {
 	color: white;
 	background-color: black;
 
-	font-family: 'Courier New', Courier, monospace;
-
 	display: flex;
 	flex-direction: column;
 }
@@ -40,6 +38,8 @@ body {
 
 #main {
 	flex: 1;
+
+	font-family: 'Courier New', Courier, monospace;
 	
 	display: grid;
 	grid-template-rows: 1.618033988749fr 1fr;
@@ -66,7 +66,7 @@ body {
 	background-color: #1f1f1f;
 
 	margin: 0.1rem;
-	padding: 0.1rem;
+	padding: 1rem;
 
 	display: grid;
 	grid-template-columns: 1fr 1fr 1fr;
@@ -77,12 +77,26 @@ body {
 	flex-direction: column;
 	align-items: center;
 	justify-content: space-evenly;
+
+	gap: 1rem;
 }
 
 .setting-section.mid .setting {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
+}
 
-	color: blueviolet;
+@media only screen and (max-width: 600px) {
+	.settings {
+		display: flex;
+		flex-direction: column;
+		gap: 3rem;
+
+		color: white;
+	}
+
+	.setting-section.mid .setting {
+		color: white;
+	}
 }
