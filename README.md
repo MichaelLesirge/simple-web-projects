@@ -10,6 +10,7 @@ Visit the project list here: https://michaellesirge.github.io/simple-web-project
 0. [rock-paper-scissors-battle](https://michaellesirge.github.io/simple-web-projects/rock-paper-scissors-battle)🪨📃✂️
 0. [pid-demo](https://michaellesirge.github.io/simple-web-projects/pid-demo)🤖⚙️
 0. [text-changer](https://michaellesirge.github.io/simple-web-projects/text-changer)🌀🔤
+0. [conway](https://michaellesirge.github.io/simple-web-projects/conway) 🧬🎮
 0. [chess](https://michaellesirge.github.io/simple-web-projects/chess)♟️🎯
 0. [tetris](https://michaellesirge.github.io/simple-web-projects/tetris)🕹️🧩
 0. [roman-numerals](https://michaellesirge.github.io/simple-web-projects/roman-numerals)🔢🏛️
