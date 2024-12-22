@@ -1,0 +1,138 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+}
+
+html, body, main {
+    height: 100%;
+    width: 100%;
+}
+
+.main {
+    display: grid;
+    grid-template-columns: 2.618fr 1fr;
+    
+    background-color: #151414;
+    color: #f0f0f0;
+}
+
+.canvas {
+    outline: auto;
+}
+
+.settings {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 1rem;
+    background-color: #1f1f1f;
+
+    width: 100%;
+}
+
+.mode-selector-buttons {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 1rem;
+    
+    box-shadow: 0 5px 10px #11111150;
+
+    background-color: #151414;
+
+    border-radius: 10px;
+}
+
+.mode-select-button {
+    display: block;
+
+    text-align: center;
+
+    padding: 0.5rem 0.75rem;
+
+    background-color: cadetblue;
+
+    white-space: nowrap;
+
+    cursor: pointer;
+}
+
+.mode-selector-buttons .mode-select-button:first-child {
+    /* border-radius: 10px 10px 0 0; */
+    border-radius: 10px 0 0 10px;
+}
+
+.mode-selector-buttons .mode-select-button:last-child {
+    /* border-radius: 0 0 10px 10px; */
+    border-radius: 0 10px 10px 0;
+}
+
+.mode-select-button:hover {
+  filter: brightness(0.85);
+}
+
+.mode-select-button:has(input:checked) {
+  outline: 1px solid white;
+}
+
+.section-settings {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.setting {
+    white-space: nowrap;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    border: 1px solid #333;
+    padding: 0.5rem;
+
+    gap: 0.5rem;
+}
+
+.setting.full {
+    width: 100%;
+}
+
+.setting.full input {
+    width: 100%;
+}
+
+.setting.semi input {
+    width: 3rem;
+}
+
+.fps-settings {
+    border: none;
+}
+
+.buttons {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.button {
+    padding: 0.2rem 1rem;
+    width: 9rem;
+    text-align: center;
+
+    cursor: pointer;
+}

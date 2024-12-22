@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" type="module"></script>
+
+    <title>Conway's Game Of Life + Others</title>
+</head>
+<body>
+    <main class="main">
+        <canvas class="canvas" id="canvas">
+    
+        </canvas>
+        <div class="settings">
+            <form class="mode-selector-buttons">
+                <label for="conway" class="mode-select-button">
+                    Conway's
+                    <input name="mode-select-button" type="radio" value="conway" id="conway" checked>
+                </label>
+                <label for="boids" class="mode-select-button">
+                    Boids
+                    <input name="mode-select-button" type="radio" value="boids" id="boids">
+                </label>
+                <label for="particle" class="mode-select-button">
+                    Particle
+                    <input name="mode-select-button" type="radio" value="particle" id="particle">
+                </label>
+            </form>
+
+            <form class="conway-settings section-settings">
+                <label class="setting semi" for="draw-color">
+                    Drawing Color
+                    <input type="color" id="draw-color" name="draw-color" value="#ffffff">
+                </label>
+                <label class="setting semi" for="random-draw-color">
+                    Random Drawing Color
+                    <input type="checkbox" id="random-draw-color" name="random-draw-color" checked>
+                </label>
+                <label class="setting semi" for="show-grid">
+                    Show Grid
+                    <input type="checkbox" id="show-grid" name="show-grid" checked>
+                </label>
+                <div>
+                    <p>
+                        Drag mouse to draw cells
+                    </p>
+                </div>
+            </form>
+
+            <div class="section-settings buttons">
+                <button id="clear-btn" class="button">Clear Canvas</button>
+                <button id="random-btn" class="button">Random Canvas</button>
+            </div>
+
+            <form class="boids-settings section-settings" style="display: none;">
+            </form>
+
+            <form class="particle-settings section-settings" style="display: none;">
+            </form>
+
+            <form class="fps-settings setting full">
+                <label for="fps">FPS</label>
+                <input type="range" id="fps" name="fps" min="0" max="120" value="60">
+                <span id="fps-value">-</span>
+            </form>
+        </div>
+    </main>
+</body>
+</html>
