@@ -18,6 +18,16 @@ function updateFPS() {
     document.getElementById('fps-value').textContent = fps;
 }
 fpsInput.addEventListener('input', updateFPS);
+
+document.getElementById("pause-btn").addEventListener("click", () => {
+    fpsInput.value = 0;
+    updateFPS();
+});
+document.getElementById("fps-btn").addEventListener("click", () => {
+    fpsInput.value = 60;
+    updateFPS();
+});
+
 updateFPS();
 
 // -- Mode selection --
@@ -104,11 +114,10 @@ class Conway {
         this.drawColorInput = document.getElementById('draw-color');
         this.randomDrawColorCheckbox = document.getElementById('random-draw-color');
 
-        setInterval(() => {
-            if (this.randomDrawColorCheckbox.checked) {
-                this.drawColorInput.value = rgbToHex(...randRGB());
-            }
-        }, 100)
+        this.drawColorInput.disabled = this.randomDrawColorCheckbox.checked;
+        this.randomDrawColorCheckbox.addEventListener('change', () => {
+            this.drawColorInput.disabled = this.randomDrawColorCheckbox.checked;
+        });
     }
 
     init(percentage = 0.5) {
@@ -203,7 +212,11 @@ class Conway {
 
         if (row < 0 || row >= this.rows || col < 0 || col >= this.cols) return;
     
-        this.grid[row][col] = this.randomDrawColorCheckbox.checked ? randRGB() : hexToRgb(this.drawColorInput.value);
+        if (this.randomDrawColorCheckbox.checked) {
+            this.drawColorInput.value = rgbToHex(...randRGB());
+        }
+
+        this.grid[row][col] = hexToRgb(this.drawColorInput.value);
     }
 
     mouseUp() {

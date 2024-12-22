@@ -84,6 +84,10 @@ html, body, main {
   outline: 1px solid white;
 }
 
+.setting:has(input:disabled) {
+    text-decoration: line-through;
+}
+
 .section-settings {
     width: 100%;
     display: flex;
@@ -101,6 +105,8 @@ html, body, main {
 
     border: 1px solid #333;
     padding: 0.5rem;
+
+    width: 100%;
 
     gap: 0.5rem;
 }
@@ -131,8 +137,14 @@ html, body, main {
 
 .button {
     padding: 0.2rem 1rem;
-    width: 9rem;
     text-align: center;
-
     cursor: pointer;
+}
+
+.button:hover {
+    filter: brightness(0.85);
+}
+
+.button:active {
+    filter: brightness(1.1);
 }

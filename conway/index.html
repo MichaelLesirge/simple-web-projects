@@ -31,13 +31,13 @@
             </form>
 
             <form class="conway-settings section-settings">
-                <label class="setting semi" for="draw-color">
-                    Drawing Color
-                    <input type="color" id="draw-color" name="draw-color" value="#ffffff">
-                </label>
                 <label class="setting semi" for="random-draw-color">
                     Random Drawing Color
                     <input type="checkbox" id="random-draw-color" name="random-draw-color" checked>
+                </label>
+                <label class="setting semi" for="draw-color">
+                    Drawing Color
+                    <input type="color" id="draw-color" name="draw-color" value="#ffffff">
                 </label>
                 <label class="setting semi" for="show-grid">
                     Show Grid
@@ -50,9 +50,9 @@
                 </div>
             </form>
 
-            <div class="section-settings buttons">
-                <button id="clear-btn" class="button">Clear Canvas</button>
-                <button id="random-btn" class="button">Random Canvas</button>
+            <div class="section-settings buttons setting">
+                <button id="clear-btn" class="button" style="background-color: #ff6347;" title="Empty setup">🗑️ Clear Canvas</button>
+                <button id="random-btn" class="button" style="background-color: #1e90ff;" title="Randomly generated setup">🎲 Random Canvas</button>
             </div>
 
             <form class="boids-settings section-settings" style="display: none;">
@@ -61,11 +61,17 @@
             <form class="particle-settings section-settings" style="display: none;">
             </form>
 
-            <form class="fps-settings setting full">
-                <label for="fps">FPS</label>
-                <input type="range" id="fps" name="fps" min="0" max="120" value="60">
-                <span id="fps-value">-</span>
-            </form>
+            <div class="section-settings">
+                <from class="fps-settings setting full">
+                    <label for="fps">FPS</label>
+                    <input type="range" id="fps" name="fps" min="0" max="90" value="60">
+                    <span id="fps-value">-</span>
+                </from>
+                <div class="buttons">
+                    <button id="pause-btn" class="button" style="background-color: #f0ad4e;" title="Set FPS to 0">⏸️ Pause</button>
+                    <button id="fps-btn" class="button" style="background-color: #28a745;" title="Set FPS to 60">🎛️ Default FPS</button>
+                </div>
+            </div>
         </div>
     </main>
 </body>
