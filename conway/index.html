@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,11 +9,16 @@
     <script src="script.js" type="module"></script>
 
     <title>Conway's Game Of Life + Others</title>
+
+    <meta name="description"
+        content="Conway's Game Of Life with Colors, Boids with Colors, Particle Simulation with Colors">
+    <meta name="keywords" content="Conway's Game Of Life, Boids, Particle, Colors, Simulation, Canvas, JavaScript">
 </head>
+
 <body>
     <main class="main">
         <canvas class="canvas" id="canvas">
-    
+
         </canvas>
         <div class="settings">
             <form class="mode-selector-buttons">
@@ -30,38 +36,93 @@
                 </label>
             </form>
 
-            <form class="conway-settings section-settings">
-                <label class="setting semi" for="random-draw-color">
-                    Random Drawing Color
-                    <input type="checkbox" id="random-draw-color" name="random-draw-color" checked>
-                </label>
-                <label class="setting semi" for="draw-color">
-                    Drawing Color
-                    <input type="color" id="draw-color" name="draw-color" value="#ffffff">
-                </label>
-                <label class="setting semi" for="show-grid">
-                    Show Grid
-                    <input type="checkbox" id="show-grid" name="show-grid" checked>
-                </label>
-                <div>
-                    <p>
-                        Drag mouse to draw cells
-                    </p>
-                </div>
-            </form>
+            <div class="mode-settings-container">
+                <form class="mode-settings section-settings" id="conway-settings">
 
-            <div class="section-settings buttons setting">
-                <button id="clear-btn" class="button" style="background-color: #ff6347;" title="Empty setup">🗑️ Clear Canvas</button>
-                <button id="random-btn" class="button" style="background-color: #1e90ff;" title="Randomly generated setup">🎲 Random Canvas</button>
+                    <div>
+                        <p>
+                            Edit grid to change environment
+                        </p>
+                    </div>
+                    <label class="setting semi" for="show-size" title="Size of the grid cell">
+                        Grid Size
+                        <input type="number" id="grid-size" name="grid-size">
+                    </label>
+                    <label class="setting semi" for="show-grid" title="Show grid on canvas">
+                        Show Grid
+                        <input type="checkbox" id="show-grid" name="show-grid">
+                    </label>
+                    <div>
+                        <p>
+                            Drag mouse to draw enabled cells
+                        </p>
+                    </div>
+                    <label class="setting semi" for="random-draw-color" title="If checked drawing color will be randomized">
+                        Random Drawing Color
+                        <input type="checkbox" id="random-draw-color" name="random-draw-color" checked>
+                    </label>
+                    <label class="setting semi" for="draw-color" title="Color of the cells drawn if random color is off">
+                        Drawing Color
+                        <input type="color" id="draw-color" name="draw-color" value="#ffffff">
+                    </label>
+                </form>
+
+                <form class="mode-settings section-settings" id="boids-settings">
+                    <div>
+                        <p>
+                            Settings to control the behavior of boids
+                        </p>
+                    </div>
+                    <div class="setting" title="How much boids should move towards the center of the flock">
+                        <label for="boids-coherence">Coherence</label>
+                        <input type="range" id="boids-coherence" name="boids-coherence" min="0" max="350" value="100">
+                        <span id="boids-coherence-value">-</span>
+                    </div>
+                    <div class="setting" title="How much boids should align with the direction of the flock">
+                        <label for="boids-alignment">Alignment</label>
+                        <input type="range" id="boids-alignment" name="boids-alignment" min="0" max="350" value="100">
+                        <span id="boids-alignment-value">-</span>
+                    </div>
+                    <div class="setting">
+                        <label for="boids-separation">Separation</label>
+                        <input type="range" id="boids-separation" name="boids-separation" min="0" max="350" value="100">
+                        <span id="boids-separation-value">-</span>
+                    </div>
+                    <div>
+                        <p>
+                            Drag mouse to add boids
+                        </p>
+                    </div>
+                    <div class="setting" title="Number of boids in the simulation">
+                        <label for="boids-count">Boids Count</label>
+                        <input type="range" id="boids-count" name="boids-count" min="0" max="1000">
+                        <span id="boids-count-value">-</span>
+                    </div>
+                    <div class="setting" title="How long the trail of boids should be. 0 means no trail.">
+                        <label for="boids-trail">Trail Length</label>
+                        <input type="range" id="boids-trail" name="boids-trail" min="0" max="25">
+                        <span id="boids-trail-value">-</span>
+                    </div>
+                </form>
+
+                <form class="mode-settings section-settings" id="particle-settings">
+                    <div>
+                        <p>
+                            Left click to add particle
+                        </p>
+                    </div>
+                </form>
             </div>
 
-            <form class="boids-settings section-settings" style="display: none;">
-            </form>
+            <div class="section-settings buttons setting">
+                <button id="clear-btn" class="button" style="background-color: #ff6347;" title="Empty setup">🗑️ Clear
+                    Canvas</button>
+                <button id="random-btn" class="button" style="background-color: #1e90ff;"
+                    title="Randomly generated setup">🎲 Random Canvas</button>
+            </div>
 
-            <form class="particle-settings section-settings" style="display: none;">
-            </form>
 
-            <div class="section-settings">
+            <div class="section-settings setting">
                 <from class="fps-settings setting full">
                     <label for="fps">FPS</label>
                     <input type="range" id="fps" name="fps" min="0" max="90" value="60">
@@ -70,9 +131,13 @@
                 <div class="buttons">
                     <button id="pause-btn" class="button" style="background-color: #f0ad4e;" title="Set FPS to 0">⏸️ Pause</button>
                     <button id="fps-btn" class="button" style="background-color: #28a745;" title="Set FPS to 60">🎛️ Default FPS</button>
+                    <div>
+                        FPS
+                        <input type="text" id="real-fps" readonly max="90" min="0" value="60" style="width: 3rem;">
+                    </div>
                 </div>
-            </div>
         </div>
     </main>
 </body>
+
 </html>
