@@ -124,10 +124,7 @@ html, body, main {
 }
 
 .mode-settings-container {
-    /* height: max(50%, max-content); */
-    /* width: max(75%, max-content); */
-    width: 75%;
-    height: 50%;
+    height: 70%;
     display: flex;
     flex-direction: column;
     justify-content: center;

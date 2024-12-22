@@ -21,7 +21,7 @@
 
         </canvas>
         <div class="settings">
-            <form class="mode-selector-buttons">
+            <div class="mode-selector-buttons">
                 <label for="conway" class="mode-select-button">
                     Conway's
                     <input name="mode-select-button" type="radio" value="conway" id="conway" checked>
@@ -34,10 +34,10 @@
                     Particle
                     <input name="mode-select-button" type="radio" value="particle" id="particle">
                 </label>
-            </form>
+            </div>
 
             <div class="mode-settings-container">
-                <form class="mode-settings section-settings" id="conway-settings">
+                <div class="mode-settings section-settings" id="conway-settings">
 
                     <div>
                         <p>
@@ -65,9 +65,9 @@
                         Drawing Color
                         <input type="color" id="draw-color" name="draw-color" value="#ffffff">
                     </label>
-                </form>
+                </div>
 
-                <form class="mode-settings section-settings" id="boids-settings">
+                <div class="mode-settings section-settings" id="boids-settings">
                     <div>
                         <p>
                             Settings to control the behavior of boids
@@ -103,15 +103,15 @@
                         <input type="range" id="boids-trail" name="boids-trail" min="0" max="25">
                         <span id="boids-trail-value">-</span>
                     </div>
-                </form>
+                </div>
 
-                <form class="mode-settings section-settings" id="particle-settings">
+                <div class="mode-settings section-settings" id="particle-settings">
                     <div>
                         <p>
                             Left click to add particle
                         </p>
                     </div>
-                </form>
+                </div>
             </div>
 
             <div class="section-settings buttons setting">

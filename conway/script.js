@@ -158,7 +158,7 @@ class Conway {
 
         this.startGridSize = gridSize;
         this.gridSizeInput.value = gridSize;
-        this.gridSizeInput.addEventListener('input', () => {
+        this.gridSizeInput.addEventListener('change', () => {
             this.init();
         });
 
@@ -632,7 +632,7 @@ class Boids {
     }
 }
 
-const conway = new Conway(15);
+const conway = new Conway(16);
 const boids = new Boids(0.7);
 
 // -- Funcs loop --
