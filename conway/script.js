@@ -1,6 +1,8 @@
 
 // -- Canvas setup --
 
+import { randHsl, stringCssHsl, blendColorsHsl } from "./colorHsl.js";
+
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 
@@ -58,41 +60,6 @@ function randRGB() {
     return [randomFloat(0, 255), randomFloat(0, 255), randomFloat(0, 255)]
 }
 
-function rgb2cmyk(r, g, b) {
-    let c = 1 - (r / 255);
-    let m = 1 - (g / 255);
-    let y = 1 - (b / 255);
-    let k = Math.min(c, m, y);
-    c = (c - k) / (1 - k);
-    m = (m - k) / (1 - k);
-    y = (y - k) / (1 - k);
-    return [c, m, y, k];
-}
-
-function cmyk2rgb(c, m, y, k) {
-    let r = c * (1 - k) + k;
-    let g = m * (1 - k) + k;
-    let b = y * (1 - k) + k;
-    r = (1 - r) * 255 + .5;
-    g = (1 - g) * 255 + .5;
-    b = (1 - b) * 255 + .5;
-    return [r, g, b];
-}
-
-function mixCmyks(...cmyks) {
-    let c = cmyks.map(cmyk => cmyk[0]).reduce((a, b) => a + b, 0) / cmyks.length;
-    let m = cmyks.map(cmyk => cmyk[1]).reduce((a, b) => a + b, 0) / cmyks.length;
-    let y = cmyks.map(cmyk => cmyk[2]).reduce((a, b) => a + b, 0) / cmyks.length;
-    let k = cmyks.map(cmyk => cmyk[3]).reduce((a, b) => a + b, 0) / cmyks.length;
-    return [c, m, y, k];
-}
-
-function mixRgb(...colors) {    
-    let cmyks = colors.map(color => rgb2cmyk(...color));
-    let mixed_cmyk = mixCmyks(...cmyks);
-    return cmyk2rgb(...mixed_cmyk);
-}
-
 function simpleBlendRGB(...colors) {
     
     const colorCount = colors.length;
@@ -132,13 +99,6 @@ function rgbToHex(r, g, b) {
     return "#" + (1 << 24 | r << 16 | g << 8 | b).toString(16).slice(1);
 }
 
-function blendColorValue(a, b, t) {
-    return Math.sqrt((1 - t) * a ** 2 + t * b ** 2);
-}
-function smartBlendRGB(c1, c2, t) {
-    return [blendColorValue(c1[0], c2[0], t), blendColorValue(c1[1], c2[1], t), blendColorValue(c1[2], c2[2], t)];
-}
-
 // --- Conway ---
 
 const DEAD = 0;
@@ -169,6 +129,8 @@ class Conway {
         this.randomDrawColorCheckbox.addEventListener('change', () => {
             this.drawColorInput.disabled = this.randomDrawColorCheckbox.checked;
         });
+
+        this.gridWrapAroundCheckbox = document.getElementById('grid-wrap-around');
     }
 
     init(percentage) {
@@ -194,7 +156,7 @@ class Conway {
                 const tile = this.grid[i][j];
 
                 if (tile === DEAD && neighborsCount === 3) {
-                    this.nextGrid[i][j] = mixRgb(...neighbors);
+                    this.nextGrid[i][j] = simpleBlendRGB(...neighbors);
                 } else if (tile !== 0 && (neighborsCount < 2 || neighborsCount > 3)) {
                     this.nextGrid[i][j] = DEAD;
                 } else {
@@ -211,9 +173,12 @@ class Conway {
         for (let i = -1; i <= 1; i++) {
             for (let j = -1; j <= 1; j++) {
                 if (i === 0 && j === 0) continue;
-
+ 
                 const tile = this.grid[(row + i + this.rows) % this.rows][(col + j + this.cols) % this.cols];
 
+                if (!this.gridWrapAroundCheckbox.checked && (row + i < 0 || row + i >= this.rows || col + j < 0 || col + j >= this.cols)) {
+                    continue;
+                }
 
                 if (tile !== DEAD) {
                     neighbors.push(tile)
@@ -379,7 +344,7 @@ const boidSettings = makeSettings("boids", {
 }, (value) => Math.floor(value), (value) => Math.floor(value));
 
 class Boid {
-    constructor(group, x, y, vx, vy, rgb, scoutGroup, biasValue = defaultBiasVal) {
+    constructor(group, x, y, vx, vy, hsl, scoutGroup, biasValue = defaultBiasVal) {
         this.group = group;
 
         this.x = x;
@@ -388,7 +353,7 @@ class Boid {
         this.vx = vx;
         this.vy = vy;
 
-        this.rgb = rgb;
+        this.hsl = hsl;
 
         this.biasValue = biasValue;
         this.scoutGroup = scoutGroup;
@@ -403,9 +368,6 @@ class Boid {
         let neighboringBoids = 0;
         let closeDx = 0, closeDy = 0;
 
-        let closestBoid = null;
-        let closestDist = Infinity;
-
         for (const other of this.group.boids) {
             if (other === this) continue;
 
@@ -414,14 +376,10 @@ class Boid {
 
             const dist = Math.hypot(dy, dx);
 
-            if (dist < closestDist) {
-                closestDist = dist;
-                closestBoid = other;
-            }
-
             if (dist < protectedRange) {
                 closeDx += dx;
                 closeDy += dy;
+                this.hsl = blendColorsHsl(this.hsl, other.hsl, 0.1);
             } else if (dist < visualRange) {
                 xPosAvg += other.x;
                 yPosAvg += other.y;
@@ -429,10 +387,6 @@ class Boid {
                 yVelAvg += other.vy;
                 neighboringBoids++;
             }
-        }
-
-        if (closestBoid && closestDist < visualRange) {
-            this.rgb = smartBlendRGB(this.rgb, closestBoid.rgb, 0.01);
         }
 
         // Alignment and Cohesion
@@ -513,7 +467,8 @@ class Boid {
         ctx.lineTo(-height, width);
         ctx.closePath();
 
-        ctx.fillStyle = rgbToCss(this.rgb);
+        ctx.fillStyle = stringCssHsl(this.hsl);
+        
         ctx.fill();
 
         ctx.restore();
@@ -526,7 +481,7 @@ class Boid {
             const lastElement = this.trail[i - 1];            
             
             ctx.save()
-            ctx.fillStyle = rgbToCss(lastElement.rgb);
+            ctx.fillStyle = stringCssHsl(lastElement.hsl); 
             
             ctx.globalAlpha = i / this.trail.length;
             ctx.beginPath();
@@ -564,7 +519,7 @@ class Boids {
                 randomFloat(this.boundaryY, this.boundaryY + this.boundaryHeight),
                 randomFloat(-1, 1),
                 randomFloat(-1, 1),
-                randRGB(),
+                randHsl(),
                 randomChoice([1, 2]),
             ));
         }
@@ -602,7 +557,7 @@ class Boids {
                 event.clientY * dpr,
                 randomFloat(-1, 1),
                 randomFloat(-1, 1),
-                randRGB(),
+                randHsl(),
                 randomChoice([1, 2]),
             ));
         boidSettings["count"].set(this.boids.length);
@@ -624,7 +579,7 @@ class Boids {
                 event.clientY * dpr,
                 event.movementX,
                 event.movementY,
-                randRGB(),
+                randHsl(),
                 randomChoice([1, 2]),
             ));
             boidSettings["count"].set(this.boids.length);
