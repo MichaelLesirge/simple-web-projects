@@ -44,6 +44,11 @@ canvas {
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
+.dark #ui {
+    background-color: #121210;
+    color: white;
+}
+
 #ui > div {
     display: flex;
     justify-content: space-between;
@@ -58,6 +63,22 @@ input[type="text"], input[type="file"] {
     border: 1px solid #ccc;
     border-radius: 4px;
     font-size: 14px;
+}
+
+input[type="color"] {
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+input {
+    box-shadow: 0 0 4px #ccc;
+}
+
+.dark input {
+    background-color: #21201D;
+    color: white;
+    box-shadow: 0 0 4px black;
 }
 
 button, .button {
