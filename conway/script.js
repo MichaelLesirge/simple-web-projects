@@ -63,7 +63,7 @@ function randRGB() {
 }
 
 function simpleBlendRGB(...colors) {
-    
+
     const colorCount = colors.length;
     let sumR = 0, sumG = 0, sumB = 0;
 
@@ -183,7 +183,7 @@ class Conway {
         for (let i = -1; i <= 1; i++) {
             for (let j = -1; j <= 1; j++) {
                 if (i === 0 && j === 0) continue;
- 
+
                 const tile = this.grid[(row + i + this.rows) % this.rows][(col + j + this.cols) % this.cols];
 
                 if (!this.gridWrapAroundCheckbox.checked && (row + i < 0 || row + i >= this.rows || col + j < 0 || col + j >= this.cols)) {
@@ -316,8 +316,10 @@ const defaultBiasVal = 0.001;
 const boidsCount = Math.floor(canvas.width * canvas.height / 10000);
 
 function makeSettings(prefix, values, func = (value) => value, textFunc = (value) => value) {
-    const settings = {};
+    return addSettings({}, prefix, values, func, textFunc);
+}
 
+function addSettings(settings, prefix, values, func = (value) => value, textFunc = (value) => value) {
     for (const [element, value] of Object.entries(values)) {
         const input = document.getElementById(`${prefix}-${element}`);
         const display = document.getElementById(`${prefix}-${element}-value`);
@@ -352,6 +354,10 @@ const boidSettings = makeSettings("boids", {
     "count": boidsCount,
     "trail": 0,
 }, (value) => Math.floor(value), (value) => Math.floor(value));
+
+addSettings(boidSettings, "boids", {
+    "scale": 100,
+}, (value) => parseFloat(value) / 100, (value) => `${value}%`);
 
 class Boid {
     constructor(group, x, y, vx, vy, rgb, scoutGroup, biasValue = defaultBiasVal) {
@@ -470,7 +476,7 @@ class Boid {
 
         // Trail
         this.trailI++;
-        this.trail.push({x: this.x, y: this.y, rgb: this.rgb});
+        this.trail.push({ x: this.x, y: this.y, rgb: this.rgb });
     }
 
     draw() {
@@ -481,7 +487,7 @@ class Boid {
         ctx.translate(this.x, this.y);
         ctx.rotate(angle);
 
-        const scale = 1;
+        const scale = boidSettings["scale"].get();
 
         const width = 3 * scale;
         const height = 7 * scale;
@@ -493,7 +499,7 @@ class Boid {
         ctx.closePath();
 
         ctx.fillStyle = rgbToCss(this.rgb);
-        
+
         ctx.fill();
 
         ctx.restore();
@@ -503,11 +509,11 @@ class Boid {
         }
         for (let i = 1; i < this.trail.length; i++) {
             const element = this.trail[i];
-            const lastElement = this.trail[i - 1];            
-            
+            const lastElement = this.trail[i - 1];
+
             ctx.save()
-            ctx.fillStyle = rgbToCss(lastElement.rgb); 
-            
+            ctx.fillStyle = rgbToCss(lastElement.rgb);
+
             ctx.globalAlpha = i / this.trail.length;
             ctx.beginPath();
             ctx.moveTo(element.x, element.y);
@@ -522,7 +528,6 @@ class Boids {
     constructor(percentagePadding = 0.1) {
         this.boids = [];
         this.percentagePadding = percentagePadding;
-
     }
 
     init(boidsCount) {
@@ -612,29 +617,233 @@ class Boids {
     }
 }
 
+// --- Particles ---
+
+const distanceConnect = 100;
+
+const particleCount = Math.floor(canvas.width * canvas.height / 50000);
+
+const particleSettings = makeSettings("particles", {
+    "count": boidsCount,
+}, (value) => Math.floor(value), (value) => Math.floor(value));
+
+addSettings(particleSettings, "particles", {
+    "scale": 100,
+    "repel": 100,
+}, (value) => parseFloat(value) / 100, (value) => `${value}%`);
+
+class Particle {
+    constructor(group, x, y, vx, vy, radius, rgb) {
+        this.group = group;
+
+        this.x = x;
+        this.y = y;
+
+        this.radius = radius;
+        this.color = rgb;
+
+        this.vx = vx;
+        this.vy = vy;
+
+        this.connections = [];
+    }
+
+    draw() {
+        const [x, y] = [this.getX(), this.getY()]
+
+        ctx.fillStyle = this.color;
+        ctx.strokeStyle = this.color;
+
+        const radius = this.radius * particleSettings["scale"].get();
+
+        ctx.beginPath();
+        ctx.arc(x, y, radius * this.connections.length, 0, Math.PI * 2, true);
+        ctx.fill();
+        ctx.closePath();
+
+        ctx.beginPath();
+        ctx.arc(x, y, (radius + 5) * this.connections.length, 0, Math.PI * 2, true);
+        ctx.stroke();
+        ctx.closePath();
+
+        ctx.stroke();
+
+        for (const otherParticle of this.connections.filter((otherParticle) => this.findDistance(otherParticle) < distanceConnect * particleSettings["scale"].get())) {
+            ctx.strokeStyle = this.color;
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.lineTo(otherParticle.getX(), otherParticle.getY());
+            ctx.stroke();
+        }
+    }
+
+    getX() {
+        return this.x * canvas.width;
+    }
+
+    getY() {
+        return this.y * canvas.height;
+    }
+
+    findDistance(other) {
+        return Math.sqrt((this.getX() - other.getX()) ** 2 + (this.getY() - other.getY()) ** 2);
+    }
+
+    update() {
+        const speedModifier = Math.pow(0.5, this.connections.length)
+
+        for (const otherParticle of this.connections) {
+            const dx = this.getX() - otherParticle.getX();
+            const dy = this.getY() - otherParticle.getY();
+
+            const dist = Math.hypot(dy, dx);
+
+            if (dist < 1) continue;
+
+            const force = (1 / dist ** 2) * 5 * particleSettings["repel"].get();
+
+            this.vx += dx * force;
+            this.vy += dy * force;
+        }
+
+        this.x += (this.vx / canvas.width) * speedModifier;
+        this.y += (this.vy / canvas.height) * speedModifier;
+
+        if (this.x > 1) this.x = 0;
+        if (this.x < 0) this.x = 1;
+        if (this.y > 1) this.y = 0;
+        if (this.y < 0) this.y = 1;
+
+        this.connections = this.group.particles.filter(
+            (otherParticle) => this.color === otherParticle.color &&
+                this.findDistance(otherParticle) < distanceConnect * particleSettings["scale"].get()
+        );
+    }
+}
+
+class Particles {
+    constructor(colors) {
+        this.colors = colors;
+        this.particles = [];
+    }
+
+    init(particleCount) {
+        particleSettings["count"].set(particleCount);
+        this.particles = [];
+    }
+
+    update() {
+        while (this.particles.length < particleSettings["count"].get()) {
+            this.particles.push(new Particle(
+                this,
+                randomFloat(0, 1),
+                randomFloat(0, 1),
+                randomFloat(-1.5, 1.5),
+                randomFloat(-1.5, 1.5),
+                randomFloat(1, 2),
+                randomChoice(this.colors),
+            ));
+        }
+
+        while (this.particles.length > particleSettings["count"].get()) {
+            this.particles.shift();
+        }
+
+        while (this.particles.length > 1000) {
+            this.particles.shift();
+        }
+
+        particleSettings["count"].set(this.particles.length);
+
+        for (const particle of this.particles) {
+            particle.update();
+        }
+    }
+
+    draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        this.particles.forEach(particle => particle.draw());
+
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.2)";
+        ctx.lineWidth = 3;
+        ctx.strokeRect(this.boundaryX, this.boundaryY, this.boundaryWidth, this.boundaryHeight);
+    }
+
+    click(event) {
+        this.particles.push(
+            new Particle(
+                this,
+                event.clientX * dpr,
+                event.clientY * dpr,
+                randomFloat(-1.5, 1.5),
+                randomFloat(-1, 1),
+                randomFloat(1, 2),
+                randomChoice(this.colors),
+            ));
+        particleSettings["count"].set(this.particles.length);
+    }
+
+    mouseDown(event) {
+        this.isMouseDown = true;
+    }
+
+    mouseUp(event) {
+        this.isMouseDown = false;
+    }
+
+    mouseMove(event) {
+        if (this.isMouseDown) {
+            this.particles.push(new Boid(
+                this,
+                event.clientX * dpr,
+                event.clientY * dpr,
+                event.movementX,
+                event.movementY,
+                randomFloat(1, 2),
+                randomChoice(this.colors),
+            ));
+            particleSettings["count"].set(this.particles.length);
+        }
+    }
+}
+
 const conway = new Conway(16);
 const boids = new Boids(0.7);
+const particles = new Particles(["#f35d4f", "#c0d988", "#6ddaf1", "#f1e85b"]);
 
 // -- Funcs loop --
 
 const inits = {
     "conway": () => {
         conway.init(0.1);
+        document.getElementById("conway-settings").classList.add("active");
+
         canvas.addEventListener("mousemove", (event) => conway.mouseMove(event.clientX * dpr, event.clientY * dpr));
         canvas.addEventListener("mousedown", (event) => conway.mouseDown(event.clientX * dpr, event.clientY * dpr));
         canvas.addEventListener("mouseup", (event) => conway.mouseUp());
         canvas.addEventListener("mouseleave", (event) => conway.mouseUp());
-        document.getElementById("conway-settings").classList.add("active");
     },
     "boids": () => {
         boids.init(boidsCount);
         document.getElementById("boids-settings").classList.add("active");
+
         canvas.addEventListener("click", (event) => boids.click(event));
         canvas.addEventListener("mousemove", (event) => boids.mouseMove(event));
         canvas.addEventListener("mousedown", (event) => boids.mouseDown(event));
         canvas.addEventListener("mouseup", (event) => boids.mouseUp(event));
         canvas.addEventListener("mouseleave", (event) => boids.mouseUp(event));
     },
+    "particle": () => {
+        particles.init(particleCount);
+        document.getElementById("particle-settings").classList.add("active");
+
+        canvas.addEventListener("click", (event) => particles.click(event));
+        canvas.addEventListener("mousemove", (event) => particles.mouseMove(event));
+        canvas.addEventListener("mousedown", (event) => particles.mouseDown(event));
+        canvas.addEventListener("mouseup", (event) => particles.mouseUp(event));
+        canvas.addEventListener("mouseleave", (event) => particles.mouseUp(event));
+    }
 }
 
 const updates = {
@@ -643,6 +852,9 @@ const updates = {
     },
     "boids": () => {
         boids.update();
+    },
+    "particle": () => {
+        particles.update();
     }
 }
 
@@ -652,6 +864,9 @@ const clearCanvas = {
     },
     "boids": () => {
         boids.init(0);
+    },
+    "particle": () => {
+        particles.init(0);
     }
 }
 
@@ -663,10 +878,7 @@ const draws = {
         boids.draw();
     },
     "particle": () => {
-        ctx.font = "30px Arial";
-        ctx.fillStyle = "white";
-        ctx.textAlign = "center";
-        ctx.fillText("TODO: Finish this mode", canvas.width / 2, canvas.height / 2);
+        particles.draw();
     }
 }
 
@@ -683,6 +895,12 @@ const clear = {
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         document.getElementById("boids-settings").classList.remove("active");
     },
+    "particle": () => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "black";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        document.getElementById("particle-settings").classList.remove("active");
+    }
 }
 
 

@@ -44,15 +44,15 @@
                             Edit grid to change environment
                         </p>
                     </div>
-                    <label class="setting semi" for="show-size" title="Size of the grid cell">
+                    <label class="setting semi" for="grid-size" title="Size of a grid cell in pixels">
                         Grid Size
                         <input type="number" id="grid-size" name="grid-size">
                     </label>
-                    <label class="setting semi" for="show-grid" title="Show grid on canvas">
+                    <label class="setting semi" for="show-grid" title="If checked show grid on canvas">
                         Show Grid
                         <input type="checkbox" id="show-grid" name="show-grid">
                     </label>
-                    <label class="setting semi" for="grid-wrap-around" title="Choose how edge tiles should behave">
+                    <label class="setting semi" for="grid-wrap-around" title="If checked tiles on the edge of the grid should wrap around to the other side">
                         Grid Wrap Around
                         <input type="checkbox" id="grid-wrap-around" name="grid-wrap-around" checked>
                     </label>
@@ -88,7 +88,7 @@
                         <span id="boids-alignment-value">-</span>
                     </div>
                     <div class="setting">
-                        <label for="boids-separation">Separation</label>
+                        <label for="boids-separation" title="How much boids will try and get away from other boids in their protected range">Separation</label>
                         <input type="range" id="boids-separation" name="boids-separation" min="0" max="350" value="100">
                         <span id="boids-separation-value">-</span>
                     </div>
@@ -98,14 +98,19 @@
                         </p>
                     </div>
                     <div class="setting" title="Number of boids in the simulation">
-                        <label for="boids-count">Boids Count</label>
+                        <label for="boids-count">Count</label>
                         <input type="range" id="boids-count" name="boids-count" min="0" max="1000">
                         <span id="boids-count-value">-</span>
                     </div>
                     <div class="setting" title="How long the trail of boids should be. 0 means no trail.">
-                        <label for="boids-trail">Trail Length</label>
+                        <label for="boids-trail">Trail</label>
                         <input type="range" id="boids-trail" name="boids-trail" min="0" max="25">
                         <span id="boids-trail-value">-</span>
+                    </div>
+                    <div class="setting" title="Size of boid">
+                        <label for="boids-scale">Scale</label>
+                        <input type="range" id="boids-scale" name="boids-scale" min="1" max="350", value="100">
+                        <span id="boids-scale-value">-</span>
                     </div>
                 </div>
 
@@ -114,6 +119,21 @@
                         <p>
                             Left click to add particle
                         </p>
+                    </div>
+                    <div class="setting" title="Number of particle in the simulation">
+                        <label for="particles-count">Count</label>
+                        <input type="range" id="particles-count" name="particle-count" min="0" max="1000">
+                        <span id="particles-count-value">-</span>
+                    </div>
+                    <div class="setting" title="Size of particle">
+                        <label for="particles-scale">Scale</label>
+                        <input type="range" id="particles-scale" name="particles-scale" min="1" max="350", value="100">
+                        <span id="particles-scale-value">-</span>
+                    </div>
+                    <div class="setting" title="Repel force between particles. Negative causes attraction">
+                        <label for="particles-repel">Repel</label>
+                        <input type="range" id="particles-repel" name="particles-repel" min="-50" max="350", value="100">
+                        <span id="particles-repel-value">-</span>
                     </div>
                 </div>
             </div>
