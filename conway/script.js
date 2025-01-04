@@ -1,7 +1,9 @@
 
-// -- Canvas setup --
+function repeat(value, times) {
+    return Array.from({ length: times }, () => value);
+}
 
-import { randHsl, stringCssHsl, blendColorsHsl } from "./colorHsl.js";
+// -- Canvas setup --
 
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
@@ -76,6 +78,14 @@ function simpleBlendRGB(...colors) {
     const blendedB = Math.sqrt(sumB / colorCount);
 
     return [blendedR, blendedG, blendedB];
+}
+
+function weightedAverageBlendRGB(color1, color2, t) {
+    return [
+        color1[0] * (1 - t) + color2[0] * t,
+        color1[1] * (1 - t) + color2[1] * t,
+        color1[2] * (1 - t) + color2[2] * t,
+    ];
 }
 
 function rgbToCss(color) {
@@ -344,7 +354,7 @@ const boidSettings = makeSettings("boids", {
 }, (value) => Math.floor(value), (value) => Math.floor(value));
 
 class Boid {
-    constructor(group, x, y, vx, vy, hsl, scoutGroup, biasValue = defaultBiasVal) {
+    constructor(group, x, y, vx, vy, rgb, scoutGroup, biasValue = defaultBiasVal) {
         this.group = group;
 
         this.x = x;
@@ -353,7 +363,7 @@ class Boid {
         this.vx = vx;
         this.vy = vy;
 
-        this.hsl = hsl;
+        this.rgb = rgb;
 
         this.biasValue = biasValue;
         this.scoutGroup = scoutGroup;
@@ -361,12 +371,18 @@ class Boid {
         this.trail = [];
 
         this.trailI = 0;
+
+        this.groupRGB = null;
+        this.oldGroupRGB = null;
     }
 
     update() {
         let xPosAvg = 0, yPosAvg = 0, xVelAvg = 0, yVelAvg = 0;
         let neighboringBoids = 0;
         let closeDx = 0, closeDy = 0;
+
+
+        let isInGroup = false;
 
         for (const other of this.group.boids) {
             if (other === this) continue;
@@ -379,14 +395,23 @@ class Boid {
             if (dist < protectedRange) {
                 closeDx += dx;
                 closeDy += dy;
-                this.hsl = blendColorsHsl(this.hsl, other.hsl, 0.1);
             } else if (dist < visualRange) {
                 xPosAvg += other.x;
                 yPosAvg += other.y;
                 xVelAvg += other.vx;
                 yVelAvg += other.vy;
                 neighboringBoids++;
+                isInGroup = true;
+                this.groupRGB = other.groupRGB === null ? randRGB() : other.groupRGB;
             }
+        }
+
+        if (!isInGroup) {
+            this.groupRGB = null;
+        }
+
+        if (this.groupRGB !== null) {
+            this.rgb = weightedAverageBlendRGB(this.rgb, this.groupRGB, 0.01);
         }
 
         // Alignment and Cohesion
@@ -467,7 +492,7 @@ class Boid {
         ctx.lineTo(-height, width);
         ctx.closePath();
 
-        ctx.fillStyle = stringCssHsl(this.hsl);
+        ctx.fillStyle = rgbToCss(this.rgb);
         
         ctx.fill();
 
@@ -481,7 +506,7 @@ class Boid {
             const lastElement = this.trail[i - 1];            
             
             ctx.save()
-            ctx.fillStyle = stringCssHsl(lastElement.hsl); 
+            ctx.fillStyle = rgbToCss(lastElement.rgb); 
             
             ctx.globalAlpha = i / this.trail.length;
             ctx.beginPath();
@@ -519,7 +544,7 @@ class Boids {
                 randomFloat(this.boundaryY, this.boundaryY + this.boundaryHeight),
                 randomFloat(-1, 1),
                 randomFloat(-1, 1),
-                randHsl(),
+                randRGB(),
                 randomChoice([1, 2]),
             ));
         }
@@ -557,7 +582,7 @@ class Boids {
                 event.clientY * dpr,
                 randomFloat(-1, 1),
                 randomFloat(-1, 1),
-                randHsl(),
+                randRGB(),
                 randomChoice([1, 2]),
             ));
         boidSettings["count"].set(this.boids.length);
@@ -579,7 +604,7 @@ class Boids {
                 event.clientY * dpr,
                 event.movementX,
                 event.movementY,
-                randHsl(),
+                randRGB(),
                 randomChoice([1, 2]),
             ));
             boidSettings["count"].set(this.boids.length);
