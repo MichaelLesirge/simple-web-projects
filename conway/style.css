@@ -21,6 +21,11 @@ html, body, main {
     color: #f0f0f0;
 }
 
+a {
+    color: cyan;
+    font-family: 'Courier New', Courier, monospace;
+}
+
 .canvas {
     outline: auto;
 }
