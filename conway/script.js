@@ -882,7 +882,7 @@ const draws = {
     }
 }
 
-const clear = {
+const end = {
     "conway": () => {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.fillStyle = "black";
@@ -932,7 +932,7 @@ function loop() {
 
     if (mode !== lastMode) {
         console.log("Mode changed to", mode);
-        if (clear[lastMode]) clear[lastMode]();
+        if (end[lastMode]) end[lastMode]();
         if (inits[mode]) inits[mode]();
     }
 
