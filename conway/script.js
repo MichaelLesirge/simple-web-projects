@@ -846,6 +846,18 @@ const inits = {
     }
 }
 
+const clearInit = {
+    "conway": () => {
+        conway.init(0);
+    },
+    "boids": () => {
+        boids.init(0);
+    },
+    "particle": () => {
+        particles.init(0);
+    }
+}
+
 const updates = {
     "conway": () => {
         conway.update();
@@ -855,18 +867,6 @@ const updates = {
     },
     "particle": () => {
         particles.update();
-    }
-}
-
-const clearCanvas = {
-    "conway": () => {
-        conway.init(0);
-    },
-    "boids": () => {
-        boids.init(0);
-    },
-    "particle": () => {
-        particles.init(0);
     }
 }
 
@@ -910,7 +910,7 @@ const clearButton = document.getElementById('clear-btn');
 const randomButton = document.getElementById('random-btn');
 
 clearButton.addEventListener('click', () => {
-    if (clearCanvas[mode]) clearCanvas[mode]();
+    if (clearInit[mode]) clearInit[mode]();
 });
 
 randomButton.addEventListener('click', () => {
