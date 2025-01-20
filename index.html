@@ -170,7 +170,8 @@
     </main>
 
     <footer>
-        <button id="more">Show More Projects</button>
+        <button id="random">Open Random Project 🎲</button>
+        <button id="more">Show More Projects ➕</button>
         <div id="github-foot">
             <a class="github-info" href="https://github.com/michaellesirge/simple-web-projects">
                 github.com/michaellesirge
@@ -216,7 +217,7 @@
             {
                 name: "chess",
                 title: "Chess ♟️🎯",
-                desc: "Chess, but where you win by taking the opponents king",
+                desc: "Simple chess, to play against another person. No AI yet.",
             },
             {
                 name: "tetris",
@@ -293,6 +294,19 @@
         loadMoreButton.addEventListener("click", (data) => {
             loadMoreButton.remove();
             extraProjects.forEach(createProject);
+        });
+
+        const randomButton = document.getElementById("random");
+        let randomURLs = [];
+        randomButton.addEventListener("click", () => {
+            if (randomURLs.length === 0) {
+                randomURLs = projects.map(({ name, url }) => name ?? url ?? "");
+            }
+            const randomIndex = Math.floor(Math.random() * randomURLs.length);
+            const randomURL = randomURLs.splice(randomIndex, 1)[0];
+            window.open(randomURL, "_blank");
+            console.log(randomURLs);
+            
         });
 
     </script>
