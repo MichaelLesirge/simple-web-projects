@@ -632,6 +632,10 @@ addSettings(particleSettings, "particles", {
     "repel": 100,
 }, (value) => parseFloat(value) / 100, (value) => `${value}%`);
 
+addSettings(particleSettings, "particles", {
+    "friction": 0,
+}, (value) => parseFloat(value) / 100, (value) => `${value / 100}`);
+
 class Particle {
     constructor(group, x, y, vx, vy, radius, rgb) {
         this.group = group;
@@ -706,6 +710,10 @@ class Particle {
             this.vy += dy * force;
         }
 
+        this.vx *= (1 - particleSettings["friction"].get() / canvas.width * 100);
+        this.vy *= (1 - particleSettings["friction"].get() / canvas.height * 100);
+        
+
         this.x += (this.vx / canvas.width) * speedModifier;
         this.y += (this.vy / canvas.height) * speedModifier;
 
@@ -770,41 +778,18 @@ class Particles {
         ctx.strokeRect(this.boundaryX, this.boundaryY, this.boundaryWidth, this.boundaryHeight);
     }
 
-    click(event) {
-        this.particles.push(
+    click(event) {        
+        this.particles.push(            
             new Particle(
                 this,
-                event.clientX * dpr,
-                event.clientY * dpr,
+                event.clientX / canvas.width,
+                event.clientY / canvas.height,
                 randomFloat(-1.5, 1.5),
                 randomFloat(-1, 1),
                 randomFloat(1, 2),
                 randomChoice(this.colors),
             ));
         particleSettings["count"].set(this.particles.length);
-    }
-
-    mouseDown(event) {
-        this.isMouseDown = true;
-    }
-
-    mouseUp(event) {
-        this.isMouseDown = false;
-    }
-
-    mouseMove(event) {
-        if (this.isMouseDown) {
-            this.particles.push(new Boid(
-                this,
-                event.clientX * dpr,
-                event.clientY * dpr,
-                event.movementX,
-                event.movementY,
-                randomFloat(1, 2),
-                randomChoice(this.colors),
-            ));
-            particleSettings["count"].set(this.particles.length);
-        }
     }
 }
 
@@ -839,10 +824,6 @@ const inits = {
         document.getElementById("particle-settings").classList.add("active");
 
         canvas.addEventListener("click", (event) => particles.click(event));
-        canvas.addEventListener("mousemove", (event) => particles.mouseMove(event));
-        canvas.addEventListener("mousedown", (event) => particles.mouseDown(event));
-        canvas.addEventListener("mouseup", (event) => particles.mouseUp(event));
-        canvas.addEventListener("mouseleave", (event) => particles.mouseUp(event));
     }
 }
 
