@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Urban Tree Benefits Simulation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            background-color: #f5f5f5;
+            overflow-x: hidden;
+        }
+        
+        h1 {
+            color: #2c7534;
+            margin-bottom: 10px;
+        }
+        
+        p {
+            margin: 5px 0;
+            text-align: center;
+            max-width: 800px;
+        }
+        
+        #game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+        
+        canvas {
+            border: 2px solid #333;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        #controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+            background-color: #e9f5e9;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 800px;
+        }
+        
+        #buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        button {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            background-color: #2c7534;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #1d5023;
+        }
+        
+        #metrics {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            margin-top: 10px;
+        }
+        
+        .metric {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px;
+            border-radius: 5px;
+            background-color: #fff;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+            min-width: 150px;
+        }
+        
+        .metric-value {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 5px 0;
+        }
+        
+        .good {
+            color: #2c7534;
+        }
+        
+        .moderate {
+            color: #f39c12;
+        }
+        
+        .bad {
+            color: #c0392b;
+        }
+        
+        #info-panel {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+        }
+        
+        #info-title {
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 10px;
+            color: #2c7534;
+        }
+    </style>
+</head>
+<body>
+    <h1>Urban Tree Benefits Simulation</h1>
+    <p>Plant trees in the city to see how they improve temperature, air quality, and wellbeing!</p>
+    
+    <div id="game-container">
+        <canvas id="gameCanvas" width="800" height="500"></canvas>
+        
+        <div id="controls">
+            <div id="buttons">
+                <button id="plant-tree">Plant Tree ($100)</button>
+                <button id="remove-tree">Remove Tree</button>
+                <button id="reset-game">Reset Simulation</button>
+            </div>
+            
+            <div id="metrics">
+                <div class="metric">
+                    <span>Budget</span>
+                    <span id="budget-value" class="metric-value">$1000</span>
+                </div>
+                <div class="metric">
+                    <span>Temperature</span>
+                    <span id="temperature-value" class="metric-value bad">92°F</span>
+                </div>
+                <div class="metric">
+                    <span>Air Quality</span>
+                    <span id="air-quality-value" class="metric-value bad">Poor</span>
+                </div>
+                <div class="metric">
+                    <span>Wellbeing</span>
+                    <span id="wellbeing-value" class="metric-value bad">Low</span>
+                </div>
+            </div>
+        </div>
+        
+        <div id="info-panel">
+            <div id="info-title">Benefits of Urban Trees</div>
+            <div id="info-content">
+                Plant trees around the city to experience their benefits. Trees reduce urban heat islands, filter pollutants, provide shade, increase property values, and improve mental wellbeing.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Game constants
+        const GRID_SIZE = 20;
+        const CELL_SIZE = 40;
+        const CANVAS_WIDTH = 800;
+        const CANVAS_HEIGHT = 500;
+        const TREE_COST = 100;
+        const TREE_INFLUENCE_RADIUS = 3; // In grid cells
+        
+        // Game state
+        let city = [];
+        let budget = 1000;
+        let temperature = 92; // °F
+        let airQuality = 0; // 0-100 scale
+        let wellbeing = 0; // 0-100 scale
+        let selectedCell = { x: -1, y: -1 };
+        let mode = "plant"; // "plant" or "remove"
+        
+        // Canvas and context
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+        
+        // Elements
+        const budgetValue = document.getElementById("budget-value");
+        const temperatureValue = document.getElementById("temperature-value");
+        const airQualityValue = document.getElementById("air-quality-value");
+        const wellbeingValue = document.getElementById("wellbeing-value");
+        const infoContent = document.getElementById("info-content");
+        
+        // Initialize the game
+        function initGame() {
+            // Create grid with buildings, roads, and empty spaces
+            city = [];
+            for (let y = 0; y < Math.floor(CANVAS_HEIGHT / CELL_SIZE); y++) {
+                let row = [];
+                for (let x = 0; x < Math.floor(CANVAS_WIDTH / CELL_SIZE); x++) {
+                    // Place buildings, roads and empty spaces
+                    let cellType = "empty";
+                    let rand = Math.random();
+                    
+                    if (rand < 0.4) {
+                        cellType = "building";
+                    } else if (rand < 0.55) {
+                        cellType = "road";
+                    }
+                    
+                    row.push({
+                        type: cellType,
+                        hasTree: false
+                    });
+                }
+                city.push(row);
+            }
+            
+            // Reset game state
+            budget = 1000;
+            recalculateMetrics();
+            updateUI();
+            render();
+        }
+        
+        // Draw the city
+        function render() {
+            ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+            
+            // Draw grid cells
+            for (let y = 0; y < city.length; y++) {
+                for (let x = 0; x < city[y].length; x++) {
+                    const cell = city[y][x];
+                    const posX = x * CELL_SIZE;
+                    const posY = y * CELL_SIZE;
+                    
+                    // Draw cell background based on type
+                    switch (cell.type) {
+                        case "building":
+                            ctx.fillStyle = "#95a5a6";
+                            break;
+                        case "road":
+                            ctx.fillStyle = "#7f8c8d";
+                            break;
+                        default:
+                            ctx.fillStyle = "#bdc3c7";
+                    }
+                    
+                    ctx.fillRect(posX, posY, CELL_SIZE, CELL_SIZE);
+                    
+                    // Draw grid lines
+                    ctx.strokeStyle = "#ecf0f1";
+                    ctx.lineWidth = 1;
+                    ctx.strokeRect(posX, posY, CELL_SIZE, CELL_SIZE);
+                    
+                    // Draw tree if present
+                    if (cell.hasTree) {
+                        drawTree(posX + CELL_SIZE/2, posY + CELL_SIZE/2);
+                    }
+                    
+                    // Draw building
+                    if (cell.type === "building") {
+                        drawBuilding(posX, posY);
+                    }
+                    
+                    // Draw road
+                    if (cell.type === "road") {
+                        drawRoad(posX, posY);
+                    }
+                }
+            }
+            
+            // Draw selected cell
+            if (selectedCell.x >= 0 && selectedCell.y >= 0) {
+                const posX = selectedCell.x * CELL_SIZE;
+                const posY = selectedCell.y * CELL_SIZE;
+                
+                ctx.strokeStyle = mode === "plant" ? "#27ae60" : "#c0392b";
+                ctx.lineWidth = 3;
+                ctx.strokeRect(posX, posY, CELL_SIZE, CELL_SIZE);
+            }
+        }
+        
+        // Draw a tree
+        function drawTree(x, y) {
+            // Draw tree trunk
+            ctx.fillStyle = "#8B4513";
+            ctx.fillRect(x - 3, y - 5, 6, 15);
+            
+            // Draw tree canopy
+            ctx.fillStyle = "#27ae60";
+            ctx.beginPath();
+            ctx.arc(x, y - 15, 15, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        
+        // Draw a building
+        function drawBuilding(x, y) {
+            ctx.fillStyle = "#34495e";
+            ctx.fillRect(x + 5, y + 5, CELL_SIZE - 10, CELL_SIZE - 10);
+            
+            // Draw windows
+            ctx.fillStyle = "#f1c40f";
+            const windowSize = 6;
+            const windows = 2;
+            const spacing = (CELL_SIZE - 10 - (windowSize * windows)) / (windows + 1);
+            
+            for (let wy = 0; wy < windows; wy++) {
+                for (let wx = 0; wx < windows; wx++) {
+                    ctx.fillRect(
+                        x + 5 + spacing + wx * (windowSize + spacing),
+                        y + 5 + spacing + wy * (windowSize + spacing),
+                        windowSize,
+                        windowSize
+                    );
+                }
+            }
+        }
+        
+        // Draw a road
+        function drawRoad(x, y) {
+            // Draw road lines
+            ctx.strokeStyle = "#f1c40f";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(x + CELL_SIZE/2, y + 5);
+            ctx.lineTo(x + CELL_SIZE/2, y + CELL_SIZE - 5);
+            ctx.stroke();
+        }
+        
+        // Plant a tree at the selected cell
+        function plantTree() {
+            if (selectedCell.x < 0 || selectedCell.y < 0) return;
+            
+            const cell = city[selectedCell.y][selectedCell.x];
+            
+            // Check if we can plant a tree here
+            if (cell.hasTree || cell.type === "building" || cell.type === "road") {
+                showInfoMessage("Cannot plant a tree here.");
+                return;
+            }
+            
+            // Check budget
+            if (budget < TREE_COST) {
+                showInfoMessage("Not enough budget to plant a tree.");
+                return;
+            }
+            
+            // Plant the tree and update budget
+            cell.hasTree = true;
+            budget -= TREE_COST;
+            
+            // Update game state
+            recalculateMetrics();
+            updateUI();
+            render();
+            
+            showTreeBenefitInfo();
+        }
+        
+        // Remove a tree from the selected cell
+        function removeTree() {
+            if (selectedCell.x < 0 || selectedCell.y < 0) return;
+            
+            const cell = city[selectedCell.y][selectedCell.x];
+            
+            if (!cell.hasTree) {
+                showInfoMessage("No tree to remove here.");
+                return;
+            }
+            
+            cell.hasTree = false;
+            
+            // Update game state
+            recalculateMetrics();
+            updateUI();
+            render();
+            
+            showInfoMessage("Tree removed. You lost the benefits it provided to the surrounding area.");
+        }
+        
+        // Calculate metrics based on tree placement
+        function recalculateMetrics() {
+            let treeCount = 0;
+            
+            // Count trees
+            for (let y = 0; y < city.length; y++) {
+                for (let x = 0; x < city[y].length; x++) {
+                    if (city[y][x].hasTree) {
+                        treeCount++;
+                    }
+                }
+            }
+            
+            // Calculate metrics based on tree count and distribution
+            const maxTrees = Math.floor((city.length * city[0].length) * 0.4); // 40% of cells can have trees
+            const treeCoverage = treeCount / maxTrees;
+            
+            temperature = Math.max(75, Math.round(92 - (treeCoverage * 17))); // 92°F to 75°F
+            airQuality = Math.min(100, Math.round(treeCoverage * 100));
+            wellbeing = Math.min(100, Math.round(treeCoverage * 100));
+        }
+        
+        // Update UI elements
+        function updateUI() {
+            budgetValue.textContent = "$" + budget;
+            temperatureValue.textContent = temperature + "°F";
+            
+            // Set air quality text
+            if (airQuality < 33) {
+                airQualityValue.textContent = "Poor";
+                airQualityValue.className = "metric-value bad";
+            } else if (airQuality < 66) {
+                airQualityValue.textContent = "Moderate";
+                airQualityValue.className = "metric-value moderate";
+            } else {
+                airQualityValue.textContent = "Good";
+                airQualityValue.className = "metric-value good";
+            }
+            
+            // Set wellbeing text
+            if (wellbeing < 33) {
+                wellbeingValue.textContent = "Low";
+                wellbeingValue.className = "metric-value bad";
+            } else if (wellbeing < 66) {
+                wellbeingValue.textContent = "Medium";
+                wellbeingValue.className = "metric-value moderate";
+            } else {
+                wellbeingValue.textContent = "High";
+                wellbeingValue.className = "metric-value good";
+            }
+            
+            // Set temperature class
+            if (temperature > 85) {
+                temperatureValue.className = "metric-value bad";
+            } else if (temperature > 80) {
+                temperatureValue.className = "metric-value moderate";
+            } else {
+                temperatureValue.className = "metric-value good";
+            }
+        }
+        
+        // Show info about tree benefits
+        function showTreeBenefitInfo() {
+            const benefits = [
+                "Trees reduce urban temperatures by up to 10°F through shade and evapotranspiration, mitigating the urban heat island effect.",
+                "A single mature tree can absorb 48 pounds of carbon dioxide per year and produce enough oxygen for two people.",
+                "Trees filter air pollutants like ozone, nitrogen dioxide, and particulate matter, improving respiratory health.",
+                "Properly placed trees around buildings can reduce air conditioning needs by 30% and save energy costs.",
+                "Trees increase property values by 5-15% and encourage people to spend more time in commercial areas.",
+                "Trees reduce stormwater runoff by intercepting rainfall, which helps prevent flooding and water pollution.",
+                "Access to trees and green spaces improves mental health and reduces stress levels.",
+                "Urban trees provide habitat for birds, insects, and other wildlife, increasing urban biodiversity."
+            ];
+            
+            const randomBenefit = benefits[Math.floor(Math.random() * benefits.length)];
+            showInfoMessage(randomBenefit);
+        }
+        
+        // Show message in info panel
+        function showInfoMessage(message) {
+            infoContent.textContent = message;
+        }
+        
+        // Event listeners
+        canvas.addEventListener("mousemove", (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+            
+            // Calculate grid position
+            const gridX = Math.floor(mouseX / CELL_SIZE);
+            const gridY = Math.floor(mouseY / CELL_SIZE);
+            
+            // Check if position is valid
+            if (gridX >= 0 && gridX < city[0].length && gridY >= 0 && gridY < city.length) {
+                if (selectedCell.x !== gridX || selectedCell.y !== gridY) {
+                    selectedCell.x = gridX;
+                    selectedCell.y = gridY;
+                    render();
+                }
+            }
+        });
+        
+        canvas.addEventListener("click", () => {
+            if (mode === "plant") {
+                plantTree();
+            } else {
+                removeTree();
+            }
+        });
+        
+        canvas.addEventListener("mouseleave", () => {
+            selectedCell.x = -1;
+            selectedCell.y = -1;
+            render();
+        });
+        
+        document.getElementById("plant-tree").addEventListener("click", () => {
+            mode = "plant";
+            document.getElementById("plant-tree").style.backgroundColor = "#2c7534";
+            document.getElementById("remove-tree").style.backgroundColor = "#7f8c8d";
+        });
+        
+        document.getElementById("remove-tree").addEventListener("click", () => {
+            mode = "remove";
+            document.getElementById("plant-tree").style.backgroundColor = "#7f8c8d";
+            document.getElementById("remove-tree").style.backgroundColor = "#c0392b";
+        });
+        
+        document.getElementById("reset-game").addEventListener("click", () => {
+            initGame();
+            showInfoMessage("Simulation reset. Try planting trees to improve the urban environment!");
+        });
+        
+        // Initialize the game when the page loads
+        window.onload = () => {
+            initGame();
+        };
+    </script>
+</body>
+</html>
