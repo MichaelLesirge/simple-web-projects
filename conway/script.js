@@ -823,7 +823,7 @@ const inits = {
         particles.init(particleCount);
         document.getElementById("particle-settings").classList.add("active");
 
-        canvas.addEventListener("click", (event) => particles.click(event));
+        canvas.addEventListener("mousedown", (event) => particles.click(event));
     }
 }
 
