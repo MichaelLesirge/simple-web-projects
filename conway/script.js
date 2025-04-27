@@ -1,8 +1,4 @@
 
-function repeat(value, times) {
-    return Array.from({ length: times }, () => value);
-}
-
 // -- Canvas setup --
 
 const canvas = document.getElementById('canvas');
@@ -141,6 +137,16 @@ class Conway {
         });
 
         this.gridWrapAroundCheckbox = document.getElementById('grid-wrap-around');
+
+        this.isSelected = false;
+    }
+
+    select() {
+        this.isSelected = true;
+    }
+
+    deselect() {
+        this.isSelected = false;
     }
 
     init(percentage) {
@@ -250,17 +256,19 @@ class Conway {
     }
 
     mouseUp() {
+        if (!this.isSelected) return;
         this.lastPos = null;
         this.isMouseDown = false;
     }
 
     mouseDown(x, y) {
+        if (!this.isSelected) return;
         this.drawAtPoint(x, y);
         this.isMouseDown = true;
     }
 
     mouseMove(x, y) {
-        if (!this.isMouseDown) return;
+        if (!this.isMouseDown || !this.isSelected) return;
 
         const [lastX, lastY] = this.lastPos || [x, y];
 
@@ -539,9 +547,21 @@ class Boids {
         this.boundaryY = (canvas.height - this.boundaryHeight) / 2;
 
         this.boids = [];
+
+        this.spawn();
+
+        this.isSelected = false;
     }
 
-    update() {
+    select() {
+        this.isSelected = true;
+    }
+
+    deselect() {
+        this.isSelected = false;
+    }
+
+    spawn() {
         while (this.boids.length < boidSettings["count"].get()) {
             this.boids.push(new Boid(
                 this,
@@ -563,6 +583,11 @@ class Boids {
         }
 
         boidSettings["count"].set(this.boids.length);
+    }
+
+    update() {
+
+        this.spawn();
 
         for (const boid of this.boids) {
             boid.update();
@@ -580,6 +605,7 @@ class Boids {
     }
 
     click(event) {
+        if (!this.isSelected) return;
         this.boids.push(
             new Boid(
                 this,
@@ -594,6 +620,7 @@ class Boids {
     }
 
     mouseDown(event) {
+        if (!this.isSelected) return;
         this.isMouseDown = true;
     }
 
@@ -602,6 +629,7 @@ class Boids {
     }
 
     mouseMove(event) {
+        if (!this.isSelected) return;
         if (this.isMouseDown) {
             this.boids.push(new Boid(
                 this,
@@ -661,12 +689,12 @@ class Particle {
         const radius = this.radius * particleSettings["scale"].get();
 
         ctx.beginPath();
-        ctx.arc(x, y, radius * this.connections.length, 0, Math.PI * 2, true);
+        ctx.arc(x, y, radius * (this.connections.length + 1), 0, Math.PI * 2, true);
         ctx.fill();
         ctx.closePath();
 
         ctx.beginPath();
-        ctx.arc(x, y, (radius + 5) * this.connections.length, 0, Math.PI * 2, true);
+        ctx.arc(x, y, (radius + 5) * (this.connections.length + 1), 0, Math.PI * 2, true);
         ctx.stroke();
         ctx.closePath();
 
@@ -712,7 +740,7 @@ class Particle {
 
         this.vx *= (1 - particleSettings["friction"].get() / canvas.width * 100);
         this.vy *= (1 - particleSettings["friction"].get() / canvas.height * 100);
-        
+
 
         this.x += (this.vx / canvas.width) * speedModifier;
         this.y += (this.vy / canvas.height) * speedModifier;
@@ -733,14 +761,26 @@ class Particles {
     constructor(colors) {
         this.colors = colors;
         this.particles = [];
+
+        this.isSelected = false;
     }
 
     init(particleCount) {
         particleSettings["count"].set(particleCount);
         this.particles = [];
+        this.spawn();
     }
 
-    update() {
+    select() {
+        this.isSelected = true;
+    }
+
+    deselect() {
+        this.isSelected = false;
+    }
+
+    spawn() {
+        console.log("Spawning particles", this.particles.length, particleSettings["count"].get());
         while (this.particles.length < particleSettings["count"].get()) {
             this.particles.push(new Particle(
                 this,
@@ -762,7 +802,10 @@ class Particles {
         }
 
         particleSettings["count"].set(this.particles.length);
+    }
 
+    update() {
+        this.spawn();
         for (const particle of this.particles) {
             particle.update();
         }
@@ -770,26 +813,23 @@ class Particles {
 
     draw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-
+        
         this.particles.forEach(particle => particle.draw());
-
-        ctx.strokeStyle = "rgba(255, 255, 255, 0.2)";
-        ctx.lineWidth = 3;
-        ctx.strokeRect(this.boundaryX, this.boundaryY, this.boundaryWidth, this.boundaryHeight);
     }
 
-    click(event) {        
-        this.particles.push(            
-            new Particle(
+    click(event) {
+        if (!this.isSelected) return;
+        this.particles.push(new Particle(
                 this,
-                event.clientX / canvas.width,
-                event.clientY / canvas.height,
+                event.clientX * dpr / canvas.width,
+                event.clientY * dpr / canvas.height,
                 randomFloat(-1.5, 1.5),
                 randomFloat(-1, 1),
                 randomFloat(1, 2),
                 randomChoice(this.colors),
             ));
         particleSettings["count"].set(this.particles.length);
+        this.spawn();
     }
 }
 
@@ -799,31 +839,44 @@ const particles = new Particles(["#f35d4f", "#c0d988", "#6ddaf1", "#f1e85b"]);
 
 // -- Funcs loop --
 
+canvas.addEventListener("mousemove", (event) => conway.mouseMove(event.clientX * dpr, event.clientY * dpr));
+canvas.addEventListener("mousedown", (event) => conway.mouseDown(event.clientX * dpr, event.clientY * dpr));
+canvas.addEventListener("mouseup", (event) => conway.mouseUp());
+canvas.addEventListener("mouseleave", (event) => conway.mouseUp());
+
+canvas.addEventListener("click", (event) => boids.click(event));
+canvas.addEventListener("mousemove", (event) => boids.mouseMove(event));
+canvas.addEventListener("mousedown", (event) => boids.mouseDown(event));
+canvas.addEventListener("mouseup", (event) => boids.mouseUp(event));
+canvas.addEventListener("mouseleave", (event) => boids.mouseUp(event));
+
+canvas.addEventListener("click", (event) => particles.click(event));
+
 const inits = {
     "conway": () => {
         conway.init(0.1);
-        document.getElementById("conway-settings").classList.add("active");
-
-        canvas.addEventListener("mousemove", (event) => conway.mouseMove(event.clientX * dpr, event.clientY * dpr));
-        canvas.addEventListener("mousedown", (event) => conway.mouseDown(event.clientX * dpr, event.clientY * dpr));
-        canvas.addEventListener("mouseup", (event) => conway.mouseUp());
-        canvas.addEventListener("mouseleave", (event) => conway.mouseUp());
     },
     "boids": () => {
         boids.init(boidsCount);
-        document.getElementById("boids-settings").classList.add("active");
-
-        canvas.addEventListener("click", (event) => boids.click(event));
-        canvas.addEventListener("mousemove", (event) => boids.mouseMove(event));
-        canvas.addEventListener("mousedown", (event) => boids.mouseDown(event));
-        canvas.addEventListener("mouseup", (event) => boids.mouseUp(event));
-        canvas.addEventListener("mouseleave", (event) => boids.mouseUp(event));
     },
     "particle": () => {
-        particles.init(particleCount);
-        document.getElementById("particle-settings").classList.add("active");
+        particles.init(particleCount);        
+    }
+}
 
-        canvas.addEventListener("click", (event) => particles.click(event));
+const actives = {
+    "conway": () => {
+        conway.select();
+        document.getElementById("conway-settings").classList.add("active");
+    },
+    "boids": () => {
+        boids.select();
+        document.getElementById("boids-settings").classList.add("active");
+
+    },
+    "particle": () => {
+        particles.select();
+        document.getElementById("particle-settings").classList.add("active");
     }
 }
 
@@ -865,21 +918,15 @@ const draws = {
 
 const end = {
     "conway": () => {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = "black";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        conway.deselect();
         document.getElementById("conway-settings").classList.remove("active");
     },
     "boids": () => {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = "black";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        boids.deselect();
         document.getElementById("boids-settings").classList.remove("active");
     },
     "particle": () => {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = "black";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        particles.deselect();
         document.getElementById("particle-settings").classList.remove("active");
     }
 }
@@ -889,6 +936,10 @@ const end = {
 
 const clearButton = document.getElementById('clear-btn');
 const randomButton = document.getElementById('random-btn');
+
+for (const init in inits) {
+    inits[init]();
+}
 
 clearButton.addEventListener('click', () => {
     if (clearInit[mode]) clearInit[mode]();
@@ -914,7 +965,7 @@ function loop() {
     if (mode !== lastMode) {
         console.log("Mode changed to", mode);
         if (end[lastMode]) end[lastMode]();
-        if (inits[mode]) inits[mode]();
+        if (actives[mode]) actives[mode]();
     }
 
     realFpsOutput.value = Math.round(1000 / deltaTime);
@@ -931,7 +982,7 @@ function loop() {
 }
 
 window.addEventListener("resize", () => {
-    if (inits[mode]) inits[mode]();
+    if (actives[mode]) actives[mode]();
     lastTime = performance.now();
 });
 
