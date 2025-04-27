@@ -346,7 +346,7 @@ for (const option in backgroundOptions) {
   selector.appendChild(el);
 }
 
-const url = new URL(window.location.href);
+let url = new URL(window.location.href);
 selector.value = url.searchParams.get('background') || 'Plain';
 
 function selectBackground(name) {
@@ -358,6 +358,7 @@ function selectBackground(name) {
 }
 
 selector.addEventListener('change', (event) => {
+  url = new URL(window.location.href);
   const selected = event.target.value;
   url.searchParams.set('background', selected);
   window.history.pushState({}, '', url);
