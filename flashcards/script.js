@@ -11,6 +11,8 @@ class FlashcardApp {
         this.updateEditableCards();
 
         this.loadFrom();
+
+        this.updateButtonNames();
     }
 
     initializeElements() {
@@ -26,6 +28,7 @@ class FlashcardApp {
             viewButton: document.getElementById("view-button"),
             downloadButton: document.getElementById("download-json"),
             uploadJsonFile: document.getElementById("upload-json"),
+            clearTermsButton: document.getElementById("clear-terms"),
         };
     }
 
@@ -72,6 +75,16 @@ class FlashcardApp {
             button.addEventListener("mousedown", (event) => {
                 event.preventDefault();
             });
+        });
+
+        this.elements.clearTermsButton.addEventListener("click", () => {
+            if (confirm("Are you sure you want to clear all terms?")) {
+                this.flashcards = [];
+                this.currentIndex = 0;
+                this.saveTo();
+                this.updateCard(true);
+                this.updateEditableCards();
+            }
         });
     }
 
@@ -139,7 +152,8 @@ class FlashcardApp {
         }
 
         const compressedLength = compressedUrl.toString().length;
-        const uncompressedLength = uncompressedUrl.toString().length;
+        // const uncompressedLength = uncompressedUrl.toString().length;
+        const uncompressedLength = Infinity;
 
         let finalURL;
 
@@ -178,13 +192,13 @@ class FlashcardApp {
             } else {
                 alert("Failed to decompress flashcard data from URL.");
             }
-        } else if (Array.from(params.keys()).length > 0) {
-            console.log("Loading from uncompressed URL");
-            for (const [term, definition] of params) {
-                this.flashcards.push({ term, definition });
-            }
-            this.updateCard(true);
-            this.updateEditableCards();
+        // } else if (Array.from(params.keys()).length > 0) {
+        //     console.log("Loading from uncompressed URL");
+        //     for (const [term, definition] of params) {
+        //         this.flashcards.push({ term, definition });
+        //     }
+        //     this.updateCard(true);
+        //     this.updateEditableCards();
         } else {
             console.log("No URL data, loading from localStorage");
             this.loadFromJson(localStorage.getItem("flashcards") || "[]");
@@ -287,13 +301,19 @@ class FlashcardApp {
 
     toggleShuffleMode() {
         this.shuffleMode = !this.shuffleMode;
-        this.elements.shuffleButton.textContent = `Shuffle: ${this.shuffleMode ? "On" : "Off"}`;
+        this.elements.card.classList.toggle("shuffle-mode", this.shuffleMode);
+        this.updateButtonNames();
     }
-
+    
     toggleViewMode() {
         this.frontIsTerm = !this.frontIsTerm;
-        this.elements.viewButton.textContent = `Front: ${this.frontIsTerm ? "Term" : "Definition"}`;
         this.updateCard();
+        this.updateButtonNames();
+    }
+    
+    updateButtonNames() {
+        this.elements.shuffleButton.textContent = `🔀 Shuffle: ${this.shuffleMode ? "On" : "Off"}`;
+        this.elements.viewButton.textContent = `🔄 Front: ${this.frontIsTerm ? "Term" : "Definition"}`;
     }
 
     updateCard(unFlip = true) {
@@ -329,8 +349,17 @@ document.addEventListener("DOMContentLoaded", () => {
     new FlashcardApp();
 });
 
+const termsListContainer = document.getElementById("terms-list-container");
 document.getElementById("hide").addEventListener("click", (event) => {
-    const element = document.getElementById("terms-list");
-    element.classList.toggle("hide")
-    event.target.textContent = element.classList.contains("hide") ? "Show List" : "Hide List";
+    termsListContainer.classList.toggle("hide")
+    event.target.textContent = termsListContainer.classList.contains("hide") ? "🐵 Show List" : "🙈 Hide List";
+});
+
+document.getElementById("copy-link-button").addEventListener("click", () => {
+    const url = window.location.href;
+    navigator.clipboard.writeText(url).then(() => {
+        console.log("Link copied to clipboard!");
+    }).catch(err => {
+        console.error("Failed to copy: ", err);
+    });
 });

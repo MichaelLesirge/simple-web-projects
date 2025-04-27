@@ -6,11 +6,15 @@
     <link rel="stylesheet" href="style.css">
 
     <script src="script.js" defer></script>
+    <script src="backgrounds.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/lz-string@1.4.4/libs/lz-string.min.js"></script>
 
     <title>Simple Flashcards App</title>
 </head>
 <body>
+    <canvas id="background-canvas"></canvas>
+
+
     <div>
       <h1>
         Simple Flashcards Creator and Viewer
@@ -34,8 +38,8 @@
         <button id="next-card-btn" title="Next Card">►</button>
     </div>
     <div class="action-buttons">
-        <button id="shuffle-button" title="Enable Random Next Card">Shuffle: Off</button>
-        <button id="view-button" title="Enable Reverse Cards">Front: Term</button>
+        <button id="shuffle-button" title="Enable random next card" style="background-color:royalblue;">Shuffle: Off</button>
+        <button id="view-button" title="Enable reverse cards" style="background-color:purple;">Front: Term</button>
     </div>
     <div class="card-list-container">
         <div class="terms-list-buttons">
@@ -43,21 +47,29 @@
                 <h2>Terms</h2>
             </div>
             <div>
-                <button id="hide">Hide List</button>
+                <button id="hide" style="background-color: orange;" title="Hide/show terms list">🙈 Hide List</button>
+                <button id="clear-terms" style="background-color: darkred;" title="Delete all terms in list">🗑️ Clear List</button>
             </div>
         </div>
-        <div id="terms-list"></div>
+
+        <div id="terms-list-container">
+            <div id="terms-list">
+            </div>
+            <button id="add-term-btn" style="background-color: lightgreen; color: black;">➕ Add Term</button>
+        </div>
+
         <div class="terms-list-buttons">
             <div>
-                <button id="add-term-btn">Add Term</button>
-            </div>
-            <div>
-                <button id="download-json" title="Save file containing labels">Save File</button>
-                <label class="button" for="upload-json" title="Load file containing labels">Load File</label>
+                <button id="download-json" title="Save file containing labels" style="background-color: teal;">💾 Save File</button>
+                <label class="button" for="upload-json" title="Load file containing labels" style="background-color: teal;">📂 Load File</label>
                 <input style="display: none;" itemid="upload-json" type="file" accept=".json" id="upload-json">
             </div>
-            <button id="copy-link-button" title="Copy data link with flashcard data encoded">Copy Link</button>
+            <button id="copy-link-button" title="Copy data link with flashcard data encoded" style="background-color:rgb(91, 182, 152);">🔗 Copy Data Link</button>
         </div>
     </div>
+
+    <select id="background-selector">
+    </select>
+
 </body>
 </html>
