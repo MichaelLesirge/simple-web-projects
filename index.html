@@ -154,7 +154,8 @@
     <header>
         <div>
             <h1>My Random Projects</h1>
-            <span>Simple Projects in plain HTML, CSS, and JS</span>
+            <span>Simple Projects in plain HTML, CSS, and JS.</span>
+            <span id="secondary-message">Click on the project to open it.</span>
         </div>
         <noscript class="warning">Warning: You have JavaScript disabled on this site. Most projects here require
             JavaScript for all functionality.</noscript>
@@ -319,7 +320,6 @@
 
             const availH = window.innerHeight
                 - header.getBoundingClientRect().height
-                - footer.getBoundingClientRect().height;
             const rows = Math.max(1,
                 Math.floor((availH + rowGap) / (itemH + rowGap))
             );
@@ -329,15 +329,21 @@
                 createProject(projects[i]);
             }
             nextIndex = count;
+
+            if (nextIndex < projects.length) {
+                footer.appendChild(loadMoreButton);
+            } else {
+                loadMoreButton.remove();
+            }
         }
 
         initProjects();
 
         window.addEventListener("resize", () => {
-            initProjects();
-            if (!document.body.contains(loadMoreButton) && nextIndex < projects.length) {
-                footer.appendChild(loadMoreButton);
-            }
+            // initProjects();
+            // if (!document.body.contains(loadMoreButton) && nextIndex < projects.length) {
+            //     footer.appendChild(loadMoreButton);
+            // }
         });
 
         loadMoreButton.addEventListener("click", () => {
@@ -356,6 +362,12 @@
             const url = randomURLs.splice(idx, 1)[0];
             window.open(url, "_blank");
         });
+
+        if (window.innerWidth < 700) {
+            const message = document.getElementById("secondary-message");
+            message.innerHTML = "Unfortunately, this page is not very mobile friendly. Better responsiveness is a work in progress. Please use a computer for the best experience.";
+            message.style.color = "red";
+        }
     </script>
 
 </body>
