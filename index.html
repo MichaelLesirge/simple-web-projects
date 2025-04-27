@@ -182,13 +182,12 @@
 
     <script>
         const projectsElement = document.querySelector(".projects");
+        const header = document.querySelector("header");
+        const footer = document.querySelector("footer");
+        const loadMoreButton = document.getElementById("more");
+        const randomButton = document.getElementById("random");
 
         const projects = [
-            {
-                name: "rock-paper-scissors-battle",
-                title: "Battle Royal    🪨📃✂️",
-                desc: "Watch team rock, team paper, and team scissors fight to rule the box. No canvas, just DOM manipulation.",
-            },
             {
                 name: "pid-demo",
                 title: "PID Simulation  🤖⚙️",
@@ -200,14 +199,14 @@
                 desc: "Funny tool to chain text effects. Make text reversed, cursed, binary, circled, or more. Unicode only.",
             },
             {
-                name: "roman-numerals",
-                title: "Roman Numeral 🏛️🔢",
-                desc: "Tool for roman numerals, with real time updates and explanations. Options of special unicode characters.",
+                name: "rock-paper-scissors-battle",
+                title: "Battle Royal    🪨📃✂️",
+                desc: "Watch team rock, team paper, and team scissors fight to rule the box. No canvas, just DOM manipulation.",
             },
             {
                 name: "conway",
                 title: "Conway's Game of Life 🧬🎮",
-                desc: "Conway's Game of Life with colors and a few extra features. Also has Boids simulation.",
+                desc: "Conway's Game of Life with colors and a few extra features. Also has Boids and magnet particle simulation.",
             },
             {
                 name: "fancy-effects",
@@ -215,14 +214,14 @@
                 desc: "Some random interesting canvas projects. Don't have much functionality or interactivity, but still look cool.",
             },
             {
-                name: "chess",
-                title: "Chess ♟️🎯",
-                desc: "Simple chess, to play against another person. Has features like board flipping and undo. Work in progress.",
-            },
-            {
                 name: "tetris",
                 title: "Tetris 🧩🕹️",
                 desc: "My recreation of the original tetris game. Has fun audio for emersion. Uses unicode art only.",
+            },
+            {
+                name: "roman-numerals",
+                title: "Roman Numeral 🏛️🔢",
+                desc: "Tool for roman numerals, with real time updates and explanations. Options of special unicode characters.",
             },
             {
                 name: "xbox-diagram-maker",
@@ -230,85 +229,133 @@
                 desc: "Simple tool to label picture of xbox controller. Made for printing control scenes of FRC robots.",
             },
             {
+                name: "chess",
+                title: "Chess ♟️🎯",
+                desc: "Simple chess, to play against another person. Has features like board flipping and undo. Work in progress.",
+            },
+            {
+                name: "flashcards",
+                title: "Simple Flashcards 📚🔖",
+                desc: "Simple flashcards creator and viewer. Stores  data locally or in URL. Make sure to check out fun backgrounds.",
+            },
+            {
                 name: "customisable-dice-roller",
                 title: "Dice Roller    🎲🛠️",
                 desc: "Dice roller tool, started it a long time ago but got bored and never finished. Has stats and custom dice.",
             },
             {
-                name: "flashcards",
-                title: "Simple Flashcards 📚🔖",
-                desc: "Simple flashcards creator and viewer. Stores data locally. Fun backgrounds.",
-            },
-            {
                 name: "one-second",
                 title: "One Second Game ⏱️🎯",
-                desc: "Simple game where you try and stop a timer at exactly 1 second (00:01.00).",
+                desc: "Simple game where you try and stop a timer at exactly 1 second (00:01.00). If you win you get confetti.",
             },
-        ];
-
-        const extraProjects = [
             {
                 name: "tic-tac-toe/HTML-CSS-JS",
                 url: "https://raw.githack.com/michaellesirge/tic-tac-toe/main/HTML-CSS-JS/",
                 title: "Tic Tac Toe ❌⭕",
-                desc: "Highly customizable Tic Tac Toe game, from different repo",
+                desc: "Highly customizable Tic Tac Toe game, from different repo where I was leaning HTML, CSS, and JS.",
             },
             {
                 name: "dont-leave",
-                title: "Don't Leave 🚪😅",
-                desc: "Random thing I thought was kinda funny. Don't try to leave him!",
+                title: "Don't Leave 🚪😈",
+                desc: "Random thing. Uses cursor position. (This barely works, only tested on Chrome on desktop)",
             },
             {
                 name: "happy-holiday-eve",
                 title: "Happy Holiday Eve Eve 🎄🎉",
-                desc: "Another random thing I thought was kinda funny at the time",
+                desc: "Another random thing. Uses datetime. Countdown to the day before a holiday.",
             },
             {
                 name: "this",
                 url: "/",
                 title: "Project Page 🏠🗂️",
-                desc: "This page, I wanted an even number ¯\\_(ツ)_/¯",
+                desc: "This page. Has my plain HTML CSS JS projects. Uses janky system to dynamically create project cards.",
             },
         ]
 
-        // TODO, have all projects in one big array, create one row at a time until screen is full, then have bottom{load more} load one more row
+        let nextIndex = 0;
 
-        // yaaa, not my finest work \/
-        // <span class="title"><h3 title="${name}">${title ?? "Empty"}</h3><img width=10 class="github-logo" src="images/github.png" alt="github logo"></span>
-
-        function createProject({ name, title, desc, ...extra }) {
+        function createProject({ name, title, desc, url }) {
             projectsElement.innerHTML += `
-            <a class="project" href="${extra.url ?? name ?? ""}" target="_blank">
-                <img width=500 class="project-image" src="images/${name.split("/")[0] || "example"}.png" alt="Screenshot of ${title ?? "Project"}">
-                <div class="info">
-                    <span class="title"><h3 title="${name}">${title ?? "Untitled"}</h3></span>
-                    <p>${desc ?? ""}</p>
-                </div>
-            </a>
-            `;
+      <a class="project" href="${url ?? name}" target="_blank">
+        <img class="project-image"
+             src="images/${name.split("/")[0]}.png"
+             alt="Screenshot of ${title}">
+        <div class="info">
+          <span class="title">
+            <h3 title="${name}">${title}</h3>
+          </span>
+          <p>${desc}</p>
+        </div>
+      </a>`;
         }
 
-        projects.forEach(createProject)
+        function initProjects() {
+            projectsElement.innerHTML = "";
 
-        const loadMoreButton = document.getElementById("more");
-        loadMoreButton.addEventListener("click", (data) => {
-            loadMoreButton.remove();
-            extraProjects.forEach(createProject);
+            const sample = document.createElement("a");
+            sample.className = "project";
+            sample.style.visibility = "hidden";
+            sample.innerHTML = `
+      <img class="project-image" src="images/${projects[0].name.split("/")[0]}.png">
+      <div class="info">
+        <h3>${projects[0].title}</h3>
+        <p>${projects[0].desc}</p>
+      </div>`;
+
+            projectsElement.appendChild(sample);
+
+            const style = getComputedStyle(projectsElement);
+            const columnGap = parseFloat(style.columnGap);
+            const rowGap = parseFloat(style.rowGap);
+            const rect = sample.getBoundingClientRect();
+            const itemW = rect.width;
+            const itemH = rect.height;
+            projectsElement.removeChild(sample);
+
+            const containerW = projectsElement.clientWidth;
+            const cols = Math.max(1,
+                Math.floor((containerW + columnGap) / (itemW + columnGap))
+            );
+
+            const availH = window.innerHeight
+                - header.getBoundingClientRect().height
+                - footer.getBoundingClientRect().height;
+            const rows = Math.max(1,
+                Math.floor((availH + rowGap) / (itemH + rowGap))
+            );
+
+            const count = Math.min(projects.length, Math.max(cols * rows, cols < 3 ? projects.length : 1));
+            for (let i = 0; i < count; i++) {
+                createProject(projects[i]);
+            }
+            nextIndex = count;
+        }
+
+        initProjects();
+
+        window.addEventListener("resize", () => {
+            initProjects();
+            if (!document.body.contains(loadMoreButton) && nextIndex < projects.length) {
+                footer.appendChild(loadMoreButton);
+            }
         });
 
-        const randomButton = document.getElementById("random");
+        loadMoreButton.addEventListener("click", () => {
+            for (let i = nextIndex; i < projects.length; i++) {
+                createProject(projects[i]);
+            }
+            loadMoreButton.remove();
+        });
+
         let randomURLs = [];
         randomButton.addEventListener("click", () => {
             if (randomURLs.length === 0) {
-                randomURLs = projects.map(({ name, url }) => name ?? url ?? "");
+                randomURLs = projects.map(p => p.url ?? p.name);
             }
-            const randomIndex = Math.floor(Math.random() * randomURLs.length);
-            const randomURL = randomURLs.splice(randomIndex, 1)[0];
-            window.open(randomURL, "_blank");
-            console.log(randomURLs);
-            
+            const idx = Math.floor(Math.random() * randomURLs.length);
+            const url = randomURLs.splice(idx, 1)[0];
+            window.open(url, "_blank");
         });
-
     </script>
 
 </body>
