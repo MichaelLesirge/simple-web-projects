@@ -140,7 +140,7 @@ class FlashcardApp {
         const rawJson = this.getAsJson();
         const compressed = LZString.compressToEncodedURIComponent(rawJson);
 
-        const url = new URL(window.location);
+        const url = new URL(window.location.href);
         url.search = "";
         const compressedUrl = new URL(url);
         compressedUrl.searchParams.set("state", compressed);
