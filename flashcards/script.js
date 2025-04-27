@@ -23,7 +23,9 @@ class FlashcardApp {
             cardNumber: document.getElementById("card-number"),
             viewMode: document.getElementById("view-mode"),
             shuffleButton: document.getElementById("shuffle-button"),
-            viewButton: document.getElementById("view-button")
+            viewButton: document.getElementById("view-button"),
+            downloadButton: document.getElementById("download-json"),
+            uploadJsonFile: document.getElementById("upload-json"),
         };
     }
 
@@ -42,6 +44,29 @@ class FlashcardApp {
             if (event.target.tagName === "INPUT") return;
             if (event.key === " ") event.preventDefault();
         });
+
+        this.elements.downloadButton.addEventListener("click", () => {
+            const json = this.getAsJson();
+            const blob = new Blob([json], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "flashcards.json";
+            a.click();
+            URL.revokeObjectURL(url);
+        });
+
+        this.elements.uploadJsonFile.addEventListener("change", (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    this.loadFromJson(e.target.result);
+                };
+                reader.readAsText(file);
+            }
+        });
+
 
         document.querySelectorAll("button").forEach((button) => {
             button.addEventListener("mousedown", (event) => {

@@ -150,3 +150,11 @@ function setAllowedChars(elementClass, pattern) {
         });
     });
 }
+
+if (localStorage.getItem("firstTime") !== "false") {
+    const currentYear = new Date().getFullYear();
+    decimalInput.value = currentYear;
+    decimalInput.select();
+    update();
+    localStorage.setItem("firstTime", "false");
+}
