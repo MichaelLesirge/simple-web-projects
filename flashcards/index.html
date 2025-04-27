@@ -4,7 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
+
     <script src="script.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/lz-string@1.4.4/libs/lz-string.min.js"></script>
+
     <title>Simple Flashcards App</title>
 </head>
 <body>
@@ -53,6 +56,7 @@
                 <label class="button" for="upload-json" title="Load file containing labels">Load File</label>
                 <input style="display: none;" itemid="upload-json" type="file" accept=".json" id="upload-json">
             </div>
+            <button id="copy-link-button" title="Copy data link with flashcard data encoded">Copy Link</button>
         </div>
     </div>
 </body>

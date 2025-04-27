@@ -9,7 +9,7 @@ class FlashcardApp {
         this.attachEventListeners();
         this.updateCard();
         this.updateEditableCards();
-        
+
         this.loadFrom();
     }
 
@@ -88,7 +88,7 @@ class FlashcardApp {
         if (action) action();
     }
 
-    updateEditableCards() {        
+    updateEditableCards() {
         this.elements.termsList.innerHTML = "";
         this.flashcards.forEach((flashcard, index) => {
             const editableCard = this.createEditableCard(flashcard, index);
@@ -124,31 +124,83 @@ class FlashcardApp {
     }
 
     saveTo() {
-        console.log("Saving to local storage and URL");
-        
+        const rawJson = this.getAsJson();
+        const compressed = LZString.compressToEncodedURIComponent(rawJson);
+
         const url = new URL(window.location);
         url.search = "";
-        for (let i = 0; i < this.flashcards.length; i++) {
-            url.searchParams.append(this.flashcards[i].term, this.flashcards[i].definition);
-        }
-        window.history.replaceState({}, "", url);
+        const compressedUrl = new URL(url);
+        compressedUrl.searchParams.set("state", compressed);
 
-        localStorage.setItem("flashcards", this.getAsJson());
+        const uncompressedUrl = new URL(url);
+        const flashcards = this.flashcards;
+        for (let i = 0; i < flashcards.length; i++) {
+            uncompressedUrl.searchParams.append(flashcards[i].term, flashcards[i].definition);
+        }
+
+        const compressedLength = compressedUrl.toString().length;
+        const uncompressedLength = uncompressedUrl.toString().length;
+
+        let finalURL;
+
+        if (compressedLength < uncompressedLength) {    
+            console.log("Compressed URL is shorter, using it.");
+            finalURL = compressedUrl.toString();
+        } else {
+            console.log("Uncompressed URL is shorter, using it.");
+            finalURL = uncompressedUrl.toString();
+        }
+
+        if (finalURL.length < 2000) {
+            console.log("Saving flashcards into URL.");
+            window.history.replaceState({}, "", finalURL);
+            this.enableCopyLinkButton(true);
+        } else {
+            console.warn("URL too long, not saving flashcards into URL.");
+            url.search = "";
+            window.history.replaceState({}, "", url);
+            this.enableCopyLinkButton(false);
+        }
+
+        console.log("Saving to localStorage");
+        localStorage.setItem("flashcards", rawJson);
     }
 
     loadFrom() {
-        
-        if (window.location.search === "") {
-            console.log("No terms in URL, Loading from local storage");
-            this.loadFromJson(localStorage.getItem("flashcards") || "[]");
-        }
-        else {
-            console.log("Loading from URL");
-            for (const [term, definition] of new URLSearchParams(location.search)) {
+        const params = new URLSearchParams(window.location.search);
+        const compressedState = params.get("state");
+
+        if (compressedState) {
+            console.log("Loading from compressed URL");
+            const json = LZString.decompressFromEncodedURIComponent(compressedState);
+            if (json) {
+                this.loadFromJson(json);
+            } else {
+                alert("Failed to decompress flashcard data from URL.");
+            }
+        } else if (Array.from(params.keys()).length > 0) {
+            console.log("Loading from uncompressed URL");
+            for (const [term, definition] of params) {
                 this.flashcards.push({ term, definition });
             }
             this.updateCard(true);
             this.updateEditableCards();
+        } else {
+            console.log("No URL data, loading from localStorage");
+            this.loadFromJson(localStorage.getItem("flashcards") || "[]");
+        }
+    }
+
+    enableCopyLinkButton(enable) {
+        const button = document.getElementById("copy-link-button");
+        if (enable) {
+            button.disabled = false;
+            button.title = "Copy shareable link";
+            button.style.opacity = 1;
+        } else {
+            button.disabled = true;
+            button.title = "Too much data to share via link!";
+            button.style.opacity = 0.5;
         }
     }
 
