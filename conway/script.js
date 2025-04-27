@@ -43,11 +43,21 @@ updateFPS();
 
 // -- Mode selection --
 
-let mode = Array.from(document.getElementsByName("mode-select-button")).filter((button) => button.checked)[0].value;
+const url = new URL(window.location.href);
+
+const modeSelectButtons = Array.from(document.getElementsByName("mode-select-button")); 
+if (url.searchParams.has("mode")) {
+    const urlMode = url.searchParams.get("mode");
+    (modeSelectButtons.find((button) => button.value === urlMode) ?? modeSelectButtons[0]).checked = true;
+}
+
+let mode = modeSelectButtons.filter((button) => button.checked)[0].value;
 
 document.getElementsByName("mode-select-button").forEach((button) => {
     button.addEventListener("change", (event) => {
         mode = event.target.value;
+        url.searchParams.set("mode", mode);
+        window.history.pushState({}, '', url);
     });
 });
 
@@ -780,7 +790,6 @@ class Particles {
     }
 
     spawn() {
-        console.log("Spawning particles", this.particles.length, particleSettings["count"].get());
         while (this.particles.length < particleSettings["count"].get()) {
             this.particles.push(new Particle(
                 this,
