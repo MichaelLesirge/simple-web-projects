@@ -880,6 +880,32 @@ resetCarButton.onclick = () => {
 	carPidController.reset();
 }
 
+document.addEventListener("keydown", (event) => {
+	if (event.key == "r") {
+		car.reset();
+		carPidController.reset();
+	}
+	if (event.key == "ArrowLeft") {
+		console.log(Number(setPointInput.value) - 10)		
+		setPointInput.value = Number(setPointInput.value) - 10;
+		setPointSlider.setLocalCenteredPosition(Number(setPointInput.value));
+	}
+	if (event.key == "ArrowRight") {
+		setPointInput.value = Number(setPointInput.value) + 10;
+		setPointSlider.setLocalCenteredPosition(Number(setPointInput.value));
+	}
+	if (event.key == "ArrowUp") {
+		groundDegreesInput.value = Number(groundDegreesInput.value) + 1;
+		world.setFloorDegrees(Number(groundDegreesInput.value));
+		groundAngleSlider.setCenteredPosition(world.getFloorOffset() / 2);
+	}
+	if (event.key == "ArrowDown") {
+		groundDegreesInput.value = Number(groundDegreesInput.value) - 1;
+		world.setFloorDegrees(Number(groundDegreesInput.value));
+		groundAngleSlider.setCenteredPosition(world.getFloorOffset() / 2);
+	}
+});
+
 locationGraph.createDataPoint("car position", {color: "black", thickness: 5})
 locationGraph.createDataPoint("setpoint", {color: "green", thickness: 5})
 
