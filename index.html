@@ -324,7 +324,7 @@
                 Math.floor((availH + rowGap) / (itemH + rowGap))
             );
 
-            const count = Math.min(projects.length, Math.max(cols * rows, cols < 3 ? projects.length : 1));
+            const count = Math.min(projects.length - (projects.length % cols), Math.max((cols * rows), cols < 3 ? projects.length : 1));
             for (let i = 0; i < count; i++) {
                 createProject(projects[i]);
             }
