@@ -167,7 +167,7 @@ function downloadJSON() {
         "time": new Date().toISOString(),
         "sourceHref": document.location.href,
         "sourceName": document.location.hostname,
-        "version": "1.0.0"
+        "version": version
     }
 
     const jsonString = JSON.stringify({...state, ...extraData}, null, 2);
@@ -199,7 +199,6 @@ function loadJSON(event) {
             }
         };
         reader.readAsText(file);
-
     }
 }
 
