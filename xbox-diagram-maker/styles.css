@@ -105,6 +105,15 @@ button:hover, .button:hover {
     display: none;
 }
 
+.title-options {
+    height: 80%;
+    padding: 8px;
+    border-radius: 4px;
+    background-color: inherit;
+    color: inherit;
+}
+
+
 @media print {
     h1, #ui, #left-labels, #right-labels, .theme-selector {
         display: none;

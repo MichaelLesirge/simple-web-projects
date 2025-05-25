@@ -11,6 +11,8 @@ const distanceFromCenter = 165;
 const LEFT = canvas.width / 2 - distanceFromCenter;
 const RIGHT = canvas.width / 2 + distanceFromCenter - 6;
 
+const version = "1.0.0";
+
 const buttonPositions = {
     "View": [LEFT, 17],
     "Menu": [RIGHT, 17],
@@ -37,6 +39,7 @@ const buttonPositions = {
 const defaultState = {
     title: "",
     titleColor: "#000000",
+    titleAlign: "left",
     labels: {}
 }
 
@@ -49,13 +52,25 @@ function drawController() {
     ctx.textBaseline = "middle";
     ctx.direction = "ltr";
     ctx.font = "32px Arial";
-    ctx.fillStyle = state.titleColor;
-    ctx.fillText(state.title, 5, 18);
+    ctx.fillStyle = state.titleColor || "#000000";
+
+    if (state.titleAlign === "right") {
+        ctx.textAlign = "right";
+        ctx.fillText(state.title, canvas.width - 5, 18);
+    } else if (state.titleAlign === "center") {
+        ctx.textAlign = "center";
+        ctx.fillText(state.title, canvas.width / 2, 18);
+    }
+    else {
+        ctx.textAlign = "left";
+        ctx.fillText(state.title, 5, 18);
+    }
 
     if (DEBUG) {
         for (const [button, position] of Object.entries(buttonPositions)) {
             ctx.fillStyle = "red";
             ctx.font = "16px Arial";
+            ctx.textAlign = "start";
             ctx.direction = position[0] === LEFT ? "rtl" : "ltr";
             ctx.fillText(`-------{${button}}------`, position[0], position[1] + 16 / 3);
         }
@@ -76,6 +91,7 @@ function drawController() {
         if (position && label) {
             ctx.fillStyle = "#000";
             ctx.font = "16px Arial";
+            ctx.textAlign = "start";
             ctx.direction = position[0] === LEFT ? "rtl" : "ltr";
             ctx.fillText(label, position[0], position[1] + 16 / 2.8);
         }
@@ -146,7 +162,16 @@ function updateState(newState) {
 }
 
 function downloadJSON() {
-    const jsonString = JSON.stringify(state, null, 2);
+
+    const extraData = {
+        "time": new Date().toISOString(),
+        "sourceHref": document.location.href,
+        "sourceName": document.location.hostname,
+        "version": "1.0.0"
+    }
+
+    const jsonString = JSON.stringify({...state, ...extraData}, null, 2);
+
     const blob = new Blob([jsonString], { type: "application/json" });
     const url = URL.createObjectURL(blob);
 
@@ -242,6 +267,11 @@ document.getElementById("title-input").addEventListener("input", (e) => {
 
 document.getElementById("title-color").addEventListener("input", (e) => {
     state.titleColor = e.target.value;
+    saveState();
+});
+
+document.getElementById("title-position").addEventListener("change", (e) => {
+    state.titleAlign = e.target.value;
     saveState();
 });
 
