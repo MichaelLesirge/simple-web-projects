@@ -50,7 +50,6 @@ function drawController() {
     ctx.drawImage(controllerImage, 0, 0, canvas.width - 6, canvas.height);
 
     ctx.textBaseline = "middle";
-    ctx.direction = "ltr";
     ctx.font = "32px Arial";
     ctx.fillStyle = state.titleColor || "#000000";
 
@@ -71,7 +70,6 @@ function drawController() {
             ctx.fillStyle = "red";
             ctx.font = "16px Arial";
             ctx.textAlign = "start";
-            ctx.direction = position[0] === LEFT ? "rtl" : "ltr";
             ctx.fillText(`-------{${button}}------`, position[0], position[1] + 16 / 3);
         }
 
@@ -91,8 +89,7 @@ function drawController() {
         if (position && label) {
             ctx.fillStyle = "#000";
             ctx.font = "16px Arial";
-            ctx.textAlign = "start";
-            ctx.direction = position[0] === LEFT ? "rtl" : "ltr";
+            ctx.textAlign = position[0] === LEFT ? "end" : "start";
             ctx.fillText(label, position[0], position[1] + 16 / 2.8);
         }
     }
