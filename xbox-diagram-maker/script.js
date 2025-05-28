@@ -13,6 +13,12 @@ const RIGHT = canvas.width / 2 + distanceFromCenter - 6;
 
 const version = "1.0.0";
 
+if (typeof structuredClone === 'undefined') {
+    globalThis.structuredClone = function(obj) {
+        return JSON.parse(JSON.stringify(obj));
+    };
+}
+
 const buttonPositions = {
     "View": [LEFT, 17],
     "Menu": [RIGHT, 17],
@@ -138,17 +144,43 @@ function createLabelInputs() {
 }
 
 function saveState() {
-    localStorage.setItem("controllerState", JSON.stringify(state));
+    try {
+        localStorage.setItem("controllerState", JSON.stringify(state));
+    } catch (error) {
+        console.error("Unable to use localStorage");
+    }
 }
 
 function loadState() {
-    const savedState = localStorage.getItem("controllerState");
 
-    if (savedState) {
-        const state = JSON.parse(savedState);
-        updateState(state);
+    let savedStateJson;
+
+    try {
+        savedStateJson = localStorage.getItem("controllerState");
+    } catch (error) {
+        console.error("Unable to use localStorage");
+        return false;
     }
+
+    return updateStateJson(savedStateJson);
 }
+
+function updateStateJson(json) {
+    let newState;
+    try {
+        newState = JSON.parse(json);
+    } catch (error) {
+        console.error("Error parsing JSON for state");
+    }
+    
+    if (newState) {
+        updateState(newState);
+        return true;
+    }
+    
+    return false;
+}
+
 
 function updateState(newState) {
 
@@ -161,9 +193,11 @@ function updateState(newState) {
     document.getElementById("title-color").value = titleColor;
     document.getElementById("title-position").value = titleAlign;
     
-    for (const [button, label] of Object.entries(labels)) {
-        const input = document.querySelector(`input[placeholder="${button}"]`);
-        if (input) input.value = label;
+    for (const button of Object.keys(buttonPositions)) {
+        const input = document.getElementById(button);
+        if (input) {
+            input.value = labels[button] || "";
+        }
     }
 
     state = {
@@ -201,10 +235,13 @@ function loadJSON(event) {
         const reader = new FileReader();
         reader.onload = function (e) {
             try {
-                const newState = JSON.parse(e.target.result);
                 setTimeout(() => event.target.value = null, 1000)
-                updateState(newState, false);
-                saveState();
+                if (updateStateJson(e.target.result)) {
+                    saveState();
+                } else {
+                    alert("Invalid JSON format. Please ensure the file is a valid Xbox Diagram Maker JSON file.");
+                    console.error("Invalid JSON format");
+                }
             } catch (error) {
                 console.error("Error parsing JSON:", error);
                 alert("Error loading JSON file. Please make sure it\"s a valid JSON file.");
@@ -263,6 +300,7 @@ document.getElementById("title-position").addEventListener("change", (e) => {
 document.getElementById('reset-button').addEventListener('click', async () => {
     if (confirm('Are you sure you want to reset? This will clear all labels and the title.')) {
         resetState();
+        saveState();
     }
 });
 
@@ -278,24 +316,36 @@ window.addEventListener("load", () => {
 });
 
 
-function updateTheme() {
-    let value = localStorage.getItem("theme") ?? "system";
+let theme = "system";
+try {
+    theme = localStorage.getItem("theme") || theme;
+} catch (error) {
+    console.error("Unable to use localStorage for theme");
+}
+updateTheme(theme);
 
-    if (value === "system") {
-        value = window.matchMedia('(prefers-color-scheme: dark)').matches ? "dark" : "light";
+function updateTheme(newTheme) {
+    if (newTheme === "system") {
+        newTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? "dark" : "light";                
     }
 
-    if (value === "dark") {
+    if (newTheme === "dark") {
         document.body.classList.add("dark");
+        console.log("Using dark theme");   
     }
-    else {
+    else if (newTheme === "light") {
         document.body.classList.remove("dark");
+        console.log("Using light theme");
     }
 }
 
 document.getElementById("theme").addEventListener("input", (e) => {
-    localStorage.setItem("theme", e.target.value);
-    updateTheme();
+    try {
+        localStorage.setItem("theme", e.target.value);
+    } catch (error) {
+        console.error("Unable to use localStorage for theme");
+    }
+    updateTheme(e.target.value);
 });
 
 window.matchMedia('(prefers-color-scheme: dark)').addEventListener("change", updateTheme)
@@ -322,7 +372,7 @@ const buttonCode = {
     "D-pad Down": "povDown()",
     "D-pad Right": "povRight()",
     "Right Stick Y Axis": "getRightY()",
-    "Right Stick X Axis": "getLeftX()",
+    "Right Stick X Axis": "getRightX()",
     "Right Stick Button": "rightStick()",
 };
 
