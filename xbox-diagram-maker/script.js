@@ -141,21 +141,33 @@ function loadState() {
 }
 
 function updateState(newState) {
+
     const title = newState.title || "";
     const titleColor = newState.titleColor || "";
+    const titleAlign = newState.titleAlign || "left";
     const labels = newState.labels || {};
 
     document.getElementById("title-input").value = title;
     document.getElementById("title-color").value = titleColor;
-
+    document.getElementById("title-position").value = titleAlign;
+    
     for (const [button, label] of Object.entries(labels)) {
         const input = document.querySelector(`input[placeholder="${button}"]`);
-        if (input) {
-            input.value = label;
-        }
+        if (input) input.value = label;
     }
 
+    state = {
+        title: title,
+        titleColor: titleColor,
+        titleAlign: titleAlign,
+        labels: labels
+    };
+
     drawController();
+}
+
+function resetState() {
+    updateState(defaultState)
 }
 
 function downloadJSON() {
@@ -228,32 +240,6 @@ function printImage() {
     // printWindow.print();
     // printWindow.close();
     print()
-}
-
-function resetState() {
-    updateState(defaultState)
-}
-
-
-function updateState(newState) {
-
-    title = newState.title || '';
-    titleColor = newState.titleColor || '';
-    labels = newState.labels || {};
-
-    document.getElementById('title-input').value = title;
-    document.getElementById('title-color').value = titleColor;
-
-    document.querySelectorAll('#left-labels input, #right-labels input').forEach(input => {
-        const button = input.placeholder;
-        input.value = labels[button] || '';
-    });
-
-    state = { title, titleColor, labels }
-
-    drawController();
-
-    saveState()
 }
 
 document.getElementById("title-input").addEventListener("input", (e) => {
