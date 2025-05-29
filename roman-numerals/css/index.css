@@ -16,8 +16,6 @@ body {
     display: grid;
 
     grid-template-rows: repeat(3, 1fr);
-    grid-template-columns: 5fr 1fr;
-    /* grid-template-rows: 5fr 1fr; */
 
     grid-template-areas: 
         "decimal    decimal"
@@ -53,7 +51,7 @@ body {
 
     font-family: inherit;
 
-    font-size: 7rem;
+    font-size: 6rem;
 
     text-align: center;
 
@@ -170,7 +168,11 @@ option[selected]:not([value="standard"]) {
     white-space: nowrap;
 }
 
-@media only screen and (max-width: 1100px) {
+.under-text:last-child {
+    margin-bottom: 0.5rem;
+}
+
+@media only screen and (max-width: 400px) {
     .under-text {
         flex-direction: column;
         width: max-content;

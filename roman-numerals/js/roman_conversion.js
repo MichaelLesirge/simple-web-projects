@@ -1,21 +1,22 @@
 function sortMapKeys(map, reversed = false) {
-    let keys = Array.from(map.keys()).sort((a,b)=>a-b);
+    let keys = Array.from(map.keys()).sort((a, b) => a - b);
     if (reversed) keys = keys.reverse();
     return keys;
 }
 
-function makeGlyphSet(values) {
+function makeGlyphSet(values, offset = 0) {
     const output = new Map()
-    
+
     for (let i = 0; i < values.length; i++) {
-        const num = (10 ** Math.ceil(i / 2)) / (i % 2 + 1)
-        const last = (10 ** (Math.ceil(i / 2) - 1))
-        
-        if (output.has(last)) output.set(num-last, output.get(last)+values[i])
+        const index = i + offset;
+        const num = (10 ** Math.ceil(index / 2)) / (index % 2 + 1)
+        const last = (10 ** (Math.ceil(index / 2) - 1))
+
+        if (output.has(last)) output.set(num - last, output.get(last) + values[i])
 
         output.set(num, values[i])
     }
-    
+
     return output;
 }
 
@@ -29,40 +30,56 @@ const standardGlyphsMap = new Map(specialGlyphs.map((char, i) => [char, standard
 const zero = "Nūlla"
 const clockGlyphs = ["Ⅰ", "Ⅱ", "Ⅲ", "Ⅳ", "Ⅴ", "Ⅵ", "Ⅶ", "Ⅷ", "Ⅸ", "Ⅹ", "Ⅺ", "Ⅻ"]
 
-const apostrophusReducedGlyphs = {
-    500: ["ⅠↃ", "I)", "Ⅾ"],
-    1000: ["ⅭIↃ", "(I)", "ↀ"],
-    5000: ["IↃↃ", "I))", "ↁ"],
-    10000: ["ⅭⅭIↃↃ", "((I))", "ↂ"],
-    50000: ["IↃↃↃ", "I)))", "ↇ"],
-    100000: ["ⅭⅭⅭIↃↃↃ", "(((I)))", "ↈ"],
+const apostrophusAllGlyphs = {
+    500: ["Ⅾ", "ⅠↃ", "I)"],
+    1000: ["ↀ", "ⅭIↃ", "(I)"],
+    5000: ["ↁ", "IↃↃ", "I))"],
+    10000: ["ↂ", "ⅭⅭIↃↃ", "((I))"],
+    50000: ["ↇ", "IↃↃↃ", "I)))"],
+    100000: ["ↈ", "ⅭⅭⅭIↃↃↃ", "(((I)))"],
 }
-function makeApostrophusGlyphSet(rules) {
-    const output = new Map();
-    for (const [value, glyphs] of Object.entries(apostrophusReducedGlyphs)) {
-        const mode = rules.specialCharters ? 2 : (rules.specialCharters ? 0 : 1);
-        output.set(Number(value), glyphs[mode]);
-    }
-    return output;
+
+const apostrophusGlyphs = new Array();
+const apostrophusSymbolToSpecial = new Map();
+const apostrophusSymbolToNormal = new Map();
+const apostrophusSymbolToSpecialReverse = new Map();
+const apostrophusSymbolToNormalReverse = new Map();
+for (const value of Object.values(apostrophusAllGlyphs)) {
+    const glyph = value[0];
+    apostrophusGlyphs.push(glyph);
+    apostrophusSymbolToSpecial.set(glyph, value[1]);
+    apostrophusSymbolToNormal.set(glyph, value[2]);
+    apostrophusSymbolToSpecialReverse.set(value[1], glyph);
+    apostrophusSymbolToNormalReverse.set(value[2], glyph);
 }
+
+const apostrophusNumbersMap = makeGlyphSet(apostrophusGlyphs, 5);
 
 export function toRules(glyphs, rules) {
 
-    glyphs = glyphs.split("").map((glyph) => (rules.specialCharters ? specialGlyphsMap : standardGlyphsMap).get(glyph) ?? glyph).join("");
-    
+    glyphs = glyphs.split("").map((glyph) =>
+        (rules.specialCharters ? specialGlyphsMap : standardGlyphsMap).get(glyph) ?? glyph)
+        .join("");
+
     if (rules.lowercase) glyphs = glyphs.toLowerCase();
     else glyphs = glyphs.toUpperCase();
-    
+
+    if (rules.mode === "apostrophus") {
+        glyphs = glyphs.split("").map((glyph) =>
+            (rules.combined ? new Map() : (rules.specialCharters ? apostrophusSymbolToSpecial : apostrophusSymbolToNormal)).get(glyph) ?? glyph)
+            .join("");
+    }
+
     return glyphs;
 }
 
 export function toRulesWriting(glyphs, rules) {
-    
+
     if (rules.lowercase) glyphs = glyphs.toLowerCase();
     else glyphs = glyphs.toUpperCase();
 
     glyphs = glyphs.split("").map((glyph) => (rules.specialCharters ? specialGlyphsMap : standardGlyphsMap).get(glyph) ?? glyph).join("");
-    
+
     return glyphs;
 }
 
@@ -74,23 +91,27 @@ export function toStandard(glyphs) {
 
 export function numToRoman(num, rules) {
     const totalPlaces = Math.floor(Math.log10(num))
-    let result = Array.from({length: totalPlaces+1}, () => "");
+    let result = Array.from({ length: totalPlaces + 1 }, () => "");
 
     if (rules.zero && num === 0) {
         result = [zero];
     }
-    
+
     if (rules.combined && num <= 12) {
-        result = [toRules(clockGlyphs[num-1], rules)];
+        result = [toRules(clockGlyphs[num - 1], rules)];
         num = 0;
     }
 
-    
-    if (rules.mode === "apostrophus" && num > 3999) {
-        
+    let currentNumberMap = numbersMap;
+
+    if (rules.mode === "apostrophus") {
+        currentNumberMap = new Map([...numbersMap, ...apostrophusNumbersMap]);
     }
+
+    console.log(currentNumberMap);
     
-    const keys = sortMapKeys(numbersMap, true);
+
+    const keys = sortMapKeys(currentNumberMap, true);
     let currentIndex = 0;
 
     while (num > 0) {
@@ -99,16 +120,17 @@ export function numToRoman(num, rules) {
         if (num - current >= 0) {
             const place = Math.floor(Math.log10(num))
             num -= current;
-            result[place] += toRules(numbersMap.get(current), rules)
+            result[place] += toRules(currentNumberMap.get(current), rules)
         }
         else {
             currentIndex++;
         }
     }
-    
-    console.log(result)
+
     return [result.reverse().join(""), result];
 }
+
+const clockGlyphsMap = new Map(clockGlyphs.map((char, i) => [char, numToRoman(i + 1, { zero: false, combined: false, specialCharters: false, lowercase: false, mode: "standard" })[0]]));
 
 export function romanToNum(glyphs) {
     glyphs = toStandard(glyphs);
@@ -117,12 +139,19 @@ export function romanToNum(glyphs) {
         return [0, false]
     }
 
-    const clockValue = clockGlyphs.indexOf(glyphs) + 1
-    if (clockValue !== 0) {
-        return [clockValue, false];
+    for (const [key, value] of clockGlyphsMap) {
+        glyphs = glyphs.replaceAll(key, value);
     }
-    
-    const keys = new Map([...numbersMap].map(([key, value]) => [value, key]))
+
+
+    for (const [key, value] of apostrophusSymbolToNormalReverse) {
+        glyphs = glyphs.replaceAll(key, value);
+    }
+    for (const [key, value] of apostrophusSymbolToSpecialReverse) {
+        glyphs = glyphs.replaceAll(key, value);
+    }
+
+    const keys = new Map([...numbersMap, ...apostrophusNumbersMap].map(([key, value]) => [value, key]))
 
     let num = 0;
     let highest = 0;
@@ -141,6 +170,5 @@ export function romanToNum(glyphs) {
         else num -= value;
     }
 
-    console.log(glyphs, num)
     return [num, valid];
 }

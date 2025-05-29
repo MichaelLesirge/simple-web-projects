@@ -50,20 +50,29 @@ function setInfoDisplay(numeralsPlaces, value) {
     })
 }
 
+function makeRules() {
+    return {
+        ...defaultRules,
+        lowercase: lowercaseCheck.checked,
+        specialCharters: specialCheck.checked,
+        combined: combinedCheck.checked,
+        mode: modeSelect.value,
+    }
+    
+}
+
 function update() {
      if (decimalInput.value) {
         const value = Number.parseInt(decimalInput.value)
 
-        const rules = {
-            ...defaultRules,
-            lowercase: lowercaseCheck.checked,
-            specialCharters: specialCheck.checked,
-            combined: combinedCheck.checked,
-            mode: modeSelect.value,
-        }
+        const rules = makeRules();
     
-        if (rules.mode === "standard" && value > 3999) {
-            numeralCorrect.innerText = "Invalid numeral, must be 3999 or lower";
+        console.log(rules.mode, value)
+        if (rules.mode == "standard" && value > 3999) {
+            numeralCorrect.innerText = "Invalid numeral, must be 3999 or lower for standard mode";
+        }
+        else if (rules.mode == "apostrophus" && value > 399999) {
+            numeralCorrect.innerText = "Invalid numeral, must be 399999 or lower for apostrophus mode";
         }
         else if (value < 1) {
             numeralCorrect.innerText = "Invalid numeral, must be 1 or higher";
@@ -76,6 +85,7 @@ function update() {
         setInfoDisplay(numeralsPlace, value.toString());
         numeralInput.value = numeral;
         wordDisplay.innerText = numToWord(value, true);
+        console.log(numeralsPlace);
     }
     else {
         wordDisplay.innerText = startingWords;
@@ -89,14 +99,18 @@ decimalInput.addEventListener("input", update)
 lowercaseCheck.addEventListener("change", update)
 specialCheck.addEventListener("change", update)
 combinedCheck.addEventListener("change", update)
+modeSelect.addEventListener("change", update)
+
+modeSelect.addEventListener("change", (event) => {
+    if (event.target.value === "apostrophus" && !combinedCheck.checked && confirm("Apostrophus is best with combined characters. Do you want to enable it?")) {
+        combinedCheck.checked = true;
+        update();
+        combinedCheck.select();
+    }
+});
 
 function updateNumeral(event) {
-    const rules = {
-        ...defaultRules,
-        lowercase: lowercaseCheck.checked,
-        specialCharters: specialCheck.checked,
-        combined: combinedCheck.checked,
-    }
+    const rules = makeRules();
 
     const inputValue = numeralInput.value;
     numeralInput.value = toRulesWriting(inputValue, rules);
@@ -119,7 +133,7 @@ function updateNumeral(event) {
                 if (numeral === numeralInput.value) {
                     setInfoDisplay(numeralsPlace, number.toString())
                 }
-                else {
+                else {                    
                     numeralCorrect.innerText = `Invalid numeral, format should be ${numeral}`;
                     setInfoDisplay([]);
                 }

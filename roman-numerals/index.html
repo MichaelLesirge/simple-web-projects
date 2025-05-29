@@ -28,6 +28,16 @@
         <input type="text" name="numeral" id="numeral" spellcheck="false" class="numeral-input">
         <div class="under-text settings">
             <span id="numeral-correct">Valid Numeral</span>
+            <div class="check-mark">
+                <label for="numeral-system">Large Numerals</label>
+                <select name="numeral-system" id="numeral-system">
+                    <option value="standard" selected>Standard</option>
+                    <option value="apostrophus">Apostrophus</option>
+                    <!-- <option value="vinculum">Vinculum</option> -->
+                </select>
+            </div>
+        </div>
+        <div class="under-text settings">
             <div class="check-mark" title="Lowercase versions of numerals">
                 <label for="lowercase">Lowercase</label>                
                 <input type="checkbox" name="lowercase" id="lowercase">
@@ -39,14 +49,6 @@
             <div class="check-mark" title="Whether to replace multiple characters with their special combined versions if possible, such as 1-12 clock charters.">
                 <label for="combined-charters">Combine charters</label>                
                 <input type="checkbox" name="combined-charters" id="combined-charters">
-            </div>
-            <div class="check-mark">
-                <label for="numeral-system">Large Numerals</label>
-                <select name="numeral-system" id="numeral-system">
-                    <option value="standard">Standard</option>
-                    <option value="apostrophus" selected>Apostrophus</option>
-                    <!-- <option value="vinculum">Vinculum</option> -->
-                </select>
             </div>
         </div>
     </div>
