@@ -1,5 +1,3 @@
-// 3,999 is max for standard. Still convert but say it is not valid
-
 function sortMapKeys(map, reversed = false) {
     let keys = Array.from(map.keys()).sort((a,b)=>a-b);
     if (reversed) keys = keys.reverse();
@@ -35,9 +33,17 @@ const apostrophusReducedGlyphs = {
     500: ["ⅠↃ", "I)", "Ⅾ"],
     1000: ["ⅭIↃ", "(I)", "ↀ"],
     5000: ["IↃↃ", "I))", "ↁ"],
-    1000: ["ⅭⅭIↃↃ", "((I))", "ↂ"],
+    10000: ["ⅭⅭIↃↃ", "((I))", "ↂ"],
     50000: ["IↃↃↃ", "I)))", "ↇ"],
-    10000: ["ⅭⅭⅭIↃↃↃ", "(((I)))", "ↈ"],
+    100000: ["ⅭⅭⅭIↃↃↃ", "(((I)))", "ↈ"],
+}
+function makeApostrophusGlyphSet(rules) {
+    const output = new Map();
+    for (const [value, glyphs] of Object.entries(apostrophusReducedGlyphs)) {
+        const mode = rules.specialCharters ? 2 : (rules.specialCharters ? 0 : 1);
+        output.set(Number(value), glyphs[mode]);
+    }
+    return output;
 }
 
 export function toRules(glyphs, rules) {
@@ -74,11 +80,16 @@ export function numToRoman(num, rules) {
         result = [zero];
     }
     
-    if (rules.clock && num <= 12) {
+    if (rules.combined && num <= 12) {
         result = [toRules(clockGlyphs[num-1], rules)];
         num = 0;
     }
 
+    
+    if (rules.mode === "apostrophus" && num > 3999) {
+        
+    }
+    
     const keys = sortMapKeys(numbersMap, true);
     let currentIndex = 0;
 

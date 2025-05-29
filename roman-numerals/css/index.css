@@ -148,8 +148,17 @@ body {
     border-color: blue;
 }
 
-.check-mark:has(:checked) {
+.check-mark select {
+    background-color: #ffffffc5
+}
+
+.check-mark:has(input[type=checkbox]:checked) {
     background-color: rgba(134, 134, 253, 0.1);
+}
+
+
+option[selected]:not([value="standard"]) {
+    background-color: #07f;
 }
 
 .check-mark input {
@@ -161,7 +170,7 @@ body {
     white-space: nowrap;
 }
 
-@media only screen and (max-width: 600px) {
+@media only screen and (max-width: 1100px) {
     .under-text {
         flex-direction: column;
         width: max-content;

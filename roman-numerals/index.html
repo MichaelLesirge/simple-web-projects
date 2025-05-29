@@ -25,7 +25,7 @@
     </div>
     <div class="input-box numeral center-box">
         <label for="numeral"><b>Roman Numeral:</b></label>
-        <input type="text" name="numeral" id="numeral" spellcheck="false">
+        <input type="text" name="numeral" id="numeral" spellcheck="false" class="numeral-input">
         <div class="under-text settings">
             <span id="numeral-correct">Valid Numeral</span>
             <div class="check-mark" title="Lowercase versions of numerals">
@@ -36,11 +36,18 @@
                 <label for="special-charters">Special charters</label>                
                 <input type="checkbox" name="special-charters" id="special-charters" checked>
             </div>
-            <div class="check-mark" title="Whether to use special roman numeral versions of characters for numbers on clock (1 though 12)">
-                <label for="clock-charters">Clock charters</label>                
-                <input type="checkbox" name="clock-charters" id="clock-charters">
+            <div class="check-mark" title="Whether to replace multiple characters with their special combined versions if possible, such as 1-12 clock charters.">
+                <label for="combined-charters">Combine charters</label>                
+                <input type="checkbox" name="combined-charters" id="combined-charters">
             </div>
-            <!-- - <span id="numeral-info">Ok</span> -->
+            <div class="check-mark">
+                <label for="numeral-system">Large Numerals</label>
+                <select name="numeral-system" id="numeral-system">
+                    <option value="standard">Standard</option>
+                    <option value="apostrophus" selected>Apostrophus</option>
+                    <!-- <option value="vinculum">Vinculum</option> -->
+                </select>
+            </div>
         </div>
     </div>
 </body>

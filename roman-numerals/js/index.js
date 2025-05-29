@@ -2,18 +2,15 @@ import { numToRoman, romanToNum, toRulesWriting } from "./roman_conversion.js";
 import { numToWord } from "./english_conversion.js";
 
 setAllowedChars("decimal-input", /\d/)
-setAllowedChars("decimal-input", /\d/)
+setAllowedChars("numeral-input", /[A-Za-z'̱̄̅̇̇]/);
 
 const defaultRules = {
     lowercase: false,
 
     zero: true,
-    clock: false,
+    combined: false,
 
-    standard: true,
-    apostrophus: false,
-    apostrophusReduced: false,
-    vinculum: false,
+    mode: "standard", // standard, apostrophus, or vinculum
 
     specialCharters: true,
 }
@@ -32,7 +29,8 @@ const explanationBox = document.getElementById("explanation-box")
 
 const lowercaseCheck = document.getElementById("lowercase")
 const specialCheck = document.getElementById("special-charters")
-const clockCheck = document.getElementById("clock-charters")
+const combinedCheck = document.getElementById("combined-charters")
+const modeSelect = document.getElementById("numeral-system")
 
 function setInfoDisplay(numeralsPlaces, value) {
     explanationBox.innerHTML = "";
@@ -60,10 +58,11 @@ function update() {
             ...defaultRules,
             lowercase: lowercaseCheck.checked,
             specialCharters: specialCheck.checked,
-            clock: clockCheck.checked,
+            combined: combinedCheck.checked,
+            mode: modeSelect.value,
         }
     
-        if (rules.standard && value > 3999) {
+        if (rules.mode === "standard" && value > 3999) {
             numeralCorrect.innerText = "Invalid numeral, must be 3999 or lower";
         }
         else if (value < 1) {
@@ -89,14 +88,14 @@ function update() {
 decimalInput.addEventListener("input", update)
 lowercaseCheck.addEventListener("change", update)
 specialCheck.addEventListener("change", update)
-clockCheck.addEventListener("change", update)
+combinedCheck.addEventListener("change", update)
 
 function updateNumeral(event) {
     const rules = {
         ...defaultRules,
         lowercase: lowercaseCheck.checked,
         specialCharters: specialCheck.checked,
-        clock: clockCheck.checked,
+        combined: combinedCheck.checked,
     }
 
     const inputValue = numeralInput.value;
