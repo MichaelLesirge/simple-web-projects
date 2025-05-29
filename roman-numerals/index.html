@@ -18,7 +18,7 @@
 <body>
     <div class="input-box decimal center-box">
         <label for="decimal"><b>Decimal Number:</b></label>
-        <input type="number" class="decimal-input" min="1" name="decimal" id="decimal" autofocus="on">
+        <input type="number" class="decimal-input" min="1" name="decimal" id="decimal" autofocus="on" maxlength="4" max="3999">
         <div class="under-text"><span><span id="english">Any Number</span>&nbspas a Roman Numeral</span></div>
     </div>
     <div id="explanation-box" class="explanation center-box">
@@ -33,7 +33,7 @@
                 <select name="numeral-system" id="numeral-system">
                     <option value="standard" selected>Standard</option>
                     <option value="apostrophus">Apostrophus</option>
-                    <!-- <option value="vinculum">Vinculum</option> -->
+                    <option value="vinculum">Vinculum</option>
                 </select>
             </div>
         </div>

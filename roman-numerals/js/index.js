@@ -2,6 +2,7 @@ import { numToRoman, romanToNum, toRulesWriting } from "./roman_conversion.js";
 import { numToWord } from "./english_conversion.js";
 
 setAllowedChars("decimal-input", /\d/)
+enforceMaxLength("decimal-input");
 setAllowedChars("numeral-input", /[A-Za-z'̱̄̅̇̇]/);
 
 const defaultRules = {
@@ -13,6 +14,12 @@ const defaultRules = {
     mode: "standard", // standard, apostrophus, or vinculum
 
     specialCharters: true,
+}
+
+const maxNumbers = {
+    standard: 3999,
+    apostrophus: 399999,
+    vinculum: 3999999999,
 }
 
 const decimalInput = document.getElementById("decimal")
@@ -68,16 +75,13 @@ function update() {
         const rules = makeRules();
     
         console.log(rules.mode, value)
-        if (rules.mode == "standard" && value > 3999) {
-            numeralCorrect.innerText = "Invalid numeral, must be 3999 or lower for standard mode";
-        }
-        else if (rules.mode == "apostrophus" && value > 399999) {
-            numeralCorrect.innerText = "Invalid numeral, must be 399999 or lower for apostrophus mode";
+        
+        if (value > maxNumbers[rules.mode]) {
+            numeralCorrect.innerText = `Invalid numeral, must be ${maxNumbers[rules.mode]} or lower for ${rules.mode} mode`;
         }
         else if (value < 1) {
             numeralCorrect.innerText = "Invalid numeral, must be 1 or higher";
-        }
-        else {
+        } else {
             numeralCorrect.innerText = "Valid Numeral";
         }
 
@@ -105,8 +109,13 @@ modeSelect.addEventListener("change", (event) => {
     if (event.target.value === "apostrophus" && !combinedCheck.checked && confirm("Apostrophus is best with combined characters. Do you want to enable it?")) {
         combinedCheck.checked = true;
         update();
-        combinedCheck.select();
     }
+    if (event.target.value === "vinculum" && specialCheck.checked && confirm("Vinculum bars only work with non special characters. Do you want to disable special characters?")) {
+        specialCheck.checked = false;
+        update();
+    }
+    decimalInput.maxLength = maxNumbers[event.target.value].toString().length;
+    decimalInput.max = maxNumbers[event.target.value];
 });
 
 function updateNumeral(event) {
@@ -162,6 +171,16 @@ function setAllowedChars(elementClass, pattern) {
             }
         });
     });
+}
+
+function enforceMaxLength(elementClass) {
+    document.querySelectorAll("input." + elementClass).forEach((input) => {
+        input.addEventListener("input", () => {
+            if (input.value.length > input.maxLength) {
+                input.value = input.value.slice(0, input.maxLength);
+            }
+        });
+    });   
 }
 
 if (localStorage.getItem("firstTime") !== "false") {

@@ -20,6 +20,8 @@ function makeGlyphSet(values, offset = 0) {
     return output;
 }
 
+// Normal Roman Numerals
+
 const standardGlyphs = Array.from("IVXLCDM")
 const specialGlyphs = Array.from("ⅠⅤⅩⅬⅭⅮⅯ")
 
@@ -27,8 +29,7 @@ const numbersMap = makeGlyphSet(standardGlyphs);
 const specialGlyphsMap = new Map(standardGlyphs.map((char, i) => [char, specialGlyphs[i]]));
 const standardGlyphsMap = new Map(specialGlyphs.map((char, i) => [char, standardGlyphs[i]]));
 
-const zero = "Nūlla"
-const clockGlyphs = ["Ⅰ", "Ⅱ", "Ⅲ", "Ⅳ", "Ⅴ", "Ⅵ", "Ⅶ", "Ⅷ", "Ⅸ", "Ⅹ", "Ⅺ", "Ⅻ"]
+// Apostrophus Roman Numerals
 
 const apostrophusAllGlyphs = {
     500: ["Ⅾ", "ⅠↃ", "I)"],
@@ -54,6 +55,24 @@ for (const value of Object.values(apostrophusAllGlyphs)) {
 }
 
 const apostrophusNumbersMap = makeGlyphSet(apostrophusGlyphs, 5);
+
+// Vinculum
+
+const combiningOverline = '̅';
+const combiningMacron = '̄';
+const vinculumNumbersMap = new Map([...numbersMap.entries()].map(([key, value]) => [key * 1000, value.replace(/./g, "$&" + combiningOverline)]));
+const vinculumSecondNumbersMap = new Map([...numbersMap.entries()].map(([key, value]) => [key * 1000 * 1000, value.replace(/./g, "$&" + combiningOverline + combiningOverline)]));
+
+
+// Special Roman Numerals
+
+const zero = "Nūlla"
+
+// Clock Roman Numerals
+const clockGlyphs = ["Ⅰ", "Ⅱ", "Ⅲ", "Ⅳ", "Ⅴ", "Ⅵ", "Ⅶ", "Ⅷ", "Ⅸ", "Ⅹ", "Ⅺ", "Ⅻ"]
+const clockGlyphsMap = new Map(clockGlyphs.map((char, i) => [char, numToRoman(i + 1, { zero: false, combined: false, specialCharters: false, lowercase: false, mode: "standard" })[0]]));
+
+// Exported Functions
 
 export function toRules(glyphs, rules) {
 
@@ -106,10 +125,9 @@ export function numToRoman(num, rules) {
 
     if (rules.mode === "apostrophus") {
         currentNumberMap = new Map([...numbersMap, ...apostrophusNumbersMap]);
+    } else if (rules.mode === "vinculum") {
+        currentNumberMap = new Map([...vinculumSecondNumbersMap, ...vinculumNumbersMap, ...numbersMap]);
     }
-
-    console.log(currentNumberMap);
-    
 
     const keys = sortMapKeys(currentNumberMap, true);
     let currentIndex = 0;
@@ -129,8 +147,6 @@ export function numToRoman(num, rules) {
 
     return [result.reverse().join(""), result];
 }
-
-const clockGlyphsMap = new Map(clockGlyphs.map((char, i) => [char, numToRoman(i + 1, { zero: false, combined: false, specialCharters: false, lowercase: false, mode: "standard" })[0]]));
 
 export function romanToNum(glyphs) {
     glyphs = toStandard(glyphs);
