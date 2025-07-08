@@ -1,0 +1,82 @@
+body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+	background-color: #000;
+	color: #fff;
+
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+
+	min-height: 100vh;
+	margin: 0;
+}
+
+#timer {
+	font-size: 72px;
+	font-weight: 300;
+	margin: 40px 0;
+
+	font-variant-numeric: tabular-nums;
+}
+
+.buttons {
+	display: flex;
+	gap: 20px;
+}
+
+button {
+	width: 7.6rem;
+	font-size: 18px;
+
+	padding: 15px 40px;
+	border-radius: 25px;
+	border: none;
+
+	cursor: pointer;
+
+	/* transition: all 0.3s; */
+}
+
+button:hover {
+	transform: scale(1.01);
+	filter: brightness(0.9);
+}
+
+button:active {
+	transform: scale(0.99);
+	filter: brightness(1.1);
+}
+
+#start {
+	background-color: #34c759;
+	color: white;
+}
+
+#start.stop {
+	background-color: #ff3b30;
+}
+
+#reset {
+	background-color: #3a3a3c;
+	color: white;
+}
+
+#score {
+	margin-top: 20px;
+	font-size: 18px;
+}
+
+.confetti {
+	position: fixed;
+	width: 10px;
+	height: 10px;
+	pointer-events: none;
+}
+
+@keyframes fall {
+	to {
+		transform: translateY(200vh) rotate(360deg);
+	}
+}
