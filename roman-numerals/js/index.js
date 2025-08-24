@@ -109,7 +109,7 @@ modeSelect.addEventListener("change", (event) => {
 	if (
 		event.target.value === "apostrophus" &&
 		!combinedCheck.checked &&
-		confirm("Apostrophus is best with combined characters. Do you want to enable it?")
+		confirm(`Apostrophus works best with ${combinedCheck.labels[0].innerText.toLocaleLowerCase()} enabled. Do you want to enable it?`)
 	) {
 		combinedCheck.checked = true;
 		update();
@@ -117,7 +117,7 @@ modeSelect.addEventListener("change", (event) => {
 	if (
 		event.target.value === "vinculum" &&
 		specialCheck.checked &&
-		confirm("Vinculum bars only work with non special characters. Do you want to disable special characters?")
+		confirm(`Vinculum bars work best with ${specialCheck.labels[0].innerText.toLocaleLowerCase()} disabled. Do you want to disable it?`)
 	) {
 		specialCheck.checked = false;
 		update();
