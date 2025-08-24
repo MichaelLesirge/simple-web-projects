@@ -31,7 +31,7 @@ function setAllowedChars(input, pattern) {
 	});
 }
 
-function makeSettings(header, values, form, { getInputElements = false } = {}) {
+function makeSettings(header, values, form, { getInputElements = false, getSyncFunc = false } = {}) {
 	// .category
 	const category = document.createElement("fieldset");
 	category.classList.add("category");
@@ -80,7 +80,7 @@ function makeSettings(header, values, form, { getInputElements = false } = {}) {
 			input.setAttribute(ruleType, ruleValue);
 		}
 
-		input.step = 1;
+		input.step = "";
 		document.addEventListener("click", (event) => input.step = event.target == input ? rules.step : "any")
 
 		form.addEventListener("reset", () => { if (input.oninput) setTimeout(input.oninput) })
@@ -96,7 +96,17 @@ function makeSettings(header, values, form, { getInputElements = false } = {}) {
 
 	form.appendChild(category);
 
-	return getInputElements ? inputs : updateObject;
+	const returnValue = getInputElements ? inputs : updateObject;
+
+	if (getSyncFunc) {
+		return [returnValue, () => {
+			for (const input of inputs) {
+				input.value = updateObject[input.id];
+			}
+		}];
+	}
+
+	return returnValue;
 
 }
 
@@ -104,16 +114,16 @@ const backgroundColor = "white";
 const FPS = 60;
 const FORCE_LINE_MULTIPLIER = 15;
 
-const pidSettings = makeSettings("PID Gains", {
+const [pidSettings, pidSettingsUpdateInputs] = makeSettings("PID Gains", {
 	P: { value: 1, min: 0, title: "The proportional gain value.", step: 0.1 },
 	I: { value: 0, min: 0, title: "The integral gain value", step: 0.1 },
 	D: { value: 0, min: 0, title: "The derivative gain value", step: 0.1 },
-}, pidControlMenu)
+}, pidControlMenu, { getSyncFunc: true });
 
-const settingsITerm = makeSettings("I Term Rules", {
+const [settingsITerm, settingsITermUpdateInputs] = makeSettings("I Term Rules", {
 	maxAccum: { name: "Max Accum", min: 0, title: "This value is used to constrain the I accumulator to help manage integral wind-up.", step: 10 },
 	zone: { name: "Zone", min: 0, title: "This value specifies the range the |error| must be within for the integral constant to take effect.", step: 10 },
-}, pidControlMenu)
+}, pidControlMenu, {getSyncFunc: true});
 
 const [groundDegreesInput, setPointInput, carPointInput] = makeSettings("General", {
 	slopeDegrees: { name: "Floor Angle Degrees", title: "Angle of the floor in degrees, between 90 and -90 with 0 being level" },
@@ -129,18 +139,19 @@ const physicsSettings = makeSettings("World", {
 }, settingsMenu);
 
 const carSettings = makeSettings("Car", {
-	maxMotorPower: { name: "Max Motor Power", value: 10, min: 0, max: 60, title: "Max amount of force motors can spin wheels with", step: 0.1 },
+	maxMotorPower: { name: "Max Motor Power", value: 16, min: 0, max: 60, title: "Max amount of force motors can spin wheels with", step: 0.1 },
 	mass: { name: "Mass", value: 3, min: 0, title: "Mass of car, how much gravity effects car", step: 0.1 },
 	dragCoefficient: { name: "Drag Coefficient", value: 0.01, min: 0, title: "How much drag effects car", step: 0.1 },
 }, settingsMenu);
 
 const infoLineOpacities = makeSettings("Info Lines Opacity", {
-	carMotorPower: { name: "Motor Power", value: 0, min: 0, max: 1, title: "How visible arrow showing car's motor force is", step: 0.1 },
+	carMotorPower: { name: "Motor Power", value: 1, min: 0, max: 1, title: "How visible arrow showing car's motor force is", step: 0.1 },
 	force: { name: "Forces", value: 0, min: 0, max: 1, title: "How visible force arrows are, force arrows are gravity, friction, air resistance, and velocity", step: 0.1 },
 	carOutlineLines: { name: "Car Outline", value: 0, min: 0, max: 1, title: "How visible car outline is", step: 0.1 },
 }, settingsMenu);
 
 const resetCarButton = document.getElementById("reset-button");
+const loadBestButton = document.getElementById("load-best-button");
 
 const deltaTime = 25;
 
@@ -880,29 +891,49 @@ resetCarButton.onclick = () => {
 	carPidController.reset();
 }
 
+const bestPidSettings = {
+	P: 3,
+	I: 1,
+	D: 6,
+	zone: 300,
+	maxAccum: 1000,
+}
+
+loadBestButton.onclick = () => {
+	pidSettings.P = bestPidSettings.P;
+	pidSettings.I = bestPidSettings.I;
+	pidSettings.D = bestPidSettings.D;
+	settingsITerm.maxAccum = bestPidSettings.maxAccum;
+	settingsITerm.zone = bestPidSettings.zone;
+	pidSettingsUpdateInputs();
+	settingsITermUpdateInputs();
+}
+
 document.addEventListener("keydown", (event) => {
-	if (event.key == "r") {
-		car.reset();
-		carPidController.reset();
-	}
-	if (event.key == "ArrowLeft") {
-		console.log(Number(setPointInput.value) - 10)		
-		setPointInput.value = Number(setPointInput.value) - 10;
-		setPointSlider.setLocalCenteredPosition(Number(setPointInput.value));
-	}
-	if (event.key == "ArrowRight") {
-		setPointInput.value = Number(setPointInput.value) + 10;
-		setPointSlider.setLocalCenteredPosition(Number(setPointInput.value));
-	}
-	if (event.key == "ArrowUp") {
-		groundDegreesInput.value = Number(groundDegreesInput.value) + 1;
-		world.setFloorDegrees(Number(groundDegreesInput.value));
-		groundAngleSlider.setCenteredPosition(world.getFloorOffset() / 2);
-	}
-	if (event.key == "ArrowDown") {
-		groundDegreesInput.value = Number(groundDegreesInput.value) - 1;
-		world.setFloorDegrees(Number(groundDegreesInput.value));
-		groundAngleSlider.setCenteredPosition(world.getFloorOffset() / 2);
+	if (event.target == document.body) {
+		if (event.key == "r") {
+			car.reset();
+			carPidController.reset();
+		}
+		if (event.key == "ArrowLeft") {
+			console.log(Number(setPointInput.value) - 10)		
+			setPointInput.value = Number(setPointInput.value) - 10;
+			setPointSlider.setLocalCenteredPosition(Number(setPointInput.value));
+		}
+		if (event.key == "ArrowRight") {
+			setPointInput.value = Number(setPointInput.value) + 10;
+			setPointSlider.setLocalCenteredPosition(Number(setPointInput.value));
+		}
+		if (event.key == "ArrowUp") {
+			groundDegreesInput.value = Number(groundDegreesInput.value) + 1;
+			world.setFloorDegrees(Number(groundDegreesInput.value));
+			groundAngleSlider.setCenteredPosition(world.getFloorOffset() / 2);
+		}
+		if (event.key == "ArrowDown") {
+			groundDegreesInput.value = Number(groundDegreesInput.value) - 1;
+			world.setFloorDegrees(Number(groundDegreesInput.value));
+			groundAngleSlider.setCenteredPosition(world.getFloorOffset() / 2);
+		}
 	}
 });
 
