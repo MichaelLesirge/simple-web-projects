@@ -14,7 +14,7 @@ const RIGHT = canvas.width / 2 + distanceFromCenter - 6;
 const version = "1.0.0";
 
 if (typeof structuredClone === 'undefined') {
-    globalThis.structuredClone = function(obj) {
+    globalThis.structuredClone = function (obj) {
         return JSON.parse(JSON.stringify(obj));
     };
 }
@@ -172,12 +172,12 @@ function updateStateJson(json) {
     } catch (error) {
         console.error("Error parsing JSON for state");
     }
-    
+
     if (newState) {
         updateState(newState);
         return true;
     }
-    
+
     return false;
 }
 
@@ -192,7 +192,7 @@ function updateState(newState) {
     document.getElementById("title-input").value = title;
     document.getElementById("title-color").value = titleColor;
     document.getElementById("title-position").value = titleAlign;
-    
+
     for (const button of Object.keys(buttonPositions)) {
         const input = document.getElementById(button);
         if (input) {
@@ -216,7 +216,7 @@ function resetState() {
 
 function downloadJSON() {
 
-    const jsonString = JSON.stringify({...state, ...getExtraData()}, null, 2);
+    const jsonString = JSON.stringify({ ...state, ...getExtraData() }, null, 2);
 
     const blob = new Blob([jsonString], { type: "application/json" });
     const url = URL.createObjectURL(blob);
@@ -326,12 +326,12 @@ updateTheme(theme);
 
 function updateTheme(newTheme) {
     if (newTheme === "system") {
-        newTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? "dark" : "light";                
+        newTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? "dark" : "light";
     }
 
     if (newTheme === "dark") {
         document.body.classList.add("dark");
-        console.log("Using dark theme");   
+        console.log("Using dark theme");
     }
     else if (newTheme === "light") {
         document.body.classList.remove("dark");
@@ -377,11 +377,11 @@ const buttonCode = {
 };
 
 String.prototype.toCapitalized = function () {
-	return this.charAt(0).toUpperCase() + this.slice(1).toLowerCase();
+    return this.charAt(0).toUpperCase() + this.slice(1).toLowerCase();
 };
 
 function convertString(text, func, split_separator = "", join_separator = undefined) {
-	return text.split(split_separator).map(func).join(join_separator ?? split_separator)
+    return text.split(split_separator).map(func).join(join_separator ?? split_separator)
 }
 
 function toPascalCase(text) {
@@ -429,8 +429,8 @@ function createJavaReference() {
     }
 
     const extraData = getExtraData();
-   
-    return  `package frc.robot;
+
+    return `package frc.robot;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -463,7 +463,7 @@ public class RobotContainer {
 
 function createJavaReferenceObject() {
     const fileContent = createJavaReference();
-    const file = new Blob([fileContent], {type: 'text/plain'});
+    const file = new Blob([fileContent], { type: 'text/plain' });
 
     return (window.URL || window.webkitURL).createObjectURL(file)
 }
@@ -473,4 +473,92 @@ document.getElementById("download-java").addEventListener("click", () => {
     link.setAttribute("href", createJavaReferenceObject());
     link.setAttribute("download", toPascalCase((state.title || "xbox") + " mapping reference") + ".java");
     link.click();
+});
+
+document.getElementById("load-reefscape-drive").addEventListener("click", () => {
+    const reefscapeDrive = {
+        "title": "Drive",
+        "titleColor": "#1e458a",
+        "titleAlign": "center",
+        "labels": {
+            "Y": "toggle field relative",
+            "B": "cancel and pause",
+            "D-pad Up": "Aim at reef",
+            "D-pad Left": "Aim to source left",
+            "D-pad Down": "Aim to cage",
+            "D-pad Right": "Aim to source right",
+            "Left Stick Y Axis": "drive (y translation)",
+            "Left Stick X Axis": "drive (x translation)",
+            "Right Stick X Axis": "drive (rotation)",
+            "View": "stow arm low",
+            "Menu": "zero gyro (hold)",
+            "Right Trigger": "Score on reef",
+            "Left Trigger": "Intake from source",
+            "X": "hold position with X",
+            "Right Bumper": "enable heading drive",
+            "Left Bumper": "Next auto align goal",
+            "A": "",
+            "Right Stick Button": ""
+        },
+    };
+    updateState(reefscapeDrive);
+});
+
+document.getElementById("load-reefscape-operator").addEventListener("click", () => {
+    const reefscapeDrive = {
+        "title": "Operate",
+        "titleColor": "#1e458a",
+        "titleAlign": "center",
+        "labels": {
+            "Right Trigger": "Place coral",
+            "D-pad Up": "shift elevator up",
+            "D-pad Down": "shift elevator down",
+            "D-pad Left": "shift wrist up",
+            "D-pad Right": "shirt wrist down",
+            "Y": "score L4",
+            "B": "score L1",
+            "X": "score L3",
+            "A": "score L2",
+            "Right Stick Button": "stow mechanism low",
+            "Left Stick Button": "stow mechanism high",
+            "Menu": "toggle sensor use",
+            "Left Stick X Axis": "",
+            "Left Stick Y Axis": "Manual intake speed",
+            "Left Trigger": "Intake coral",
+            "Right Stick Y Axis": "Manual hang speed",
+            "Left Bumper": "Hang deploy",
+            "Right Bumper": "Hang retract",
+            "View": "unshift arm/wrist"
+        },
+    };
+    updateState(reefscapeDrive);
+});
+
+document.getElementById("load-tshirt").addEventListener("click", () => {
+    const reefscapeDrive = {
+        "title": "Cannon",
+        "titleColor": "#e60017",
+        "titleAlign": "center",
+        "labels": {
+            "Y": "toggle field relative",
+            "B": "cancel and pause",
+            "D-pad Up": "drive robot forward",
+            "D-pad Left": "drive robot ark left",
+            "D-pad Down": "drive robot backward",
+            "D-pad Right": "drive robot ark right",
+            "Left Stick Y Axis": "drive (y translation)",
+            "Left Stick X Axis": "drive (x translation)",
+            "Right Stick X Axis": "drive (rotation)",
+            "View": "shot ready check",
+            "Menu": "zero gyro (hold)",
+            "Right Trigger": "fire shot",
+            "Left Trigger": "enable shot backfill",
+            "X": "set power shot psi",
+            "Right Bumper": "increase shot psi",
+            "Left Bumper": "decrease shot psi",
+            "A": "reset shot psi",
+            "Right Stick Button": "enable heading drive"
+        }
+    };
+    updateState(reefscapeDrive);
 });
