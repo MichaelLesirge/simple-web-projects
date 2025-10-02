@@ -16,8 +16,8 @@ const pauseBtn = document.getElementById("pause-btn");
 let fps = 0;
 let lastFPS = fpsInput.value;
 
-const pauseText = "⏸️ Pause";
-const resumeText = "▶️ Resume";
+const pauseText = "⏸ Pause";
+const resumeText = "▶ Resume";
 
 function updateFPS() {
     fps = fpsInput.value;
