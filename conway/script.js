@@ -64,55 +64,116 @@ document.getElementsByName("mode-select-button").forEach((button) => {
 
 // --- Color Util ---
 
-function randRGB() {
-    return [randomFloat(0, 255), randomFloat(0, 255), randomFloat(0, 255)]
-}
-
-function simpleBlendRGB(...colors) {
-
-    const colorCount = colors.length;
-    let sumR = 0, sumG = 0, sumB = 0;
-
-    for (const color of colors) {
-        sumR += color[0] ** 2;
-        sumG += color[1] ** 2;
-        sumB += color[2] ** 2;
-    }
-
-    const blendedR = Math.sqrt(sumR / colorCount);
-    const blendedG = Math.sqrt(sumG / colorCount);
-    const blendedB = Math.sqrt(sumB / colorCount);
-
-    return [blendedR, blendedG, blendedB];
-}
-
-function weightedAverageBlendRGB(color1, color2, t) {
+function randHSL() {
     return [
-        color1[0] * (1 - t) + color2[0] * t,
-        color1[1] * (1 - t) + color2[1] * t,
-        color1[2] * (1 - t) + color2[2] * t,
+        randomFloat(0, 360),
+        randomFloat(70, 100),
+        randomFloat(50, 70),
     ];
 }
 
-function rgbToCss(color) {
-    if (color.length == 4) {
-        return `rgba(${color[0]}, ${color[1]}, ${color[2]}, ${color[3]})`
+function simpleBlendHSL(...colors) {
+    const colorCount = colors.length;
+    
+    let sumX = 0, sumY = 0, sumS = 0, sumL = 0;
+    
+    for (const color of colors) {
+        const hueRad = (color[0] * Math.PI) / 180;
+        sumX += Math.cos(hueRad);
+        sumY += Math.sin(hueRad);
+        sumS += color[1];
+        sumL += color[2];
     }
-    return `rgb(${color[0]}, ${color[1]}, ${color[2]})`
+    
+    const avgHueRad = Math.atan2(sumY / colorCount, sumX / colorCount);
+    const avgHue = ((avgHueRad * 180) / Math.PI + 360) % 360;
+    
+    return [
+        avgHue,
+        sumS / colorCount,
+        sumL / colorCount
+    ];
 }
 
-function hexToRgb(hex) {
+function weightedAverageBlendHSL(color1, color2, t) {
+    let h1 = color1[0];
+    let h2 = color2[0];
+    
+    let diff = h2 - h1;
+    if (diff > 180) diff -= 360;
+    if (diff < -180) diff += 360;
+    
+    const blendedHue = (h1 + diff * t + 360) % 360;
+    
+    return [
+        blendedHue,
+        color1[1] * (1 - t) + color2[1] * t,
+        color1[2] * (1 - t) + color2[2] * t
+    ];
+}
+
+function hslToCss(color) {
+    if (color.length === 4) {
+        return `hsla(${color[0]}, ${color[1]}%, ${color[2]}%, ${color[3]})`;
+    }
+    return `hsl(${color[0]}, ${color[1]}%, ${color[2]}%)`;
+}
+
+function hexToHSL(hex) {
     const shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
-    hex = hex.replace(shorthandRegex, function (m, r, g, b) {
-        return r + r + g + g + b + b;
-    });
-
+    hex = hex.replace(shorthandRegex, (m, r, g, b) => r + r + g + g + b + b);
+    
     const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return result ? [parseInt(result[1], 16), parseInt(result[2], 16), parseInt(result[3], 16)] : null;
+    if (!result) return null;
+    
+    let r = parseInt(result[1], 16) / 255;
+    let g = parseInt(result[2], 16) / 255;
+    let b = parseInt(result[3], 16) / 255;
+    
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    const delta = max - min;
+    
+    let h = 0;
+    let s = 0;
+    let l = (max + min) / 2;
+    
+    if (delta !== 0) {
+        s = l > 0.5 ? delta / (2 - max - min) : delta / (max + min);
+        
+        switch (max) {
+            case r: h = ((g - b) / delta + (g < b ? 6 : 0)) / 6; break;
+            case g: h = ((b - r) / delta + 2) / 6; break;
+            case b: h = ((r - g) / delta + 4) / 6; break;
+        }
+    }
+    
+    return [h * 360, s * 100, l * 100];
 }
 
-function rgbToHex(r, g, b) {
-    return "#" + (1 << 24 | r << 16 | g << 8 | b).toString(16).slice(1);
+function hslToHex(h, s, l) {
+    s /= 100;
+    l /= 100;
+    
+    const c = (1 - Math.abs(2 * l - 1)) * s;
+    const x = c * (1 - Math.abs((h / 60) % 2 - 1));
+    const m = l - c / 2;
+    
+    let r = 0, g = 0, b = 0;
+    
+    if (h < 60) { r = c; g = x; b = 0; }
+    else if (h < 120) { r = x; g = c; b = 0; }
+    else if (h < 180) { r = 0; g = c; b = x; }
+    else if (h < 240) { r = 0; g = x; b = c; }
+    else if (h < 300) { r = x; g = 0; b = c; }
+    else { r = c; g = 0; b = x; }
+    
+    const toHex = (n) => {
+        const hex = Math.round((n + m) * 255).toString(16);
+        return hex.length === 1 ? '0' + hex : hex;
+    };
+    
+    return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
 }
 
 // --- Conway ---
@@ -167,7 +228,7 @@ class Conway {
         this.cols = Math.floor(canvas.width / this.cellSize);
         this.rows = Math.floor(canvas.height / this.cellSize);
 
-        this.grid = Array.from({ length: this.rows }, () => Array.from({ length: this.cols }, () => Math.random() < this.percentage ? randRGB() : DEAD));
+        this.grid = Array.from({ length: this.rows }, () => Array.from({ length: this.cols }, () => Math.random() < this.percentage ? randHSL() : DEAD));
         this.nextGrid = Array.from({ length: this.rows }, () => Array.from({ length: this.cols }, () => DEAD));
     }
 
@@ -182,7 +243,7 @@ class Conway {
                 const tile = this.grid[i][j];
 
                 if (tile === DEAD && neighborsCount === 3) {
-                    this.nextGrid[i][j] = simpleBlendRGB(...neighbors);
+                    this.nextGrid[i][j] = simpleBlendHSL(...neighbors);
                 } else if (tile !== 0 && (neighborsCount < 2 || neighborsCount > 3)) {
                     this.nextGrid[i][j] = DEAD;
                 } else {
@@ -227,13 +288,13 @@ class Conway {
             for (let col = 0; col < this.cols; col++) {
                 ctx.clearRect(col * this.cellSize, row * this.cellSize, this.cellSize, this.cellSize);
                 if (this.grid[row][col] !== DEAD) {
-                    ctx.fillStyle = rgbToCss(this.grid[row][col]);
+                    ctx.fillStyle = hslToCss(this.grid[row][col]);
                     ctx.fillRect(col * this.cellSize, row * this.cellSize, this.cellSize, this.cellSize);
                 }
             }
         }
         if (this.showGridInput.checked) {
-            ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
+            ctx.strokeStyle = "hsla(255, 255, 255, 0.1)";
             ctx.lineWidth = 1;
             for (let i = 0; i < this.rows + 1; i++) {
                 ctx.beginPath();
@@ -259,10 +320,10 @@ class Conway {
         if (row < 0 || row >= this.rows || col < 0 || col >= this.cols) return;
 
         if (this.randomDrawColorCheckbox.checked) {
-            this.drawColorInput.value = rgbToHex(...randRGB());
+            this.drawColorInput.value = hslToHex(...randHSL());
         }
 
-        this.grid[row][col] = hexToRgb(this.drawColorInput.value);
+        this.grid[row][col] = hexToHSL(this.drawColorInput.value);
     }
 
     mouseUp() {
@@ -378,7 +439,7 @@ addSettings(boidSettings, "boids", {
 }, (value) => parseFloat(value) / 100, (value) => `${value}%`);
 
 class Boid {
-    constructor(group, x, y, vx, vy, rgb, scoutGroup, biasValue = defaultBiasVal) {
+    constructor(group, x, y, vx, vy, hsl, scoutGroup, biasValue = defaultBiasVal) {
         this.group = group;
 
         this.x = x;
@@ -387,7 +448,7 @@ class Boid {
         this.vx = vx;
         this.vy = vy;
 
-        this.rgb = rgb;
+        this.hsl = hsl;
 
         this.biasValue = biasValue;
         this.scoutGroup = scoutGroup;
@@ -426,7 +487,7 @@ class Boid {
                 yVelAvg += other.vy;
                 neighboringBoids++;
                 isInGroup = true;
-                this.groupRGB = other.groupRGB === null ? randRGB() : other.groupRGB;
+                this.groupRGB = other.groupRGB === null ? randHSL() : other.groupRGB;
             }
         }
 
@@ -435,7 +496,7 @@ class Boid {
         }
 
         if (this.groupRGB !== null) {
-            this.rgb = weightedAverageBlendRGB(this.rgb, this.groupRGB, 0.01);
+            this.hsl = weightedAverageBlendHSL(this.hsl, this.groupRGB, 0.01);
         }
 
         // Alignment and Cohesion
@@ -494,7 +555,7 @@ class Boid {
 
         // Trail
         this.trailI++;
-        this.trail.push({ x: this.x, y: this.y, rgb: this.rgb });
+        this.trail.push({ x: this.x, y: this.y, hsl: this.hsl });
     }
 
     draw() {
@@ -516,7 +577,7 @@ class Boid {
         ctx.lineTo(-height, width);
         ctx.closePath();
 
-        ctx.fillStyle = rgbToCss(this.rgb);
+        ctx.fillStyle = hslToCss(this.hsl);
 
         ctx.fill();
 
@@ -530,7 +591,7 @@ class Boid {
             const lastElement = this.trail[i - 1];
 
             ctx.save()
-            ctx.fillStyle = rgbToCss(lastElement.rgb);
+            ctx.fillStyle = hslToCss(lastElement.hsl);
 
             ctx.globalAlpha = i / this.trail.length;
             ctx.beginPath();
@@ -579,7 +640,7 @@ class Boids {
                 randomFloat(this.boundaryY, this.boundaryY + this.boundaryHeight),
                 randomFloat(-1, 1),
                 randomFloat(-1, 1),
-                randRGB(),
+                randHSL(),
                 randomChoice([1, 2]),
             ));
         }
@@ -609,7 +670,7 @@ class Boids {
 
         this.boids.forEach(boid => boid.draw());
 
-        ctx.strokeStyle = "rgba(255, 255, 255, 0.2)";
+        ctx.strokeStyle = "hsla(255, 255, 255, 0.2)";
         ctx.lineWidth = 3;
         ctx.strokeRect(this.boundaryX, this.boundaryY, this.boundaryWidth, this.boundaryHeight);
     }
@@ -623,7 +684,7 @@ class Boids {
                 event.clientY * dpr,
                 randomFloat(-1, 1),
                 randomFloat(-1, 1),
-                randRGB(),
+                randHSL(),
                 randomChoice([1, 2]),
             ));
         boidSettings["count"].set(this.boids.length);
@@ -647,7 +708,7 @@ class Boids {
                 event.clientY * dpr,
                 event.movementX,
                 event.movementY,
-                randRGB(),
+                randHSL(),
                 randomChoice([1, 2]),
             ));
             boidSettings["count"].set(this.boids.length);
@@ -675,14 +736,14 @@ addSettings(particleSettings, "particles", {
 }, (value) => parseFloat(value) / 100, (value) => `${value / 100}`);
 
 class Particle {
-    constructor(group, x, y, vx, vy, radius, rgb) {
+    constructor(group, x, y, vx, vy, radius, hsl) {
         this.group = group;
 
         this.x = x;
         this.y = y;
 
         this.radius = radius;
-        this.color = rgb;
+        this.color = hsl;
 
         this.vx = vx;
         this.vy = vy;
