@@ -668,11 +668,11 @@ class Boids {
     draw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        this.boids.forEach(boid => boid.draw());
-
-        ctx.strokeStyle = "hsla(255, 255, 255, 0.2)";
+        ctx.strokeStyle = "grey";
         ctx.lineWidth = 3;
         ctx.strokeRect(this.boundaryX, this.boundaryY, this.boundaryWidth, this.boundaryHeight);
+
+        this.boids.forEach(boid => boid.draw());
     }
 
     click(event) {
