@@ -352,7 +352,7 @@ document.addEventListener("DOMContentLoaded", () => {
 const termsListContainer = document.getElementById("terms-list-container");
 document.getElementById("hide").addEventListener("click", (event) => {
     termsListContainer.classList.toggle("hide")
-    event.target.textContent = termsListContainer.classList.contains("hide") ? "🐵 Show List" : "🙈 Hide List";
+    event.target.textContent = termsListContainer.classList.contains("hide") ? "Show List" : "Hide List";
 });
 
 document.getElementById("copy-link-button").addEventListener("click", () => {

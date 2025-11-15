@@ -16,43 +16,51 @@
         <canvas id="controllerCanvas" width="644" height="406"></canvas>
         <div id="right-labels"></div>
     </div>
-    <div id="ui">
-        <div>
-            <input type="text" id="title-input" placeholder="Enter title" title="Enter Title" list="title-suggestions"
-                spellcheck="true">
-            <datalist id="title-suggestions">
-                <option>Drive</option>
-                <option>Operate</option>
-                <option>Demo</option>
-            </datalist>
-            <input type="color" id="title-color" title="Pick Title Color" list="color-suggestions">
-            <datalist id="color-suggestions">
-                <option>#000000</option>
-                <option>#1E458A</option>
-                <option>#18c735</option>
-                <option>#e60017</option>
-                <option>#540c5c</option>
-            </datalist>
-            <select name="title-position" id="title-position" title="Select Title Position" class="title-options">
-                <option value="left" title="Position the title on the left side">Left</option>
-                <option value="center" title="Position the title in the center">Center</option>
-                <option value="right" title="Position the title on the right side">Right</option>
-            </select>
+    <div class="menus">
+        <div class="ui">
+            <div>
+                <input type="text" id="title-input" placeholder="Enter title" title="Enter Title" list="title-suggestions"
+                    spellcheck="true">
+                <datalist id="title-suggestions">
+                    <option>Drive</option>
+                    <option>Operate</option>
+                    <option>Demo</option>
+                </datalist>
+                <input type="color" id="title-color" title="Pick Title Color" list="color-suggestions">
+                <datalist id="color-suggestions">
+                    <option>#000000</option>
+                    <option>#1E458A</option>
+                    <option>#18c735</option>
+                    <option>#e60017</option>
+                    <option>#540c5c</option>
+                </datalist>
+                <select name="title-position" id="title-position" title="Select Title Position" class="title-options">
+                    <option value="left" title="Position the title on the left side">Left</option>
+                    <option value="center" title="Position the title in the center">Center</option>
+                    <option value="right" title="Position the title on the right side">Right</option>
+                </select>
+            </div>
+            <div class="button-row">
+                <button id="download-button" title="Download diagram as PNG">Save Image</button>
+                <button id="print-button" title="Open print dialog for diagram">Print Image</button>
+            </div>
+            <div class="button-row no-phone">
+                <button style="background-color: #32aa66;" id="download-json" title="Save JSON config file containing labels">Export Labels JSON</button>
+                <label style="background-color: #32aa66;" class="button" for="upload-json" title="Load JSON config file containing labels">Import Labels JSON</label>
+                <input itemid="upload-json" type="file" accept=".json" id="upload-json">
+            </div>
+            <div class="button-row no-phone">
+                <button id="download-java" title="Download Java file to use as reference for creating this control map using WPILib for FRC robotics">Download WPILib Java Reference</button>
+            </div>
+            <div class="button-row">
+                <button style="background-color: red;" id="reset-button">Reset 🗑️</button>
+            </div>
         </div>
-        <div class="button-row">
-            <button id="download-button" title="Download diagram as PNG">Save Image 🖼️</button>
-            <button id="print-button" title="Open print dialog for diagram">Print Image 🖨️</button>
-        </div>
-        <div class="button-row no-phone">
-            <button style="background-color: #32aa66;" id="download-json" title="Save JSON config file containing labels">Export Labels JSON 💾</button>
-            <label style="background-color: #32aa66;" class="button" for="upload-json" title="Load JSON config file containing labels">Import Labels JSON 📂</label>
-            <input itemid="upload-json" type="file" accept=".json" id="upload-json">
-        </div>
-        <div class="button-row no-phone">
-            <button id="download-java" title="Download Java file to use as reference for creating this control map using WPILib for FRC robotics">Download WPILib Java Reference (FRC 🤖)</button>
-        </div>
-        <div class="button-row">
-            <button style="background-color: red;" id="reset-button">Reset 🗑️</button>
+        <div class="ui presets">
+            <h4>FRC 8032</h4>
+            <button type="button" id="load-reefscape-drive" style="background-color: bisque; color: black;">Load 2025 Reefscape Robot Drive Controls</button>
+            <button type="button" id="load-reefscape-operator" style="background-color: bisque; color: black;">Load 2025 Reefscape Robot Operator Controls</button>
+            <button type="button" id="load-tshirt" style="background-color: bisque; color: black;">Load T-Shirt Cannon Controls</button>
         </div>
     </div>
     <div class="theme-selector">
